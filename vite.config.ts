@@ -11,16 +11,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    rollupOptions: {
-      input: {
-        index: path.resolve(__dirname, "./index.html"),
-        content: path.resolve(__dirname, "./src/content.tsx"),
-      },
-      output: {
-        entryFileNames: "[name].js",
-        assetFileNames: "assets/[name].[ext]",
-      },
-    },
-  },
 });

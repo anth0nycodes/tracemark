@@ -1,3 +1,9 @@
+import { Toolbar } from "@/components/toolbar";
+
 export function App() {
-  return <div>Hello world</div>;
+  return (
+    <main className="rounded-full">
+      <Toolbar />
+    </main>
+  );
 }

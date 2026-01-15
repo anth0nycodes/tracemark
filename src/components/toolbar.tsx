@@ -11,7 +11,11 @@ import {
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ToolbarItemProps {
   icon: LucideIcon | CustomIcon;

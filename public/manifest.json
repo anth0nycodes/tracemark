@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Tracemark",
   "version": "1.0",
-  "description": "An open-source Chrome extension that lets you draw over any webpage and copy the result as an image.",
+  "description": "A Chrome extension that lets you draw over any webpage and copy the result as an image.",
   "action": {
     "default_popup": "index.html"
   }

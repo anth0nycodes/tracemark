@@ -32,6 +32,7 @@ function createToolbar(root: ShadowRoot) {
 
 function initTracemark() {
   // Prevents duplicate injection requests
+  // TODO: Fix the cleanup logic when you click the extension icon if it's already initialized
   if (rootContainer && shadowRoot) {
     document.body.removeChild(rootContainer);
     rootContainer = null;

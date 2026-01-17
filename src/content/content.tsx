@@ -4,7 +4,6 @@ import { createRoot } from "react-dom/client";
 import styles from "../index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
-// TODO: fix styles being overrided on some sites
 
 let rootContainer: HTMLDivElement | null = null;
 let shadowRoot: ShadowRoot | null = null;

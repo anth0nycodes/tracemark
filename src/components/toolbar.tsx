@@ -11,11 +11,6 @@ import {
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface ToolbarItemProps {
   icon: LucideIcon | CustomIcon;
@@ -93,43 +88,59 @@ export function Toolbar() {
   // TODO: handle each toolbar item logic when active
 
   return (
-    <div className="flex items-center gap-2 border border-gray-300 rounded-lg w-max p-1 bg-background shadow-md">
+    <div
+      className="flex items-center border-2 border-border bg-background text-foreground shadow-2xl"
+      style={{
+        width: "max-content",
+        height: "max-content",
+        gap: "8px",
+        padding: "4px",
+        borderRadius: "12px",
+      }}
+    >
       {Object.values(toolbarItems).map((item) => {
         const isActive = activeToolbarItem === item.tooltipText;
 
         return (
-          <Tooltip key={item.tooltipText}>
-            <TooltipTrigger asChild>
-              <Button
-                variant={isActive ? null : "ghost"}
-                className={cn(
-                  "relative rounded-lg size-11 flex items-center justify-center",
-                  isActive && "text-background",
-                )}
-                onClick={() => setActiveToolbarItem(item.tooltipText)}
-              >
-                <item.icon aria-hidden="true" className="z-10" />
-                <span
-                  className={cn(
-                    "absolute bottom-1 right-1.5 z-10 text-[9px] font-semibold transition-colors",
-                    isActive
-                      ? "text-background/80"
-                      : "text-muted-foreground/60",
-                  )}
-                >
-                  {item.shortcut}
-                </span>
-                <TooltipContent side="top">{item.tooltipText}</TooltipContent>
-                {isActive && (
-                  <motion.div
-                    layoutId="toolbar-item"
-                    className="absolute inset-0 bg-foreground rounded-lg"
-                    transition={{ type: "spring", damping: 50, stiffness: 600 }}
-                  />
-                )}
-              </Button>
-            </TooltipTrigger>
-          </Tooltip>
+          <Button
+            key={item.tooltipText}
+            variant={isActive ? null : "ghost"}
+            className={cn(
+              "relative flex items-center justify-center shrink-0",
+              isActive && "text-background",
+            )}
+            style={{ width: "44px", height: "44px", borderRadius: "10px" }}
+            onClick={() => setActiveToolbarItem(item.tooltipText)}
+            aria-label={`${item.tooltipText} (${item.shortcut})`}
+            title={`${item.tooltipText} (${item.shortcut})`}
+            aria-pressed={isActive}
+          >
+            <item.icon
+              aria-hidden="true"
+              className="z-10"
+              style={{ width: "20px", height: "20px" }}
+            />
+            <span
+              className={cn(
+                "absolute z-10 font-semibold transition-colors",
+                isActive
+                  ? "text-background/80"
+                  : "text-muted-foreground/60 dark:text-foreground",
+              )}
+              style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
+              aria-hidden="true"
+            >
+              {item.shortcut}
+            </span>
+            {isActive && (
+              <motion.div
+                layoutId="toolbar-item"
+                className="absolute inset-0 bg-foreground"
+                style={{ borderRadius: "10px" }}
+                transition={{ type: "spring", damping: 50, stiffness: 600 }}
+              />
+            )}
+          </Button>
         );
       })}
     </div>

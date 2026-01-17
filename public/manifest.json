@@ -4,6 +4,11 @@
   "version": "1.0",
   "description": "A Chrome extension that lets you draw over any webpage and copy the result as an image.",
   "action": {
-    "default_popup": "index.html"
+    "default_title": "Open Tracemark"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "background": {
+    "service_worker": "./src/background/background.js",
+    "type": "module"
   }
 }

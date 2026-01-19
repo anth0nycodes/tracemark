@@ -1,12 +1,30 @@
-import { Toolbar } from "@/components/toolbar";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Canvas } from "@/components/canvas";
+import { Toolbar } from "@/components/toolbar";
 import styles from "../index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
 
 let rootContainer: HTMLDivElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
+
+function createCanvas() {
+  const canvasContainer = document.createElement("div");
+  canvasContainer.id = "canvas-container";
+  document.body.appendChild(canvasContainer);
+
+  Object.assign(canvasContainer.style, {
+    position: "relative",
+    userSelect: "none",
+  });
+
+  createRoot(canvasContainer).render(
+    <StrictMode>
+      <Canvas />
+    </StrictMode>
+  );
+}
 
 function createToolbar(root: ShadowRoot) {
   // Creates the toolbar container and appends it to the shadow DOM, then appends the content to the toolbar container
@@ -26,17 +44,13 @@ function createToolbar(root: ShadowRoot) {
   createRoot(toolbarContainer).render(
     <StrictMode>
       <Toolbar />
-    </StrictMode>,
+    </StrictMode>
   );
 }
 
 function initTracemark() {
-  // Prevents duplicate injection requests
-  // TODO: Fix the cleanup logic when you click the extension icon if it's already initialized
-  if (rootContainer && shadowRoot) {
-    document.body.removeChild(rootContainer);
-    rootContainer = null;
-    shadowRoot = null;
+  if (rootContainer) {
+    console.warn("Tracemark has already been initialized!");
     return;
   }
 
@@ -51,10 +65,26 @@ function initTracemark() {
   styleElement.textContent = styles;
   shadowRoot.appendChild(styleElement);
 
+  // Inject canvas
+  createCanvas();
+
   // Inject toolbar
   createToolbar(shadowRoot);
 
   document.body.appendChild(rootContainer);
+
+  return () => cleanup();
+}
+
+function cleanup() {
+  // Prevents duplicate injection requests
+  // TODO: Fix the cleanup logic when you click the extension icon if it's already initialized
+  if (rootContainer) {
+    rootContainer.remove();
+    rootContainer = null;
+    shadowRoot = null;
+    return;
+  }
 }
 
 initTracemark();

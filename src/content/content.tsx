@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Canvas } from "@/components/canvas";
-import { Toolbar } from "@/components/toolbar";
+import { App } from "@/App";
 import styles from "../index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
@@ -9,10 +8,10 @@ import styles from "../index.css?inline";
 let rootContainer: HTMLDivElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
 
-function createCanvas() {
+function createCanvas(root: ShadowRoot) {
   const canvasContainer = document.createElement("div");
   canvasContainer.id = "canvas-container";
-  document.body.appendChild(canvasContainer);
+  root.appendChild(canvasContainer);
 
   Object.assign(canvasContainer.style, {
     position: "relative",
@@ -21,29 +20,7 @@ function createCanvas() {
 
   createRoot(canvasContainer).render(
     <StrictMode>
-      <Canvas />
-    </StrictMode>
-  );
-}
-
-function createToolbar(root: ShadowRoot) {
-  // Creates the toolbar container and appends it to the shadow DOM, then appends the content to the toolbar container
-  const toolbarContainer = document.createElement("div");
-  toolbarContainer.id = "toolbar-container";
-  root.appendChild(toolbarContainer);
-
-  // Position toolbar container on screen
-  Object.assign(toolbarContainer.style, {
-    position: "fixed",
-    bottom: "20px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    zIndex: "2147483647",
-  });
-
-  createRoot(toolbarContainer).render(
-    <StrictMode>
-      <Toolbar />
+      <App />
     </StrictMode>
   );
 }
@@ -66,10 +43,7 @@ function initTracemark() {
   shadowRoot.appendChild(styleElement);
 
   // Inject canvas
-  createCanvas();
-
-  // Inject toolbar
-  createToolbar(shadowRoot);
+  createCanvas(shadowRoot);
 
   document.body.appendChild(rootContainer);
 

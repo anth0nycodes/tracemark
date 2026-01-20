@@ -38,8 +38,6 @@ export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
   };
 
   const startDrawing = (e: MouseEvent<HTMLCanvasElement>) => {
-    if (currentTool !== "Draw") return;
-
     const { x, y } = getCurrentMousePosition(e);
     const ctx = ctxRef.current;
     if (!ctx) return;
@@ -49,15 +47,28 @@ export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
     ctx.moveTo(x, y);
   };
 
-  const draw = (e: MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || currentTool !== "Draw") return;
+  const handleMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
 
     const { x, y } = getCurrentMousePosition(e);
     const ctx = ctxRef.current;
     if (!ctx) return;
 
-    ctx.lineTo(x, y);
-    ctx.stroke();
+    if (currentTool === "Draw") {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = "red"; // these drawing propeties are hardcoded, can set up later with color picker and other options
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    } else if (currentTool === "Erase") {
+      const eraserBrushSize = 30; // hardcoded for now, can set later
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.arc(x, y, eraserBrushSize, 0, Math.PI * 2, false);
+      ctx.fill();
+    }
   };
 
   const stopDrawing = () => {
@@ -71,18 +82,11 @@ export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
     const ctx = canvas.getContext("2d");
     ctxRef.current = ctx;
     setupCanvas(canvas, ctx);
-
-    if (ctx) {
-      ctx.strokeStyle = "red";
-      ctx.lineWidth = 5;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-    }
   }, []);
 
   return (
     <canvas
-      onMouseMove={draw}
+      onMouseMove={handleMouseMove}
       onMouseDown={startDrawing}
       onMouseUp={stopDrawing}
       ref={canvasRef}

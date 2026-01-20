@@ -1,6 +1,6 @@
-import { Toolbar } from "@/components/toolbar";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { App } from "@/App";
 import styles from "../index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
@@ -8,35 +8,26 @@ import styles from "../index.css?inline";
 let rootContainer: HTMLDivElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
 
-function createToolbar(root: ShadowRoot) {
-  // Creates the toolbar container and appends it to the shadow DOM, then appends the content to the toolbar container
-  const toolbarContainer = document.createElement("div");
-  toolbarContainer.id = "toolbar-container";
-  root.appendChild(toolbarContainer);
+function createCanvas(root: ShadowRoot) {
+  const canvasContainer = document.createElement("div");
+  canvasContainer.id = "canvas-container";
+  root.appendChild(canvasContainer);
 
-  // Position toolbar container on screen
-  Object.assign(toolbarContainer.style, {
-    position: "fixed",
-    bottom: "20px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    zIndex: "2147483647",
+  Object.assign(canvasContainer.style, {
+    position: "relative",
+    userSelect: "none",
   });
 
-  createRoot(toolbarContainer).render(
+  createRoot(canvasContainer).render(
     <StrictMode>
-      <Toolbar />
-    </StrictMode>,
+      <App />
+    </StrictMode>
   );
 }
 
 function initTracemark() {
-  // Prevents duplicate injection requests
-  // TODO: Fix the cleanup logic when you click the extension icon if it's already initialized
-  if (rootContainer && shadowRoot) {
-    document.body.removeChild(rootContainer);
-    rootContainer = null;
-    shadowRoot = null;
+  if (rootContainer) {
+    console.warn("Tracemark has already been initialized!");
     return;
   }
 
@@ -51,10 +42,23 @@ function initTracemark() {
   styleElement.textContent = styles;
   shadowRoot.appendChild(styleElement);
 
-  // Inject toolbar
-  createToolbar(shadowRoot);
+  // Inject canvas
+  createCanvas(shadowRoot);
 
   document.body.appendChild(rootContainer);
+
+  return () => cleanup();
+}
+
+function cleanup() {
+  // Prevents duplicate injection requests
+  // TODO: Fix the cleanup logic when you click the extension icon if it's already initialized
+  if (rootContainer) {
+    rootContainer.remove();
+    rootContainer = null;
+    shadowRoot = null;
+    return;
+  }
 }
 
 initTracemark();

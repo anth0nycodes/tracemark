@@ -14,7 +14,11 @@ function createCanvas(root: ShadowRoot) {
   root.appendChild(canvasContainer);
 
   Object.assign(canvasContainer.style, {
-    position: "relative",
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
     userSelect: "none",
   });
 
@@ -33,6 +37,15 @@ function initTracemark() {
 
   rootContainer = document.createElement("div");
   rootContainer.id = "tracemark-shadow-host";
+
+  // Position the shadow host to cover the entire document
+  Object.assign(rootContainer.style, {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+  });
 
   // Attach #shadow-root to rootContainer
   shadowRoot = rootContainer.attachShadow({ mode: "open" });

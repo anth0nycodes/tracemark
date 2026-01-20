@@ -7,16 +7,21 @@ function setupCanvas(
 ) {
   const dpr = window.devicePixelRatio || 1;
 
-  // Get the size of the canvas in CSS pixels
-  const rect = canvas.getBoundingClientRect(); // grabs more accurate fractional values since the canvas is within a container
-  const cssWidth = rect.width;
-  const cssHeight = rect.height;
+  // Get the full document dimensions (not just viewport)
+  const cssWidth = Math.max(
+    document.documentElement.scrollWidth,
+    document.body.scrollWidth
+  );
+  const cssHeight = Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight
+  );
 
   // Set the actual canvas pixel dimensions to the CSS size * devicePixelRatio
   canvas.width = cssWidth * dpr;
   canvas.height = cssHeight * dpr;
 
-  // Set the canvas display size back to the original CSS size
+  // Set the canvas display size to cover the full document
   canvas.style.width = `${cssWidth}px`;
   canvas.style.height = `${cssHeight}px`;
 
@@ -90,7 +95,7 @@ export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
       onMouseDown={startDrawing}
       onMouseUp={stopDrawing}
       ref={canvasRef}
-      className="pointer-events-auto fixed top-0 left-0 z-2147483646 h-screen w-screen"
+      className="pointer-events-auto absolute top-0 left-0 z-2147483646"
     />
   );
 }

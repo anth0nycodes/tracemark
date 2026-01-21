@@ -91,7 +91,9 @@ export function Toolbar({
   // TODO: handle each toolbar item logic when active
 
   return (
-    <div className="fixed right-0 bottom-5 left-0 z-2147483647 flex justify-center">
+    // TODO: fix bug where if you dont release your mouse and go off screen and then come back, the tool snaps to the current position
+    // TODO: fix bug where you can't draw underneath toolbar because it's fixed
+    <div className="fixed bottom-5 left-1/2 z-2147483647 flex w-max -translate-x-1/2 justify-center">
       <div
         className="border-border bg-background text-foreground flex items-center border-2 shadow-2xl"
         style={{

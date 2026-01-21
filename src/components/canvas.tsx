@@ -76,6 +76,10 @@ export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
     }
   };
 
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -85,19 +89,11 @@ export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
     setupCanvas(canvas, ctx);
   }, []);
 
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      setIsDrawing(false);
-    };
-
-    window.addEventListener("mouseup", handleGlobalMouseUp);
-    return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
-  }, []);
-
   return (
     <canvas
       onMouseMove={handleMouseMove}
       onMouseDown={startDrawing}
+      onMouseLeave={stopDrawing}
       ref={canvasRef}
       className="pointer-events-auto absolute top-0 left-0 z-2147483646 cursor-crosshair"
     />

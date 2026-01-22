@@ -28,7 +28,7 @@ function setupCanvas(
   if (!ctx) return;
 
   // Reset and scale all drawing operations by the dpr
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // this line fixes the case of cumulative dpr scaling because it resets the entire transformation (including scale) to identity
   ctx.scale(dpr, dpr);
 }
 

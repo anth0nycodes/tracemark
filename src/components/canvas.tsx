@@ -27,9 +27,9 @@ function setupCanvas(
 
   if (!ctx) return;
 
-  // Scale all drawing operations by the dpr
+  // Reset and scale all drawing operations by the dpr
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(dpr, dpr);
-  return ctx;
 }
 
 export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
@@ -86,7 +86,33 @@ export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
 
     const ctx = canvas.getContext("2d");
     ctxRef.current = ctx;
-    setupCanvas(canvas, ctx);
+
+    if (!ctx) return;
+
+    const resize = () => {
+      // Grabs the current canvas content, starting from (0, 0) to the full width & height
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      setupCanvas(canvas, ctx);
+
+      // Persist the canvas content on resize
+      if (imageData) {
+        ctx.putImageData(imageData, 0, 0); // paints the imageData back starting at (0, 0)
+      }
+    };
+
+    resize();
+
+    // Watches for document size changes
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(document.body);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("mouseup", stopDrawing);
+    return () => window.removeEventListener("mouseup", stopDrawing);
   }, []);
 
   return (

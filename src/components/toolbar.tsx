@@ -47,7 +47,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
         return;
       }
 
-      // Ignore modified keys
+      // Ignore modified keys (this is susceptible to change when adding future undo/redo + copy logic)
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
         return;
       }

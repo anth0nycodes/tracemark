@@ -22,7 +22,7 @@ interface ToolbarItemProps {
 type ToolbarItemsRecord = Record<ToolbarStates, ToolbarItemProps>;
 
 const toolbarItems: ToolbarItemsRecord = {
-  Draw: { icon: PencilLine, shortcut: "1", tooltipText: "Draw" },
+  Pencil: { icon: PencilLine, shortcut: "1", tooltipText: "Pencil" },
   Erase: { icon: Eraser, shortcut: "2", tooltipText: "Erase" },
   Select: { icon: MousePointer2, shortcut: "3", tooltipText: "Select" },
   Text: { icon: Type, shortcut: "4", tooltipText: "Text" },
@@ -30,16 +30,15 @@ const toolbarItems: ToolbarItemsRecord = {
   Line: { icon: Line, shortcut: "6", tooltipText: "Line" },
 } as const;
 
-export function Toolbar({
-  currentTool,
-  setCurrentTool,
-}: {
+interface ToolbarProps {
   currentTool: ToolbarStates;
-  setCurrentTool: (tool: ToolbarStates) => void;
-}) {
+  setCurrentTool: (currentTool: ToolbarStates) => void;
+}
+
+export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   useEffect(() => {
     const handleKeyShortcuts = (e: KeyboardEvent) => {
-      // Ignore shortcuts when typing in inputs
+      // Ignore typing contexts
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
@@ -48,47 +47,32 @@ export function Toolbar({
         return;
       }
 
-      // Only handle keys 1-6 without modifiers
+      // Ignore modified keys (this is susceptible to change when adding future undo/redo + copy logic)
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
         return;
       }
 
-      switch (e.key) {
-        case "1":
-          e.preventDefault();
-          setCurrentTool("Draw");
-          break;
-        case "2":
-          e.preventDefault();
-          setCurrentTool("Erase");
-          break;
-        case "3":
-          e.preventDefault();
-          setCurrentTool("Select");
-          break;
-        case "4":
-          e.preventDefault();
-          setCurrentTool("Text");
-          break;
-        case "5":
-          e.preventDefault();
-          setCurrentTool("Frame");
-          break;
-        case "6":
-          e.preventDefault();
-          setCurrentTool("Line");
-          break;
-      }
+      const keyMap: Record<string, ToolbarStates> = {
+        "1": "Pencil",
+        "2": "Erase",
+        "3": "Select",
+        "4": "Text",
+        "5": "Frame",
+        "6": "Line",
+      };
+
+      const tool = keyMap[e.key];
+      if (!tool) return;
+
+      e.preventDefault();
+      setCurrentTool(tool);
     };
 
     window.addEventListener("keydown", handleKeyShortcuts);
-
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool]);
-
-  // TODO: handle each toolbar item logic when active
+  }, []);
 
   return (
     <div className="fixed right-0 bottom-5 left-0 z-2147483647 flex justify-center">
@@ -124,6 +108,7 @@ export function Toolbar({
                 className="z-10"
                 style={{ width: "20px", height: "20px" }}
               />
+
               <span
                 className={cn(
                   "absolute z-10 font-semibold transition-colors",
@@ -136,6 +121,7 @@ export function Toolbar({
               >
                 {item.shortcut}
               </span>
+
               {isActive && (
                 <motion.div
                   layoutId="toolbar-item"

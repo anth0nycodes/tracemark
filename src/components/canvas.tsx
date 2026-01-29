@@ -1,99 +1,94 @@
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef } from "react";
+import { EraserBrush } from "@erase2d/fabric";
+import { Canvas as FabricCanvas, PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
 
-function setupCanvas(
-  canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D | null
-) {
+function setupCanvas(fc: FabricCanvas) {
   const dpr = window.devicePixelRatio || 1;
 
-  // Get the full document dimensions (not just viewport)
-  const cssWidth = Math.max(
-    document.documentElement.scrollWidth,
-    document.body.scrollWidth
-  );
+  // Get the full document dimensions
+  const bodyContentWidth = document.body.clientWidth;
   const cssHeight = Math.max(
     document.documentElement.scrollHeight,
     document.body.scrollHeight
   );
 
-  // Set the actual canvas pixel dimensions to the CSS size * devicePixelRatio
-  canvas.width = cssWidth * dpr;
-  canvas.height = cssHeight * dpr;
+  const canvasEl = fc.lowerCanvasEl;
+  if (!canvasEl) return;
 
-  // Set the canvas display size to cover the full document
-  canvas.style.width = `${cssWidth}px`;
-  canvas.style.height = `${cssHeight}px`;
+  fc.setDimensions({
+    width: bodyContentWidth,
+    height: cssHeight,
+  });
 
-  if (!ctx) return;
+  canvasEl.style.width = `${bodyContentWidth}px`;
+  canvasEl.style.height = `${cssHeight}px`;
 
-  // Scale all drawing operations by the dpr
-  ctx.scale(dpr, dpr);
-  return ctx;
+  fc.setZoom(1 / dpr);
 }
 
-export function Canvas({ currentTool }: { currentTool: ToolbarStates }) {
+interface CanvasProps {
+  currentTool: ToolbarStates;
+}
+
+export function Canvas({ currentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const fcRef = useRef<FabricCanvas | null>(null);
 
-  const getCurrentMousePosition = (e: MouseEvent<HTMLCanvasElement>) => {
-    const { offsetX, offsetY } = e.nativeEvent;
-    return { x: offsetX, y: offsetY };
-  };
-
-  const startDrawing = (e: MouseEvent<HTMLCanvasElement>) => {
-    const { x, y } = getCurrentMousePosition(e);
-    const ctx = ctxRef.current;
-    if (!ctx) return;
-
-    setIsDrawing(true);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  };
-
-  const handleMouseMove = (e: MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-
-    const { x, y } = getCurrentMousePosition(e);
-    const ctx = ctxRef.current;
-    if (!ctx) return;
-
-    if (currentTool === "Draw") {
-      ctx.globalCompositeOperation = "source-over";
-      ctx.strokeStyle = "red"; // these drawing propeties are hardcoded, can set up later with color picker and other options
-      ctx.lineWidth = 5;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.lineTo(x, y);
-      ctx.stroke();
-    } else if (currentTool === "Erase") {
-      const eraserBrushSize = 30; // hardcoded for now, can set later
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.beginPath();
-      ctx.arc(x, y, eraserBrushSize, 0, Math.PI * 2, false);
-      ctx.fill();
-    }
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-
+  // Sets up fabric canvas
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvasRef.current) return;
+    console.log("Canvas initialized"); // here to test any rerenders
 
-    const ctx = canvas.getContext("2d");
-    ctxRef.current = ctx;
-    setupCanvas(canvas, ctx);
+    const canvas = canvasRef.current;
+    const fc = new FabricCanvas(canvas);
+
+    fcRef.current = fc;
+
+    setupCanvas(fc);
+
+    // Make all created paths erasable
+    fc.on("path:created", (e) => {
+      if (e.path) {
+        e.path.set({ erasable: true });
+      }
+    });
+
+    return () => {
+      fc.dispose();
+    };
   }, []);
+
+  // Handle active tool logic
+  useEffect(() => {
+    const fc = fcRef.current;
+
+    if (!fc) return;
+
+    switch (currentTool) {
+      case "Pencil": {
+        const pencil = new PencilBrush(fc);
+        fc.freeDrawingBrush = pencil;
+        fc.isDrawingMode = true;
+        pencil.width = 15; // hardcoded for now, can dynamically set in future popover
+        pencil.color = "#00FFFF"; // hardcoded for now, can dynamically set in future color picker
+        break;
+      }
+      case "Erase": {
+        const eraser = new EraserBrush(fc);
+        fc.freeDrawingBrush = eraser;
+        fc.isDrawingMode = true;
+        eraser.width = 30; // hardcoded for now, can dynamically set in future popover
+        break;
+      }
+      default:
+        fc.isDrawingMode = false;
+        break;
+    }
+  });
 
   return (
     <canvas
-      onMouseMove={handleMouseMove}
-      onMouseDown={startDrawing}
-      onMouseUp={stopDrawing}
       ref={canvasRef}
       className="pointer-events-auto absolute top-0 left-0 z-2147483646"
     />

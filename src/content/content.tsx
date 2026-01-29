@@ -8,12 +8,12 @@ import styles from "../index.css?inline";
 let rootContainer: HTMLDivElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
 
-function createCanvas(root: ShadowRoot) {
-  const canvasContainer = document.createElement("div");
-  canvasContainer.id = "canvas-container";
-  root.appendChild(canvasContainer);
+function injectTracemarkContent(root: ShadowRoot) {
+  const tracemarkContentContainer = document.createElement("div");
+  tracemarkContentContainer.id = "tracemark-content-container";
+  root.appendChild(tracemarkContentContainer);
 
-  Object.assign(canvasContainer.style, {
+  Object.assign(tracemarkContentContainer.style, {
     position: "absolute",
     top: "0",
     left: "0",
@@ -22,7 +22,7 @@ function createCanvas(root: ShadowRoot) {
     userSelect: "none",
   });
 
-  createRoot(canvasContainer).render(
+  createRoot(tracemarkContentContainer).render(
     <StrictMode>
       <App />
     </StrictMode>
@@ -55,8 +55,8 @@ function initTracemark() {
   styleElement.textContent = styles;
   shadowRoot.appendChild(styleElement);
 
-  // Inject canvas
-  createCanvas(shadowRoot);
+  // Inject main tracemark app content
+  injectTracemarkContent(shadowRoot);
 
   document.body.appendChild(rootContainer);
 

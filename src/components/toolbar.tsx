@@ -11,7 +11,6 @@ import { motion } from "motion/react";
 import type { ToolbarStates } from "@/App";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface ToolbarItemProps {
   icon: LucideIcon | CustomIcon;
@@ -22,9 +21,9 @@ interface ToolbarItemProps {
 type ToolbarItemsRecord = Record<ToolbarStates, ToolbarItemProps>;
 
 const toolbarItems: ToolbarItemsRecord = {
-  Pencil: { icon: PencilLine, shortcut: "1", tooltipText: "Pencil" },
-  Erase: { icon: Eraser, shortcut: "2", tooltipText: "Erase" },
-  Select: { icon: MousePointer2, shortcut: "3", tooltipText: "Select" },
+  Select: { icon: MousePointer2, shortcut: "1", tooltipText: "Select" },
+  Pencil: { icon: PencilLine, shortcut: "2", tooltipText: "Pencil" },
+  Erase: { icon: Eraser, shortcut: "3", tooltipText: "Erase" },
   Text: { icon: Type, shortcut: "4", tooltipText: "Text" },
   Frame: { icon: Square, shortcut: "5", tooltipText: "Frame" },
   Line: { icon: Line, shortcut: "6", tooltipText: "Line" },
@@ -53,9 +52,9 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
       }
 
       const keyMap: Record<string, ToolbarStates> = {
-        "1": "Pencil",
-        "2": "Erase",
-        "3": "Select",
+        "1": "Select",
+        "2": "Pencil",
+        "3": "Erase",
         "4": "Text",
         "5": "Frame",
         "6": "Line",
@@ -75,62 +74,81 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   }, []);
 
   return (
-    <div className="fixed right-0 bottom-5 left-0 z-2147483647 flex justify-center">
+    <div
+      className="z-2147483647"
+      style={{
+        position: "fixed",
+        right: "0px",
+        bottom: "20px",
+        left: "0px",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
       <div
-        className="border-border bg-background text-foreground flex items-center border-2 shadow-2xl"
+        className="bg-background text-foreground relative flex items-center shadow-2xl"
         style={{
           width: "max-content",
           height: "max-content",
           gap: "8px",
-          padding: "4px",
-          borderRadius: "12px",
+          padding: "6px",
+          borderWidth: "2px",
+          borderRadius: "10px",
+          borderColor: "var(--border)",
         }}
       >
         {Object.values(toolbarItems).map((item) => {
           const isActive = currentTool === item.tooltipText;
 
           return (
-            <Button
-              key={item.tooltipText}
-              variant={isActive ? null : "ghost"}
-              className={cn(
-                "relative flex shrink-0 items-center justify-center",
-                isActive && "text-background"
-              )}
-              style={{ width: "44px", height: "44px", borderRadius: "10px" }}
-              onClick={() => setCurrentTool(item.tooltipText)}
-              aria-label={`${item.tooltipText} (${item.shortcut})`}
-              title={`${item.tooltipText} (${item.shortcut})`}
-              aria-pressed={isActive}
-            >
-              <item.icon
-                aria-hidden="true"
-                className="z-10"
-                style={{ width: "20px", height: "20px" }}
-              />
-
-              <span
-                className={cn(
-                  "absolute z-10 font-semibold transition-colors",
-                  isActive
-                    ? "text-background/80"
-                    : "text-muted-foreground/60 dark:text-foreground"
-                )}
-                style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
-                aria-hidden="true"
+            <div style={{ width: "44px", height: "44px" }}>
+              <Button
+                key={item.tooltipText}
+                variant={isActive ? null : "ghost"}
+                className="relative flex shrink-0 items-center justify-center"
+                style={{ width: "100%", height: "100%", borderRadius: "10px" }}
+                onClick={() => setCurrentTool(item.tooltipText)}
+                aria-label={`${item.tooltipText} (${item.shortcut})`}
+                title={`${item.tooltipText} (${item.shortcut})`}
+                aria-pressed={isActive}
               >
-                {item.shortcut}
-              </span>
+                <item.icon
+                  aria-hidden="true"
+                  className="z-10"
+                  style={{ width: "20px", height: "20px" }}
+                />
 
+                <span
+                  className="text-muted-foreground/60 dark:text-foreground absolute z-10 font-semibold transition-colors"
+                  style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
+                  aria-hidden="true"
+                >
+                  {item.shortcut}
+                </span>
+
+                {isActive && (
+                  <motion.div
+                    layoutId="active-toolbar-item"
+                    className="bg-accent absolute inset-0"
+                    style={{ borderRadius: "10px" }}
+                    transition={{ type: "spring", damping: 50, stiffness: 600 }}
+                  />
+                )}
+              </Button>
               {isActive && (
                 <motion.div
-                  layoutId="toolbar-item"
-                  className="bg-foreground absolute inset-0"
-                  style={{ borderRadius: "10px" }}
+                  layoutId="active-toolbar-item-bar"
+                  style={{
+                    position: "absolute",
+                    top: "-2px",
+                    backgroundColor: "#2b7fff",
+                    width: "44px",
+                    height: "2px",
+                  }}
                   transition={{ type: "spring", damping: 50, stiffness: 600 }}
                 />
               )}
-            </Button>
+            </div>
           );
         })}
       </div>

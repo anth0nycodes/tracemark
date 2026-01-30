@@ -1,15 +1,38 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+
 import "./globals.css";
+import { Navbar } from "@/components/navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const regestoGrotesk = localFont({
+  src: [
+    {
+      path: "../../public/fonts/RegestoGrotesk-Light-BF670354791e938.woff",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/RegestoGrotesk-Regular-BF67035479252e2.woff",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/RegestoGrotesk-Medium-BF67035478ba605.woff",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/RegestoGrotesk-Bold-BF67035478bbf99.woff",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/RegestoGrotesk-Black-BF67035478db36b.woff",
+      weight: "900",
+      style: "normal",
+    },
+  ],
+  variable: "--font-regesto-grotesk",
 });
 
 export const metadata: Metadata = {
@@ -24,9 +47,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${regestoGrotesk.variable} antialiased`}>
+        <Navbar />
         {children}
       </body>
     </html>

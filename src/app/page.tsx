@@ -3,10 +3,10 @@ import { Waitlist } from "@/components/waitlist";
 
 export default function Landing() {
   return (
-    <div className="px-4 font-regesto-grotesk flex flex-col pt-16 justify-center items-center gap-12">
+    <div className="font-regesto-grotesk flex flex-col items-center justify-center gap-12 px-4 py-16">
       <div>
         <img
-          className="border-border border-2 rounded-xl"
+          className="border-border rounded-xl border-2"
           src="/tracemark-preview.png"
           alt="tracemark preview image"
         />

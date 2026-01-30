@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { TracemarkLogo } from "./svgs/logo";
 
 export function Navbar() {
   return (
-    <div className="w-full p-5 md:px-12 sm:py-6">
+    <div className="w-full p-5 sm:py-6 md:px-12">
       <Link href="/">
-        <img src="/tracemark-logo.png" alt="tracemark logo" />
+        <TracemarkLogo width={175} height={39} />
       </Link>
     </div>
   );

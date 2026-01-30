@@ -1,14 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Field, FieldError } from "./ui/field";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Field, FieldError } from "./ui/field";
 
 const waitlistSchema = z.object({
   email: z.email().min(1, "Email cannot be empty."),
@@ -49,7 +49,7 @@ export function Waitlist() {
 
       toast.success(
         payload?.message ??
-          "Successfully joined waitlist! You will receive a confirmation email in 1 minute.",
+          "Successfully joined waitlist! You will receive a confirmation email in 1 minute."
       );
 
       form.reset();
@@ -66,7 +66,7 @@ export function Waitlist() {
   return (
     <form
       id="waitlist-form"
-      className="flex flex-col sm:flex-row gap-2 w-full"
+      className="flex w-full flex-col gap-2 sm:flex-row"
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <Controller
@@ -78,7 +78,7 @@ export function Waitlist() {
               {...field}
               id={field.name}
               aria-invalid={fieldState.invalid}
-              className="bg-accent focus-visible:border-transparent! focus:ring-input! focus:ring-1! border-transparent hover:cursor-pointer placeholder:text-lg text-lg! hover:border-input transition-colors"
+              className="bg-accent focus:ring-input! hover:border-input border-transparent text-lg! transition-colors placeholder:text-lg hover:cursor-pointer focus:ring-1! focus-visible:border-transparent!"
               placeholder="Enter email"
               autoComplete="off"
             />
@@ -90,7 +90,7 @@ export function Waitlist() {
         type="submit"
         form="waitlist-form"
         variant={null}
-        className="text-lg text-background bg-[#57A3FA] hover:bg-[#3993F9] h-full transition-colors"
+        className="text-background h-full bg-[#57A3FA] text-lg transition-colors hover:bg-[#3993F9]"
       >
         {isLoading ? (
           <LoaderCircle className="size-5" aria-hidden="true" />

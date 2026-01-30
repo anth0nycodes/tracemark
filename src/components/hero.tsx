@@ -2,8 +2,8 @@ import { Badge } from "./ui/badge";
 
 export function Hero() {
   return (
-    <div className="flex flex-col gap-2 items-center text-center max-w-2xl w-full">
-      <Badge className="bg-[#EFFF9D] text-sm font-bold text-foreground">
+    <div className="flex w-full max-w-2xl flex-col items-center gap-2 text-center">
+      <Badge className="text-foreground bg-[#EFFF9D] text-sm font-bold">
         Coming Soon
       </Badge>
       <div className="flex flex-col items-center gap-3">

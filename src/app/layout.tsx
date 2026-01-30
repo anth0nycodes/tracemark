@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 
 const regestoGrotesk = localFont({
   src: [
@@ -104,6 +104,7 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Navbar } from "@/components/navbar";
-import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "sonner";
+import { Navbar } from "@/components/navbar";
 
 const regestoGrotesk = localFont({
   src: [
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/opengraph.png",
+        url: "/og.png",
         width: 1200,
         height: 630,
         alt: "Tracemark",
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
   twitter: {
     title: "Tracemark",
     card: "summary_large_image",
-    images: ["/opengraph.png"],
+    images: ["/og.png"],
   },
 };
 

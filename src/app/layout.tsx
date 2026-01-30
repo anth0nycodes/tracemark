@@ -88,6 +88,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: "Tracemark",
+    description:
+      "A Chrome extension that lets you markup/annotate any webpage and copy/export the result as an image.",
     card: "summary_large_image",
     images: ["https://tracemark.fun/og.png"],
   },

@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     "Tracemark",
   ],
   openGraph: {
-    title: "Tracemark Logo",
+    title: "Tracemark",
     description:
       "A Chrome extension that lets you markup/annotate any webpage and copy/export the result as an image.",
     url: "https://tracemark.fun",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
         url: "/opengraph.png",
         width: 1200,
         height: 630,
-        alt: "Tracemark Logo",
+        alt: "Tracemark",
       },
     ],
   },
@@ -87,7 +87,7 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    title: "Tracemark Logo",
+    title: "Tracemark",
     card: "summary_large_image",
     images: ["/opengraph.png"],
   },

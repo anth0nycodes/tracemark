@@ -3,7 +3,7 @@ import { Badge } from "./ui/badge";
 export function Hero() {
   return (
     <div className="flex flex-col gap-2 items-center text-center max-w-2xl w-full">
-      <Badge className="bg-[#EFFF9D] text-sm font-medium text-foreground">
+      <Badge className="bg-[#EFFF9D] text-sm font-bold text-foreground">
         Coming Soon
       </Badge>
       <div className="flex flex-col items-center gap-3">

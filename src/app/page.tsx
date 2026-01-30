@@ -3,7 +3,7 @@ import { Waitlist } from "@/components/waitlist";
 
 export default function Landing() {
   return (
-    <div className="font-regesto-grotesk flex flex-col pt-16 justify-center items-center gap-12">
+    <div className="px-4 font-regesto-grotesk flex flex-col pt-16 justify-center items-center gap-12">
       <div>
         <img
           className="border-border border-2 rounded-xl"

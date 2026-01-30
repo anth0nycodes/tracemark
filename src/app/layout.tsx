@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
+import { Toaster } from "sonner";
 
 const regestoGrotesk = localFont({
   src: [
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body className={`${regestoGrotesk.variable} antialiased`}>
         <Navbar />
         {children}
+        <Toaster />
       </body>
     </html>
   );

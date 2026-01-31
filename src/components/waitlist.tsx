@@ -66,7 +66,7 @@ export function Waitlist() {
   return (
     <form
       id="waitlist-form"
-      className="flex w-full flex-col gap-2 sm:flex-row"
+      className="flex h-full w-full flex-col gap-2 sm:flex-row"
       onSubmit={form.handleSubmit(onSubmit)}
     >
       <Controller
@@ -90,10 +90,13 @@ export function Waitlist() {
         type="submit"
         form="waitlist-form"
         variant={null}
+        disabled={isLoading}
         className="text-background h-full bg-[#57A3FA] text-lg transition-colors hover:bg-[#3993F9]"
       >
         {isLoading ? (
-          <LoaderCircle className="size-5" aria-hidden="true" />
+          <div className="flex w-full items-center justify-center">
+            <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
+          </div>
         ) : (
           "Join Waitlist"
         )}

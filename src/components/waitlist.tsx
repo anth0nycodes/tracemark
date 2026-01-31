@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Field, FieldError } from "./ui/field";
 
 const waitlistSchema = z.object({
@@ -90,11 +91,15 @@ export function Waitlist() {
         type="submit"
         form="waitlist-form"
         variant={null}
+        size={null}
         disabled={isLoading}
-        className="text-background h-full bg-[#57A3FA] text-lg transition-colors hover:bg-[#3993F9]"
+        className={cn(
+          "text-background bg-[#57A3FA] px-4 py-2 text-lg transition-colors hover:bg-[#3993F9] has-[>svg]:px-3",
+          !isLoading ? "h-full" : ""
+        )}
       >
         {isLoading ? (
-          <div className="flex w-full items-center justify-center">
+          <div className="flex size-full items-center justify-center">
             <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
           </div>
         ) : (

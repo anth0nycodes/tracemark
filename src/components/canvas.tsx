@@ -7,22 +7,25 @@ function setupCanvas(fc: FabricCanvas) {
   const dpr = window.devicePixelRatio || 1;
 
   // Get the full document dimensions
-  const bodyContentWidth = document.body.clientWidth;
-  const cssHeight = Math.max(
-    document.documentElement.scrollHeight,
-    document.body.scrollHeight
+  const contentWidth = Math.max(
+    document.documentElement.clientWidth,
+    document.body.clientWidth
+  );
+  const contentHeight = Math.max(
+    document.documentElement.clientHeight,
+    document.body.clientHeight
   );
 
   const canvasEl = fc.lowerCanvasEl;
   if (!canvasEl) return;
 
   fc.setDimensions({
-    width: bodyContentWidth,
-    height: cssHeight,
+    width: contentWidth,
+    height: contentHeight,
   });
 
-  canvasEl.style.width = `${bodyContentWidth}px`;
-  canvasEl.style.height = `${cssHeight}px`;
+  canvasEl.style.width = `${contentWidth}px`;
+  canvasEl.style.height = `${contentHeight}px`;
 
   fc.setZoom(1 / dpr);
 }
@@ -45,7 +48,10 @@ export function Canvas({ currentTool }: CanvasProps) {
 
     fcRef.current = fc;
 
-    setupCanvas(fc);
+    const initCanvasDimensions = () => setupCanvas(fc);
+    initCanvasDimensions();
+
+    window.addEventListener("resize", initCanvasDimensions);
 
     // Make all created paths erasable
     fc.on("path:created", (e) => {
@@ -56,6 +62,7 @@ export function Canvas({ currentTool }: CanvasProps) {
 
     return () => {
       fc.dispose();
+      window.removeEventListener("resize", initCanvasDimensions);
     };
   }, []);
 

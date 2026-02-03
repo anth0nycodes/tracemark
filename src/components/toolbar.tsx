@@ -78,11 +78,9 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
       className="z-2147483647"
       style={{
         position: "fixed",
-        right: "0px",
         bottom: "20px",
-        left: "0px",
-        display: "flex",
-        justifyContent: "center",
+        left: "50%",
+        transform: "translateX(-50%)",
       }}
     >
       <div

@@ -93,8 +93,8 @@ export function Canvas({ currentTool }: CanvasProps) {
           if (activeObjects.length > 0) {
             if (e.key === "Backspace") {
               fc.remove(...activeObjects);
-              fc.discardActiveObject();
-              fc.requestRenderAll();
+              fc.discardActiveObject(); // unselects active object
+              fc.requestRenderAll(); // rerenders canvas to update display
             }
           }
         };

@@ -84,6 +84,22 @@ export function Canvas({ currentTool }: CanvasProps) {
         eraser.width = 30; // hardcoded for now, can dynamically set in future popover
         break;
       }
+      case "Text":
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        fc.isDrawingMode = true;
+        break;
+      case "Frame":
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        fc.isDrawingMode = true;
+        break;
+
+      case "Line":
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        fc.isDrawingMode = true;
+        break;
       default: {
         fc.isDrawingMode = false; // defaults to select tool
 

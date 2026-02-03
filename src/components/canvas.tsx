@@ -66,6 +66,8 @@ export function Canvas({ currentTool }: CanvasProps) {
 
     switch (currentTool) {
       case "Pencil": {
+        fc.discardActiveObject();
+        fc.requestRenderAll();
         const pencil = new PencilBrush(fc);
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
@@ -74,15 +76,49 @@ export function Canvas({ currentTool }: CanvasProps) {
         break;
       }
       case "Erase": {
+        fc.discardActiveObject();
+        fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
         fc.freeDrawingBrush = eraser;
         fc.isDrawingMode = true;
         eraser.width = 30; // hardcoded for now, can dynamically set in future popover
         break;
       }
-      default:
-        fc.isDrawingMode = false;
+      case "Text":
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        fc.isDrawingMode = true;
         break;
+      case "Frame":
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        fc.isDrawingMode = true;
+        break;
+      case "Line":
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        fc.isDrawingMode = true;
+        break;
+      default: {
+        fc.isDrawingMode = false; // defaults to select tool
+
+        const handleDeleteObject = (e: KeyboardEvent) => {
+          const activeObjects = fc.getActiveObjects();
+
+          if (activeObjects.length > 0) {
+            if (e.key === "Backspace") {
+              fc.remove(...activeObjects);
+              fc.discardActiveObject(); // unselects active object
+              fc.requestRenderAll(); // rerenders canvas to update display
+            }
+          }
+        };
+
+        window.addEventListener("keydown", handleDeleteObject);
+        return () => {
+          window.removeEventListener("keydown", handleDeleteObject);
+        };
+      }
     }
   });
 

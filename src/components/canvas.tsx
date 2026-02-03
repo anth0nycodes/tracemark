@@ -4,8 +4,6 @@ import { Canvas as FabricCanvas, PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
 
 function setupCanvas(fc: FabricCanvas) {
-  const dpr = window.devicePixelRatio || 1;
-
   // Get the full document dimensions
   const contentWidth = Math.max(
     document.documentElement.clientWidth,
@@ -16,18 +14,10 @@ function setupCanvas(fc: FabricCanvas) {
     document.body.clientHeight
   );
 
-  const canvasEl = fc.lowerCanvasEl;
-  if (!canvasEl) return;
-
   fc.setDimensions({
     width: contentWidth,
     height: contentHeight,
   });
-
-  canvasEl.style.width = `${contentWidth}px`;
-  canvasEl.style.height = `${contentHeight}px`;
-
-  fc.setZoom(1 / dpr);
 }
 
 interface CanvasProps {
@@ -44,7 +34,9 @@ export function Canvas({ currentTool }: CanvasProps) {
     console.log("Canvas initialized"); // here to test any rerenders
 
     const canvas = canvasRef.current;
-    const fc = new FabricCanvas(canvas);
+    const fc = new FabricCanvas(canvas, {
+      enableRetinaScaling: true, // Let Fabric handle DPR automatically
+    });
 
     fcRef.current = fc;
 

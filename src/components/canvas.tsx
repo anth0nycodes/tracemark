@@ -92,7 +92,6 @@ export function Canvas({ currentTool }: CanvasProps) {
 
           if (activeObjects.length > 0) {
             if (e.key === "Backspace") {
-              console.log(e.key);
               fc.remove(...activeObjects);
               fc.discardActiveObject();
               fc.requestRenderAll();

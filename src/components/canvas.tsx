@@ -94,7 +94,6 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.requestRenderAll();
         fc.isDrawingMode = true;
         break;
-
       case "Line":
         fc.discardActiveObject();
         fc.requestRenderAll();

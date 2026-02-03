@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { EraserBrush } from "@erase2d/fabric";
-import { Canvas as FabricCanvas, PencilBrush } from "fabric";
+import { PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
+import { CanvasWithHistory as FabricCanvas } from "@/history-canvas/history";
+import { getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
   // Get the full document dimensions
@@ -121,6 +123,43 @@ export function Canvas({ currentTool }: CanvasProps) {
       }
     }
   });
+
+  useEffect(() => {
+    async function handleUndoAndRedo(e: KeyboardEvent) {
+      const os = await getOS();
+      const isMac = os === "macOS";
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+
+      const fc = fcRef.current;
+      if (!fc) return;
+
+      const canUndo = fc.canUndo();
+      const canRedo = fc.canRedo();
+      const macRedoShortcut =
+        e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
+      const windowsOrLinuxRedoShortcut =
+        e.ctrlKey && e.key.toLowerCase() === "y";
+
+      // undo
+      if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {
+        e.preventDefault();
+        if (canUndo) {
+          fc.undo();
+        }
+      }
+
+      // redo
+      if (macRedoShortcut || windowsOrLinuxRedoShortcut) {
+        e.preventDefault();
+        if (canRedo) {
+          fc.redo();
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleUndoAndRedo);
+    return () => window.removeEventListener("keydown", handleUndoAndRedo);
+  }, []);
 
   return (
     <canvas

@@ -4,27 +4,20 @@ import { Canvas as FabricCanvas, PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
 
 function setupCanvas(fc: FabricCanvas) {
-  const dpr = window.devicePixelRatio || 1;
-
   // Get the full document dimensions
-  const bodyContentWidth = document.body.clientWidth;
-  const cssHeight = Math.max(
-    document.documentElement.scrollHeight,
-    document.body.scrollHeight
+  const contentWidth = Math.max(
+    document.documentElement.clientWidth,
+    document.body.clientWidth
+  );
+  const contentHeight = Math.max(
+    document.documentElement.clientHeight,
+    document.body.clientHeight
   );
 
-  const canvasEl = fc.lowerCanvasEl;
-  if (!canvasEl) return;
-
   fc.setDimensions({
-    width: bodyContentWidth,
-    height: cssHeight,
+    width: contentWidth,
+    height: contentHeight,
   });
-
-  canvasEl.style.width = `${bodyContentWidth}px`;
-  canvasEl.style.height = `${cssHeight}px`;
-
-  fc.setZoom(1 / dpr);
 }
 
 interface CanvasProps {
@@ -41,11 +34,16 @@ export function Canvas({ currentTool }: CanvasProps) {
     console.log("Canvas initialized"); // here to test any rerenders
 
     const canvas = canvasRef.current;
-    const fc = new FabricCanvas(canvas);
+    const fc = new FabricCanvas(canvas, {
+      enableRetinaScaling: true, // Let Fabric handle DPR automatically
+    });
 
     fcRef.current = fc;
 
-    setupCanvas(fc);
+    const initCanvasDimensions = () => setupCanvas(fc);
+    initCanvasDimensions();
+
+    window.addEventListener("resize", initCanvasDimensions);
 
     // Make all created paths erasable
     fc.on("path:created", (e) => {
@@ -56,6 +54,7 @@ export function Canvas({ currentTool }: CanvasProps) {
 
     return () => {
       fc.dispose();
+      window.removeEventListener("resize", initCanvasDimensions);
     };
   }, []);
 

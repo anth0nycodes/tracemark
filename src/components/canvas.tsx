@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
+import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
 import { PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
-import { CanvasWithHistory as FabricCanvas } from "@/history-canvas/history";
 import { getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
@@ -133,8 +133,6 @@ export function Canvas({ currentTool }: CanvasProps) {
       const fc = fcRef.current;
       if (!fc) return;
 
-      const canUndo = fc.canUndo();
-      const canRedo = fc.canRedo();
       const macRedoShortcut =
         e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
       const windowsOrLinuxRedoShortcut =
@@ -143,17 +141,13 @@ export function Canvas({ currentTool }: CanvasProps) {
       // undo
       if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {
         e.preventDefault();
-        if (canUndo) {
-          fc.undo();
-        }
+        await fc.undo();
       }
 
       // redo
       if (macRedoShortcut || windowsOrLinuxRedoShortcut) {
         e.preventDefault();
-        if (canRedo) {
-          fc.redo();
-        }
+        await fc.redo();
       }
     }
 

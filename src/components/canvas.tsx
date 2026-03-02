@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
-import { PencilBrush } from "fabric";
+import { Group, PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
 import { getOS } from "@/lib/helpers";
 
@@ -81,9 +81,9 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.discardActiveObject();
         fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
-        fc.freeDrawingBrush = eraser;
-        fc.isDrawingMode = true;
         eraser.width = 30; // hardcoded for now, can dynamically set in future popover
+        fc.setEraserBrush(eraser);
+        fc.isDrawingMode = true;
         break;
       }
       case "Text":
@@ -151,8 +151,34 @@ export function Canvas({ currentTool }: CanvasProps) {
       }
     }
 
+    async function handleGrouping(e: KeyboardEvent) {
+      const os = await getOS();
+      const isMac = os === "macOS";
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+
+      const fc = fcRef.current;
+      if (!fc) return;
+
+      if (mod && e.key.toLowerCase() === "g") {
+        const activeObjects = fc.getActiveObjects();
+        const activeObjectsClone = [...activeObjects];
+        const isGroupable = activeObjectsClone.length > 1;
+        activeObjects.forEach((obj) => fc.remove(obj));
+
+        if (isGroupable) {
+          const group = new Group(activeObjectsClone);
+          fc.add(group);
+          fc.setActiveObject(group);
+        }
+      }
+    }
+
     window.addEventListener("keydown", handleUndoAndRedo);
-    return () => window.removeEventListener("keydown", handleUndoAndRedo);
+    window.addEventListener("keydown", handleGrouping);
+    return () => {
+      window.removeEventListener("keydown", handleUndoAndRedo);
+      window.removeEventListener("keydown", handleGrouping);
+    };
   }, []);
 
   return (

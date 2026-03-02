@@ -48,9 +48,9 @@ export function Canvas({ currentTool }: CanvasProps) {
     window.addEventListener("resize", initCanvasDimensions);
 
     // Make all created paths erasable
-    fc.on("path:created", (e) => {
-      if (e.path) {
-        e.path.set({ erasable: true });
+    fc.on("object:added", (e) => {
+      if (e.target) {
+        e.target.set({ erasable: true });
       }
     });
 

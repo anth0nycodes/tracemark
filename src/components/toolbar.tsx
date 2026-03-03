@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import type { ToolbarStates } from "@/App";
+import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { Button } from "@/components/ui/button";
 
@@ -95,6 +96,15 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           borderColor: "var(--border)",
         }}
       >
+        <ColorPicker />
+        <div
+          style={{
+            backgroundColor: "#C2C7CB",
+            height: "32px",
+            width: "2px",
+            borderRadius: "10px",
+          }}
+        />
         {Object.values(toolbarItems).map((item) => {
           const isActive = currentTool === item.tooltipText;
 

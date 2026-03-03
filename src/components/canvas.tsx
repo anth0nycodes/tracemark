@@ -3,6 +3,7 @@ import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history"
 import { EraserBrush } from "@erase2d/fabric";
 import { Group, PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
+import { useColor } from "@/context/color/use-color";
 import { getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
@@ -29,6 +30,7 @@ interface CanvasProps {
 export function Canvas({ currentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fcRef = useRef<FabricCanvas | null>(null);
+  const { color } = useColor();
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -74,7 +76,7 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
         pencil.width = 15; // hardcoded for now, can dynamically set in future popover
-        pencil.color = "#00FFFF"; // hardcoded for now, can dynamically set in future color picker
+        pencil.color = color;
         break;
       }
       case "Erase": {

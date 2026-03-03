@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Canvas } from "@/components/canvas";
 import { Toolbar } from "@/components/toolbar";
+import { ColorProvider } from "@/context/color/ColorContext";
 
 export type ToolbarStates =
   | "Select"
@@ -15,9 +16,9 @@ export function App() {
   // TODO: make it so you can't swap tools with the shortcuts if you're actively using the tool
 
   return (
-    <>
+    <ColorProvider>
       <Toolbar currentTool={currentTool} setCurrentTool={setCurrentTool} />
       <Canvas currentTool={currentTool} />
-    </>
+    </ColorProvider>
   );
 }

@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 import type { ToolbarStates } from "@/App";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { Button } from "@/components/ui/button";
+import { ColorPicker } from "./color-picker";
 
 interface ToolbarItemProps {
   icon: LucideIcon | CustomIcon;
@@ -95,6 +96,8 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           borderColor: "var(--border)",
         }}
       >
+        <ColorPicker />
+        <div className="bg-border h-8 w-0.5 rounded-2xl" />
         {Object.values(toolbarItems).map((item) => {
           const isActive = currentTool === item.tooltipText;
 

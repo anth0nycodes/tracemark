@@ -1,9 +1,9 @@
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
 import { Group, PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
-import { ColorContext } from "@/context/color/constants";
+import { useColor } from "@/context/color/use-color";
 import { getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
@@ -30,7 +30,7 @@ interface CanvasProps {
 export function Canvas({ currentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fcRef = useRef<FabricCanvas | null>(null);
-  const { color } = useContext(ColorContext);
+  const { color } = useColor();
 
   // Sets up fabric canvas
   useEffect(() => {

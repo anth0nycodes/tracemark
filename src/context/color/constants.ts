@@ -1,11 +1,11 @@
-import { createContext } from "react";
+import { createContext, type Dispatch, type SetStateAction } from "react";
 
 interface ColorContextProps {
   color: string;
-  setColor: (color: string) => void;
+  setColor: Dispatch<SetStateAction<string>>;
 }
 
 export const ColorContext = createContext<ColorContextProps>({
-  color: "#FF0000",
+  color: "#000000",
   setColor: () => {},
 });

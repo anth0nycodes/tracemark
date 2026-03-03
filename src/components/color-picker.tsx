@@ -1,8 +1,7 @@
-import { useContext } from "react";
-import { ColorContext } from "@/context/color/constants";
+import { useColor } from "@/context/color/use-color";
 
 export function ColorPicker() {
-  const { color, setColor } = useContext(ColorContext);
+  const { color, setColor } = useColor();
 
   return (
     <div style={{ width: "44px", height: "44px", padding: "6px" }}>

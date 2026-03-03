@@ -7,7 +7,7 @@ import {
   Type,
   type LucideIcon,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
@@ -36,6 +36,8 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   useEffect(() => {
     const handleKeyShortcuts = (e: KeyboardEvent) => {
       // Ignore typing contexts
@@ -109,9 +111,11 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           const isActive = currentTool === item.tooltipText;
 
           return (
-            <div style={{ width: "44px", height: "44px" }}>
+            <div
+              key={item.tooltipText}
+              style={{ width: "44px", height: "44px" }}
+            >
               <Button
-                key={item.tooltipText}
                 variant={isActive ? null : "ghost"}
                 className="relative flex shrink-0 items-center justify-center"
                 style={{ width: "100%", height: "100%", borderRadius: "10px" }}
@@ -136,16 +140,26 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
 
                 {isActive && (
                   <motion.div
-                    layoutId="active-toolbar-item"
+                    layoutId={
+                      prefersReducedMotion ? undefined : "active-toolbar-item"
+                    }
                     className="bg-accent absolute inset-0"
-                    style={{ borderRadius: "10px" }}
-                    transition={{ type: "spring", damping: 50, stiffness: 600 }}
+                    style={{
+                      borderRadius: "10px",
+                    }}
+                    transition={
+                      prefersReducedMotion
+                        ? { duration: 0 }
+                        : { type: "spring", damping: 50, stiffness: 600 }
+                    }
                   />
                 )}
               </Button>
               {isActive && (
                 <motion.div
-                  layoutId="active-toolbar-item-bar"
+                  layoutId={
+                    prefersReducedMotion ? undefined : "active-toolbar-item-bar"
+                  }
                   style={{
                     position: "absolute",
                     top: "-2px",
@@ -153,7 +167,11 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
                     width: "44px",
                     height: "2px",
                   }}
-                  transition={{ type: "spring", damping: 50, stiffness: 600 }}
+                  transition={
+                    prefersReducedMotion
+                      ? { duration: 0 }
+                      : { type: "spring", damping: 50, stiffness: 600 }
+                  }
                 />
               )}
             </div>

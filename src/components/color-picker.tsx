@@ -6,11 +6,12 @@ export function ColorPicker() {
   return (
     <div style={{ width: "44px", height: "44px", padding: "6px" }}>
       <div
-        className="flex items-center justify-center rounded-full"
+        className="flex items-center justify-center"
         style={{
           width: "100%",
           height: "100%",
           padding: "3px",
+          borderRadius: "100%",
           background:
             "conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
         }}

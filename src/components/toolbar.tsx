@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import type { ToolbarStates } from "@/App";
+import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { Button } from "@/components/ui/button";
-import { ColorPicker } from "./color-picker";
 
 interface ToolbarItemProps {
   icon: LucideIcon | CustomIcon;

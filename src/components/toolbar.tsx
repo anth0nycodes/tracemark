@@ -92,12 +92,19 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           gap: "8px",
           padding: "6px",
           borderWidth: "2px",
-          borderRadius: "10px",
+          borderRadius: "12px",
           borderColor: "var(--border)",
         }}
       >
         <ColorPicker />
-        <div className="bg-border h-8 w-0.5 rounded-2xl" />
+        <div
+          style={{
+            backgroundColor: "#C2C7CB",
+            height: "32px",
+            width: "2px",
+            borderRadius: "10px",
+          }}
+        />
         {Object.values(toolbarItems).map((item) => {
           const isActive = currentTool === item.tooltipText;
 

@@ -76,7 +76,7 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
         pencil.width = 15; // hardcoded for now, can dynamically set in future popover
-        pencil.color = color; // hardcoded for now, can dynamically set in future color picker
+        pencil.color = color;
         break;
       }
       case "Erase": {

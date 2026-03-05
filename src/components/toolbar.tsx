@@ -146,8 +146,6 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     if (isActive) {
       setOpenPopoverId((prev) => (prev === tooltipText ? null : tooltipText));
     }
-
-    setOpenPopoverId((prev) => (prev !== currentTool ? null : prev));
   }
 
   return (

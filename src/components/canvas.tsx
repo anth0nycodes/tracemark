@@ -165,9 +165,9 @@ export function Canvas({ currentTool }: CanvasProps) {
         const activeObjects = fc.getActiveObjects();
         const activeObjectsClone = [...activeObjects];
         const isGroupable = activeObjectsClone.length > 1;
-        activeObjects.forEach((obj) => fc.remove(obj));
 
         if (isGroupable) {
+          activeObjects.forEach((obj) => fc.remove(obj));
           const group = new Group(activeObjectsClone);
           fc.add(group);
           fc.setActiveObject(group);

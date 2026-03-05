@@ -50,7 +50,9 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
-  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
+    null
+  );
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {

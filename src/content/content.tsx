@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "@/App";
-import { ShadowContainerProvider } from "@/context/shadow-container";
+import { ShadowContainerProvider } from "@/context/shadow-dom/shadow-container";
 import styles from "../index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
@@ -50,7 +50,8 @@ function initTracemark() {
     width: "100%",
     height: "100%",
     fontSize: "16px",
-    fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+    fontFamily:
+      'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
     lineHeight: "1.5",
     fontWeight: "400",
     letterSpacing: "normal",

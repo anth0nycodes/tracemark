@@ -167,7 +167,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           padding: "6px",
           borderWidth: "2px",
           borderRadius: "10px",
-          borderColor: "var(--border)",
+          borderColor: "var(--color-border)",
         }}
       >
         <ColorPicker />

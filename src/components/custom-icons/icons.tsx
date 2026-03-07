@@ -15,7 +15,7 @@ export function Line(props: SVGProps<SVGSVGElement>) {
       {...props}
     >
       <path
-        fill="var(--foreground)"
+        fill="var(--color-foreground)"
         fillRule="evenodd"
         d="M19 5 a.5.5 0 0 1 0 .708 l-14 14 a.5.5 0 0 1-.708-.708 l14-14 a.5.5 0 0 1 .708 0"
         clipRule="evenodd"

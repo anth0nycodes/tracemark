@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Eraser,
   MousePointer2,
@@ -11,20 +11,34 @@ import { motion, useReducedMotion } from "motion/react";
 import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
+import { EraserPopover } from "@/components/popovers/erase-popover";
+import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface ToolbarItemProps {
   icon: LucideIcon | CustomIcon;
   shortcut: string;
   tooltipText: ToolbarStates;
+  popover?: ReactNode;
 }
 
 type ToolbarItemsRecord = Record<ToolbarStates, ToolbarItemProps>;
 
 const toolbarItems: ToolbarItemsRecord = {
   Select: { icon: MousePointer2, shortcut: "1", tooltipText: "Select" },
-  Pencil: { icon: PencilLine, shortcut: "2", tooltipText: "Pencil" },
-  Erase: { icon: Eraser, shortcut: "3", tooltipText: "Erase" },
+  Pencil: {
+    icon: PencilLine,
+    shortcut: "2",
+    tooltipText: "Pencil",
+    popover: <PencilPopover />,
+  },
+  Erase: {
+    icon: Eraser,
+    shortcut: "3",
+    tooltipText: "Erase",
+    popover: <EraserPopover />,
+  },
   Text: { icon: Type, shortcut: "4", tooltipText: "Text" },
   Frame: { icon: Square, shortcut: "5", tooltipText: "Frame" },
   Line: { icon: Line, shortcut: "6", tooltipText: "Line" },
@@ -36,6 +50,9 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
+  const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
+    null
+  );
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -76,6 +93,61 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (currentTool !== openPopoverId) {
+      setOpenPopoverId(null);
+    }
+  }, [currentTool, openPopoverId]);
+
+  function renderButton(isActive: boolean, item: ToolbarItemProps) {
+    return (
+      <Button
+        variant={isActive ? null : "ghost"}
+        className="relative flex shrink-0 items-center justify-center"
+        style={{ width: "100%", height: "100%", borderRadius: "10px" }}
+        onClick={() => setCurrentTool(item.tooltipText)}
+        aria-label={`${item.tooltipText} (${item.shortcut})`}
+        title={`${item.tooltipText} (${item.shortcut})`}
+        aria-pressed={isActive}
+      >
+        <item.icon
+          aria-hidden="true"
+          className="z-10"
+          style={{ width: "20px", height: "20px" }}
+        />
+
+        <span
+          className="text-muted-foreground/60 dark:text-foreground absolute z-10 font-semibold transition-colors"
+          style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
+          aria-hidden="true"
+        >
+          {item.shortcut}
+        </span>
+
+        {isActive && (
+          <motion.div
+            layoutId={prefersReducedMotion ? undefined : "active-toolbar-item"}
+            className="bg-accent absolute inset-0"
+            style={{
+              borderRadius: "10px",
+            }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { type: "spring", damping: 50, stiffness: 600 }
+            }
+          />
+        )}
+      </Button>
+    );
+  }
+
+  function handlePopoverOpen(isActive: boolean, tooltipText: ToolbarStates) {
+    if (isActive) {
+      setOpenPopoverId((prev) => (prev === tooltipText ? null : tooltipText));
+    }
+  }
+
   return (
     <div
       className="z-2147483647"
@@ -95,7 +167,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           padding: "6px",
           borderWidth: "2px",
           borderRadius: "10px",
-          borderColor: "var(--border)",
+          borderColor: "var(--color-border)",
         }}
       >
         <ColorPicker />
@@ -115,46 +187,23 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
               key={item.tooltipText}
               style={{ width: "44px", height: "44px" }}
             >
-              <Button
-                variant={isActive ? null : "ghost"}
-                className="relative flex shrink-0 items-center justify-center"
-                style={{ width: "100%", height: "100%", borderRadius: "10px" }}
-                onClick={() => setCurrentTool(item.tooltipText)}
-                aria-label={`${item.tooltipText} (${item.shortcut})`}
-                title={`${item.tooltipText} (${item.shortcut})`}
-                aria-pressed={isActive}
-              >
-                <item.icon
-                  aria-hidden="true"
-                  className="z-10"
-                  style={{ width: "20px", height: "20px" }}
-                />
-
-                <span
-                  className="text-muted-foreground/60 dark:text-foreground absolute z-10 font-semibold transition-colors"
-                  style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
-                  aria-hidden="true"
+              {item.popover ? (
+                <Popover
+                  open={openPopoverId === item.tooltipText}
+                  onOpenChange={() =>
+                    handlePopoverOpen(isActive, item.tooltipText)
+                  }
                 >
-                  {item.shortcut}
-                </span>
-
-                {isActive && (
-                  <motion.div
-                    layoutId={
-                      prefersReducedMotion ? undefined : "active-toolbar-item"
-                    }
-                    className="bg-accent absolute inset-0"
-                    style={{
-                      borderRadius: "10px",
-                    }}
-                    transition={
-                      prefersReducedMotion
-                        ? { duration: 0 }
-                        : { type: "spring", damping: 50, stiffness: 600 }
-                    }
-                  />
-                )}
-              </Button>
+                  <PopoverTrigger asChild>
+                    {renderButton(isActive, item)}
+                  </PopoverTrigger>
+                  <PopoverContent className="w-max p-1" sideOffset={16}>
+                    {item.popover}
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                renderButton(isActive, item)
+              )}
               {isActive && (
                 <motion.div
                   layoutId={

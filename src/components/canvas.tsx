@@ -4,6 +4,8 @@ import { EraserBrush } from "@erase2d/fabric";
 import { Group, PencilBrush } from "fabric";
 import type { ToolbarStates } from "@/App";
 import { useColor } from "@/context/color/use-color";
+import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
+import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
 import { getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
@@ -31,6 +33,8 @@ export function Canvas({ currentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fcRef = useRef<FabricCanvas | null>(null);
   const { color } = useColor();
+  const { pencilWidth } = usePencilPopover();
+  const { eraserWidth } = useEraserPopover();
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -75,7 +79,7 @@ export function Canvas({ currentTool }: CanvasProps) {
         const pencil = new PencilBrush(fc);
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
-        pencil.width = 15; // hardcoded for now, can dynamically set in future popover
+        pencil.width = pencilWidth;
         pencil.color = color;
         break;
       }
@@ -83,7 +87,7 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.discardActiveObject();
         fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
-        eraser.width = 30; // hardcoded for now, can dynamically set in future popover
+        eraser.width = eraserWidth;
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
         break;

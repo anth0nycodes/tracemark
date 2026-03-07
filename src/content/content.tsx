@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "@/App";
+import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
 import styles from "../index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
@@ -24,7 +25,9 @@ function injectTracemarkContent(root: ShadowRoot) {
 
   createRoot(tracemarkContentContainer).render(
     <StrictMode>
-      <App />
+      <ShadowContainerProvider container={tracemarkContentContainer}>
+        <App />
+      </ShadowContainerProvider>
     </StrictMode>
   );
 }
@@ -39,12 +42,21 @@ function initTracemark() {
   rootContainer.id = "tracemark-shadow-host";
 
   // Position the shadow host to cover the entire document
+  // Reset inherited styles to prevent host page CSS from affecting our components
   Object.assign(rootContainer.style, {
     position: "absolute",
     top: "0",
     left: "0",
     width: "100%",
     height: "100%",
+    fontSize: "16px",
+    fontFamily:
+      'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+    lineHeight: "1.5",
+    fontWeight: "400",
+    letterSpacing: "normal",
+    textTransform: "none",
+    zoom: "1",
   });
 
   // Attach #shadow-root to rootContainer

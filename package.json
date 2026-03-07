@@ -21,6 +21,7 @@
     "fabric": "^7.2.0",
     "lucide-react": "^0.562.0",
     "motion": "^12.26.2",
+    "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0",

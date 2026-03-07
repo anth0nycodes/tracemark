@@ -42,6 +42,7 @@ export function EraserPopover() {
             key={item.value}
             variant="ghost"
             className="relative"
+            aria-label={`Eraser width ${item.value}px`}
           >
             {isActive && (
               <motion.div

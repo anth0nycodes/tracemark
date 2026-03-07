@@ -4,7 +4,7 @@ import { PencilPopoverContext } from "./constants";
 export function usePencilPopover() {
   const context = useContext(PencilPopoverContext);
 
-  if (!context) {
+  if (context === null) {
     throw new Error(
       "usePencilPopover must be used within a PencilPopoverProvider"
     );

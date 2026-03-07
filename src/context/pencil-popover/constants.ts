@@ -5,7 +5,5 @@ interface PencilPopoverContextProps {
   setPencilWidth: Dispatch<SetStateAction<number>>;
 }
 
-export const PencilPopoverContext = createContext<PencilPopoverContextProps>({
-  pencilWidth: 5,
-  setPencilWidth: () => {},
-});
+export const PencilPopoverContext =
+  createContext<PencilPopoverContextProps | null>(null);

@@ -5,7 +5,5 @@ interface EraserPopoverContextProps {
   setEraserWidth: Dispatch<SetStateAction<number>>;
 }
 
-export const EraserPopoverContext = createContext<EraserPopoverContextProps>({
-  eraserWidth: 5,
-  setEraserWidth: () => {},
-});
+export const EraserPopoverContext =
+  createContext<EraserPopoverContextProps | null>(null);

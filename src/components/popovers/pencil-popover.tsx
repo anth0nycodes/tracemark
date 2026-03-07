@@ -42,6 +42,7 @@ export function PencilPopover() {
             key={item.value}
             variant="ghost"
             className="relative"
+            aria-label={`Pencil width ${item.value}px`}
           >
             {isActive && (
               <motion.div

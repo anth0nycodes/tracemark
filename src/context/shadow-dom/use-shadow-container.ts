@@ -4,11 +4,6 @@ import { ShadowContainerContext } from "./constants";
 export function useShadowContainer() {
   const context = useContext(ShadowContainerContext);
 
-  if (!context) {
-    throw new Error(
-      "useShadowContainer must be used within a ShadowContainerProvider"
-    );
-  }
-
-  return context;
+  // Fall back to document.body when no provider is present (e.g., in dev mode)
+  return context ?? document.body;
 }

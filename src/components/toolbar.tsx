@@ -197,7 +197,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
                   <PopoverTrigger asChild>
                     {renderButton(isActive, item)}
                   </PopoverTrigger>
-                  <PopoverContent sideOffset={20}>
+                  <PopoverContent className="w-max p-1" sideOffset={16}>
                     {item.popover}
                   </PopoverContent>
                 </Popover>

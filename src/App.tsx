@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Canvas } from "@/components/canvas";
 import { Toolbar } from "@/components/toolbar";
 import { ColorProvider } from "@/context/color/ColorContext";
+import { EraserPopoverProvider } from "./context/eraser-popover/PopoverProvider";
+import { PencilPopoverProvider } from "./context/pencil-popover/PopoverProvider";
 
 export type ToolbarStates =
   | "Select"
@@ -17,8 +19,12 @@ export function App() {
 
   return (
     <ColorProvider>
-      <Toolbar currentTool={currentTool} setCurrentTool={setCurrentTool} />
-      <Canvas currentTool={currentTool} />
+      <PencilPopoverProvider>
+        <EraserPopoverProvider>
+          <Toolbar currentTool={currentTool} setCurrentTool={setCurrentTool} />
+          <Canvas currentTool={currentTool} />
+        </EraserPopoverProvider>
+      </PencilPopoverProvider>
     </ColorProvider>
   );
 }

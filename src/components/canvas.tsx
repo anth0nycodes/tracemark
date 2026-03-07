@@ -87,7 +87,7 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.discardActiveObject();
         fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
-        eraser.width = eraserWidth; // hardcoded for now, can dynamically set in future popover
+        eraser.width = eraserWidth;
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
         break;

@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "@/App";
-import { ShadowContainerProvider } from "@/context/shadow-dom/shadow-container";
+import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
 import styles from "../index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable

@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Canvas } from "@/components/canvas";
 import { Toolbar } from "@/components/toolbar";
 import { ColorProvider } from "@/context/color/ColorContext";
-import { EraserPopoverProvider } from "./context/eraser-popover/PopoverProvider";
-import { PencilPopoverProvider } from "./context/pencil-popover/PopoverProvider";
+import { EraserPopoverProvider } from "@/context/eraser-popover/PopoverProvider";
+import { PencilPopoverProvider } from "@/context/pencil-popover/PopoverProvider";
 
 export type ToolbarStates =
   | "Select"

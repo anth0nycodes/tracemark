@@ -1,5 +1,5 @@
 import { LineSquiggle, type LucideIcon } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
 import { Button } from "../ui/button";
 
@@ -29,6 +29,7 @@ const popoverItems: PopoverItem[] = [
 
 export function PencilPopover() {
   const { pencilWidth, setPencilWidth } = usePencilPopover();
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <div className="flex items-center gap-1">
@@ -46,13 +47,19 @@ export function PencilPopover() {
           >
             {isActive && (
               <motion.div
-                layoutId="active-pencil-popover-item"
+                layoutId={
+                  prefersReducedMotion ? undefined : "active-pencil-popover-item"
+                }
                 className="absolute inset-0"
                 style={{
                   borderRadius: "8px",
                   backgroundColor: "var(--color-foreground)",
                 }}
-                transition={{ type: "spring", damping: 50, stiffness: 600 }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { type: "spring", damping: 50, stiffness: 600 }
+                }
               />
             )}
             <item.icon

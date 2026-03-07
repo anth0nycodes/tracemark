@@ -1,5 +1,5 @@
 import { Dot, type LucideIcon } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { Button } from "../ui/button";
 
@@ -29,6 +29,7 @@ const popoverItems: PopoverItem[] = [
 
 export function EraserPopover() {
   const { eraserWidth, setEraserWidth } = useEraserPopover();
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <div className="flex items-center gap-1">
@@ -46,13 +47,19 @@ export function EraserPopover() {
           >
             {isActive && (
               <motion.div
-                layoutId="active-eraser-popover-item"
+                layoutId={
+                  prefersReducedMotion ? undefined : "active-eraser-popover-item"
+                }
                 className="absolute inset-0"
                 style={{
                   borderRadius: "8px",
                   backgroundColor: "var(--color-foreground)",
                 }}
-                transition={{ type: "spring", damping: 50, stiffness: 600 }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { type: "spring", damping: 50, stiffness: 600 }
+                }
               />
             )}
             <item.icon

@@ -51,7 +51,15 @@ export function Canvas({ currentTool }: CanvasProps) {
     const initCanvasDimensions = () => setupCanvas(fc);
     initCanvasDimensions();
 
-    window.addEventListener("resize", initCanvasDimensions);
+    let resizeTimeout: number;
+
+    const resizeObserver = new ResizeObserver(() => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => initCanvasDimensions(), 50); // debounce to prevent rapid calls
+    });
+
+    resizeObserver.observe(document.documentElement);
+    resizeObserver.observe(document.body);
 
     // Make all created paths erasable
     fc.on("object:added", (e) => {
@@ -62,7 +70,7 @@ export function Canvas({ currentTool }: CanvasProps) {
 
     return () => {
       fc.dispose();
-      window.removeEventListener("resize", initCanvasDimensions);
+      resizeObserver.disconnect();
     };
   }, []);
 

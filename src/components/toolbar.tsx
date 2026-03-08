@@ -20,6 +20,7 @@ import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { EraserPopover } from "@/components/popovers/erase-popover";
 import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface ToolbarItemProps {
@@ -90,12 +91,15 @@ function ToolbarButton({
     >
       <item.icon
         aria-hidden="true"
-        className="z-10"
+        className={cn("z-10 transition-colors", isActive && "text-background")}
         style={{ width: "20px", height: "20px" }}
       />
 
       <span
-        className="text-muted-foreground/60 dark:text-foreground absolute z-10 font-semibold transition-colors"
+        className={cn(
+          "text-muted-foreground/60 dark:text-foreground absolute z-10 font-semibold transition-colors",
+          isActive && "text-background"
+        )}
         style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
         aria-hidden="true"
       >
@@ -105,7 +109,7 @@ function ToolbarButton({
       {isActive && (
         <motion.div
           layoutId={prefersReducedMotion ? undefined : "active-toolbar-item"}
-          className="bg-accent absolute inset-0"
+          className="bg-foreground absolute inset-0"
           style={{
             borderRadius: "10px",
           }}

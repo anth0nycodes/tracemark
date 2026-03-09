@@ -26,18 +26,18 @@ function updateCanvasHeight(fc: FabricCanvas) {
     document.body.clientHeight
   );
   const viewportHeight = window.innerHeight;
-  const currentHeight = fc.getHeight();
-  let newCanvasHeight = currentHeight || viewportHeight;
+  const currentCanvasHeight = fc.getHeight();
+  let newCanvasHeight = currentCanvasHeight || contentHeight;
 
   // total distance from top of page to bottom of visible screen
-  const scrollReachY = window.scrollY + viewportHeight;
+  const visibleBottomY = window.scrollY + viewportHeight;
 
   // expand until canvas covers bottom of visible screen
-  while (newCanvasHeight < scrollReachY) {
+  while (newCanvasHeight < visibleBottomY) {
     newCanvasHeight += EXPANSION_INCREMENT;
   }
 
-  if (newCanvasHeight > currentHeight) {
+  if (newCanvasHeight > currentCanvasHeight) {
     fc.setDimensions({
       height: Math.max(contentHeight, newCanvasHeight),
     });

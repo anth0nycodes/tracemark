@@ -222,8 +222,9 @@ export function Canvas({ currentTool }: CanvasProps) {
   }, []);
 
   return (
-    <div className="absolute top-0 left-0 z-2147483646 overflow-hidden">
-      <canvas ref={canvasRef} className="pointer-events-auto" />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-auto absolute top-0 left-0 z-2147483646"
+    />
   );
 }

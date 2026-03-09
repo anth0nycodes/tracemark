@@ -8,21 +8,39 @@ import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
 import { getOS } from "@/lib/helpers";
 
-function setupCanvas(fc: FabricCanvas) {
-  // Get the full document dimensions
+const EXPANSION_INCREMENT = 500;
+
+function updateCanvasWidth(fc: FabricCanvas) {
   const contentWidth = Math.max(
     document.documentElement.clientWidth,
     document.body.clientWidth
   );
+
+  fc.setDimensions({ width: contentWidth });
+}
+
+// TODO: fix vertical overflow caused by canvas increment logic
+function updateCanvasHeight(fc: FabricCanvas) {
   const contentHeight = Math.max(
     document.documentElement.clientHeight,
     document.body.clientHeight
   );
+  const viewportHeight = window.innerHeight;
+  const scrollReachY = window.scrollY + viewportHeight;
+  const currentHeight = fc.getHeight();
+  console.log("Current canvas height:", currentHeight);
 
-  fc.setDimensions({
-    width: contentWidth,
-    height: contentHeight,
-  });
+  let newHeight = currentHeight || viewportHeight;
+
+  while (newHeight < scrollReachY) {
+    newHeight += EXPANSION_INCREMENT;
+  }
+
+  if (newHeight > currentHeight) {
+    fc.setDimensions({
+      height: Math.max(contentHeight, newHeight),
+    });
+  }
 }
 
 interface CanvasProps {
@@ -48,18 +66,24 @@ export function Canvas({ currentTool }: CanvasProps) {
 
     fcRef.current = fc;
 
-    const initCanvasDimensions = () => setupCanvas(fc);
-    initCanvasDimensions();
+    const handleResize = () => {
+      updateCanvasWidth(fc);
+      updateCanvasHeight(fc);
+    };
+
+    const handleScroll = () => updateCanvasHeight(fc);
+    handleResize(); // Initial sizing
 
     let resizeTimeout: number;
 
     const resizeObserver = new ResizeObserver(() => {
       clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => initCanvasDimensions(), 50); // debounce to prevent rapid calls
+      resizeTimeout = setTimeout(handleResize, 50); // debounce to prevent rapid calls
     });
 
     resizeObserver.observe(document.documentElement);
     resizeObserver.observe(document.body);
+    window.addEventListener("scroll", handleScroll);
 
     // Make all created paths erasable
     fc.on("object:added", (e) => {
@@ -71,6 +95,7 @@ export function Canvas({ currentTool }: CanvasProps) {
     return () => {
       fc.dispose();
       resizeObserver.disconnect();
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -196,9 +221,8 @@ export function Canvas({ currentTool }: CanvasProps) {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-auto absolute top-0 left-0 z-2147483646"
-    />
+    <div className="absolute top-0 left-0 z-2147483646 overflow-hidden">
+      <canvas ref={canvasRef} className="pointer-events-auto" />
+    </div>
   );
 }

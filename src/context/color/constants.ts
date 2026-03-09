@@ -6,6 +6,6 @@ interface ColorContextProps {
 }
 
 export const ColorContext = createContext<ColorContextProps>({
-  color: "#000000",
+  color: "#FF0000",
   setColor: () => {},
 });

@@ -1,3 +1,6 @@
+import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
+import type { TPointerEvent } from "fabric";
+
 declare global {
   interface NavigatorUA {
     getHighEntropyValues(platforms: string[]): Promise<{ platform: string }>;
@@ -24,3 +27,8 @@ export async function getOS() {
 
   return "Unknown";
 }
+
+export const getCanvasCoordinates = (fc: FabricCanvas, e: TPointerEvent) => {
+  const { x, y } = fc.getViewportPoint(e);
+  return { x, y };
+};

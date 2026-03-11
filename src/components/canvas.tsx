@@ -1,12 +1,18 @@
 import { useEffect, useRef } from "react";
 import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
-import { Group, PencilBrush } from "fabric";
+import {
+  Group,
+  PencilBrush,
+  Textbox,
+  type TPointerEvent,
+  type TPointerEventInfo,
+} from "fabric";
 import type { ToolbarStates } from "@/App";
 import { useColor } from "@/context/color/use-color";
 import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
-import { getOS } from "@/lib/helpers";
+import { getCanvasCoordinates, getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
   // Get the full document dimensions
@@ -27,9 +33,10 @@ function setupCanvas(fc: FabricCanvas) {
 
 interface CanvasProps {
   currentTool: ToolbarStates;
+  setCurrentTool: (currentTool: ToolbarStates) => void;
 }
 
-export function Canvas({ currentTool }: CanvasProps) {
+export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fcRef = useRef<FabricCanvas | null>(null);
   const { color } = useColor();
@@ -92,11 +99,38 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.isDrawingMode = true;
         break;
       }
-      case "Text":
+      case "Text": {
         fc.discardActiveObject();
         fc.requestRenderAll();
-        fc.isDrawingMode = true;
-        break;
+        fc.isDrawingMode = false;
+
+        const createTextHandler = (e: TPointerEvent) => {
+          const { x, y } = getCanvasCoordinates(fc, e);
+
+          const text = new Textbox("", {
+            left: x,
+            top: y,
+            color: color,
+            fontFamily: "Arial",
+          });
+
+          fc.add(text);
+          fc.setActiveObject(text);
+          text.enterEditing();
+        };
+
+        const handler = (e: TPointerEventInfo<TPointerEvent>) => {
+          if (e.target) return;
+          createTextHandler(e.e);
+        };
+
+        fc.on({ "mouse:down": handler });
+
+        return () => {
+          fc.off({ "mouse:down": handler });
+          setCurrentTool("Select"); // switch back to select tool after placing text
+        };
+      }
       case "Frame":
         fc.discardActiveObject();
         fc.requestRenderAll();

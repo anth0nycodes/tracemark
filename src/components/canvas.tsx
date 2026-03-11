@@ -158,14 +158,10 @@ export function Canvas({ currentTool }: CanvasProps) {
     }
 
     async function handleGrouping(e: KeyboardEvent) {
-      const os = await getOS();
-      const isMac = os === "macOS";
-      const mod = isMac ? e.metaKey : e.ctrlKey;
-
       const fc = fcRef.current;
       if (!fc) return;
 
-      if (mod && e.key.toLowerCase() === "g") {
+      if (e.shiftKey && e.key.toLowerCase() === "g") {
         const activeObjects = fc.getActiveObjects();
         const activeObjectsClone = [...activeObjects];
         const isGroupable = activeObjectsClone.length > 1;

@@ -9,7 +9,7 @@ import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
 import { getOS } from "@/lib/helpers";
 
 const EXPANSION_INCREMENT_IN_PIXELS = 500;
-const CANVAS_MAX_HEIGHT_IN_PIXELS = 15000; // Set a maximum height to prevent excessive canvas size
+const CANVAS_MAX_HEIGHT_IN_PIXELS = 8000; // Set a maximum height to prevent excessive canvas size
 
 function updateCanvasWidth(fc: FabricCanvas) {
   const contentWidth = Math.max(
@@ -46,17 +46,24 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
   fc.setDimensions({ height: currentCanvasHeight });
 
-  if (currentCanvasHeight > CANVAS_MAX_HEIGHT_IN_PIXELS) {
+  if (
+    visibleBottomY >= currentCanvasHeight &&
+    (currentCanvasHeight || newCanvasHeight) > CANVAS_MAX_HEIGHT_IN_PIXELS
+  ) {
     alert(
-      "Tracemark does not support pages with this height. Please try again on a different website."
+      "This page is too tall for Tracemark to support. You can still draw on the visible canvas area, but it won't expand further."
     );
+    fc.setDimensions({
+      height: CANVAS_MAX_HEIGHT_IN_PIXELS,
+    });
     // TODO: remove alert and replace with better user-facing error handling
     return;
   }
 
   while (
     newCanvasHeight < visibleBottomY &&
-    visibleBottomY <= contentScrollHeight
+    visibleBottomY <= contentScrollHeight &&
+    newCanvasHeight < CANVAS_MAX_HEIGHT_IN_PIXELS
   ) {
     newCanvasHeight += EXPANSION_INCREMENT_IN_PIXELS;
   }

@@ -8,7 +8,8 @@ import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
 import { getOS } from "@/lib/helpers";
 
-const EXPANSION_INCREMENT = 500;
+const EXPANSION_INCREMENT_IN_PIXELS = 500;
+const CANVAS_MAX_HEIGHT_IN_PIXELS = 15000; // Set a maximum height to prevent excessive canvas size
 
 function updateCanvasWidth(fc: FabricCanvas) {
   const contentWidth = Math.max(
@@ -45,11 +46,19 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
   fc.setDimensions({ height: currentCanvasHeight });
 
+  if (currentCanvasHeight > CANVAS_MAX_HEIGHT_IN_PIXELS) {
+    alert(
+      "Tracemark does not support pages with this height. Please try again on a different website."
+    );
+    // TODO: remove alert and replace with better user-facing error handling
+    return;
+  }
+
   while (
     newCanvasHeight < visibleBottomY &&
     visibleBottomY <= contentScrollHeight
   ) {
-    newCanvasHeight += EXPANSION_INCREMENT;
+    newCanvasHeight += EXPANSION_INCREMENT_IN_PIXELS;
   }
 
   if (newCanvasHeight > currentCanvasHeight) {

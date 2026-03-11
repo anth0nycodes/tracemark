@@ -3,8 +3,8 @@ import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history"
 import { EraserBrush } from "@erase2d/fabric";
 import {
   Group,
+  IText,
   PencilBrush,
-  Textbox,
   type TPointerEvent,
   type TPointerEventInfo,
 } from "fabric";
@@ -104,31 +104,39 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         fc.requestRenderAll();
         fc.isDrawingMode = false;
 
-        const createTextHandler = (e: TPointerEvent) => {
-          const { x, y } = getCanvasCoordinates(fc, e);
+        let isEditingText: boolean;
 
-          const text = new Textbox("", {
+        const handler = (e: TPointerEventInfo<TPointerEvent>) => {
+          if (isEditingText) {
+            isEditingText = false;
+            return;
+          }
+
+          const { x, y } = getCanvasCoordinates(fc, e.e);
+
+          const text = new IText("", {
             left: x,
             top: y,
-            color: color,
             fontFamily: "Arial",
+            fill: color,
+          });
+
+          text.on("editing:exited", () => {
+            setCurrentTool("Select");
           });
 
           fc.add(text);
           fc.setActiveObject(text);
-          text.enterEditing();
-        };
-
-        const handler = (e: TPointerEventInfo<TPointerEvent>) => {
-          if (e.target) return;
-          createTextHandler(e.e);
+          requestAnimationFrame(() => {
+            text.enterEditing();
+          });
+          isEditingText = true;
         };
 
         fc.on({ "mouse:down": handler });
 
         return () => {
           fc.off({ "mouse:down": handler });
-          setCurrentTool("Select"); // switch back to select tool after placing text
         };
       }
       case "Frame":
@@ -146,6 +154,12 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
         const handleDeleteObject = (e: KeyboardEvent) => {
           const activeObjects = fc.getActiveObjects();
+
+          for (const object of activeObjects) {
+            if (object instanceof IText && object.isEditing) {
+              return; // skip deletion if currently editing a textbox
+            }
+          }
 
           if (activeObjects.length > 0) {
             if (e.key === "Backspace") {
@@ -180,6 +194,14 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
       // undo
       if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {
+        const activeObjects = fc.getActiveObjects();
+
+        for (const object of activeObjects) {
+          if (object instanceof IText && object.isEditing) {
+            return; // skip undo if currently editing a textbox
+          }
+        }
+
         e.preventDefault();
         await fc.undo();
       }

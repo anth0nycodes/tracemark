@@ -19,27 +19,42 @@ function updateCanvasWidth(fc: FabricCanvas) {
   fc.setDimensions({ width: contentWidth });
 }
 
-// TODO: fix vertical overflow caused by canvas increment logic
 function updateCanvasHeight(fc: FabricCanvas) {
   const contentHeight = Math.max(
     document.documentElement.clientHeight,
     document.body.clientHeight
   );
-  const viewportHeight = window.innerHeight;
+
+  fc.setDimensions({
+    height: contentHeight,
+  });
+}
+
+function updateDynamicCanvasHeight(fc: FabricCanvas) {
+  const { scrollY: scrollYAmount, innerHeight: viewportHeight } = window;
   const currentCanvasHeight = fc.getHeight();
-  let newCanvasHeight = currentCanvasHeight || contentHeight;
+  let newCanvasHeight = currentCanvasHeight;
+  const visibleBottomY = viewportHeight + scrollYAmount;
 
-  // total distance from top of page to bottom of visible screen
-  const visibleBottomY = window.scrollY + viewportHeight;
+  fc.setDimensions({ height: 0 });
 
-  // expand until canvas covers bottom of visible screen
-  while (newCanvasHeight < visibleBottomY) {
+  const contentScrollHeight = Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight
+  );
+
+  fc.setDimensions({ height: currentCanvasHeight });
+
+  while (
+    newCanvasHeight < visibleBottomY &&
+    visibleBottomY <= contentScrollHeight
+  ) {
     newCanvasHeight += EXPANSION_INCREMENT;
   }
 
   if (newCanvasHeight > currentCanvasHeight) {
     fc.setDimensions({
-      height: Math.max(contentHeight, newCanvasHeight),
+      height: Math.max(newCanvasHeight, viewportHeight),
     });
   }
 }
@@ -71,9 +86,11 @@ export function Canvas({ currentTool }: CanvasProps) {
       updateCanvasWidth(fc);
       updateCanvasHeight(fc);
     };
-
-    const handleScroll = () => updateCanvasHeight(fc);
     handleResize(); // Initial sizing
+
+    const handleScroll = () => {
+      updateDynamicCanvasHeight(fc);
+    };
 
     let resizeTimeout: number;
 

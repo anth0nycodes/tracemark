@@ -48,7 +48,7 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
   if (
     visibleBottomY >= currentCanvasHeight &&
-    (currentCanvasHeight || newCanvasHeight) > CANVAS_MAX_HEIGHT_IN_PIXELS
+    currentCanvasHeight > CANVAS_MAX_HEIGHT_IN_PIXELS
   ) {
     alert(
       "This page is too tall for Tracemark to support. You can still draw on the visible canvas area, but it won't expand further."

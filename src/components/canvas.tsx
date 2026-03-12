@@ -133,6 +133,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
           fc.add(text);
           fc.setActiveObject(text);
+
+          // we use requestAnimationFrame here to defer enterEditing until after the canvas has fully processed the newly added object, otherwise the cursor won't blink
           requestAnimationFrame(() => {
             text.enterEditing();
           });

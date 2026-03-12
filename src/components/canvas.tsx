@@ -189,6 +189,13 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
           text.on("editing:exited", () => {
             fc.off({ "mouse:down": handleMouseDown });
+            if (text.text === "") {
+              // TODO: prevent history append in fabric-history if target.excludeFromExport is true
+              text.excludeFromExport = true;
+              fc.remove(text);
+              fc.requestRenderAll();
+              return;
+            }
 
             text.set({ hasControls: true });
 

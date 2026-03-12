@@ -14,21 +14,71 @@ import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
 import { getCanvasCoordinates, getOS } from "@/lib/helpers";
 
-function setupCanvas(fc: FabricCanvas) {
-  // Get the full document dimensions
+const EXPANSION_INCREMENT_IN_PIXELS = 500;
+const CANVAS_MAX_HEIGHT_IN_PIXELS = 8000; // Set a maximum height to prevent excessive canvas size
+
+function updateCanvasWidth(fc: FabricCanvas) {
   const contentWidth = Math.max(
     document.documentElement.clientWidth,
     document.body.clientWidth
   );
+
+  fc.setDimensions({ width: contentWidth });
+}
+
+function updateCanvasHeight(fc: FabricCanvas) {
   const contentHeight = Math.max(
     document.documentElement.clientHeight,
     document.body.clientHeight
   );
 
   fc.setDimensions({
-    width: contentWidth,
     height: contentHeight,
   });
+}
+
+function updateDynamicCanvasHeight(fc: FabricCanvas) {
+  const { scrollY: scrollYAmount, innerHeight: viewportHeight } = window;
+  const currentCanvasHeight = fc.getHeight();
+  let newCanvasHeight = currentCanvasHeight;
+  const visibleBottomY = viewportHeight + scrollYAmount;
+
+  fc.setDimensions({ height: 0 });
+
+  const contentScrollHeight = Math.max(
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight
+  );
+
+  fc.setDimensions({ height: currentCanvasHeight });
+
+  if (
+    visibleBottomY >= currentCanvasHeight &&
+    currentCanvasHeight > CANVAS_MAX_HEIGHT_IN_PIXELS
+  ) {
+    alert(
+      "This page is too tall for Tracemark to support. You can still draw on the visible canvas area, but it won't expand further."
+    );
+    fc.setDimensions({
+      height: CANVAS_MAX_HEIGHT_IN_PIXELS,
+    });
+    // TODO: remove alert and replace with better user-facing error handling
+    return;
+  }
+
+  while (
+    newCanvasHeight < visibleBottomY &&
+    visibleBottomY <= contentScrollHeight &&
+    newCanvasHeight < CANVAS_MAX_HEIGHT_IN_PIXELS
+  ) {
+    newCanvasHeight += EXPANSION_INCREMENT_IN_PIXELS;
+  }
+
+  if (newCanvasHeight > currentCanvasHeight) {
+    fc.setDimensions({
+      height: Math.max(newCanvasHeight, viewportHeight),
+    });
+  }
 }
 
 interface CanvasProps {
@@ -55,10 +105,26 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
     fcRef.current = fc;
 
-    const initCanvasDimensions = () => setupCanvas(fc);
-    initCanvasDimensions();
+    const handleResize = () => {
+      updateCanvasWidth(fc);
+      updateCanvasHeight(fc);
+    };
+    handleResize(); // Initial sizing
 
-    window.addEventListener("resize", initCanvasDimensions);
+    const handleScroll = () => {
+      updateDynamicCanvasHeight(fc);
+    };
+
+    let resizeTimeout: number;
+
+    const resizeObserver = new ResizeObserver(() => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 50); // debounce to prevent rapid calls
+    });
+
+    resizeObserver.observe(document.documentElement);
+    resizeObserver.observe(document.body);
+    window.addEventListener("scroll", handleScroll);
 
     // Make all created paths erasable
     fc.on("object:added", (e) => {
@@ -69,7 +135,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
     return () => {
       fc.dispose();
-      window.removeEventListener("resize", initCanvasDimensions);
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

@@ -22,7 +22,7 @@ export function App() {
       <PencilPopoverProvider>
         <EraserPopoverProvider>
           <Toolbar currentTool={currentTool} setCurrentTool={setCurrentTool} />
-          <Canvas currentTool={currentTool} />
+          <Canvas currentTool={currentTool} setCurrentTool={setCurrentTool} />
         </EraserPopoverProvider>
       </PencilPopoverProvider>
     </ColorProvider>

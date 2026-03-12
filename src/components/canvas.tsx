@@ -1,12 +1,18 @@
 import { useEffect, useRef } from "react";
 import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
-import { Group, PencilBrush } from "fabric";
+import {
+  Group,
+  IText,
+  PencilBrush,
+  type TPointerEvent,
+  type TPointerEventInfo,
+} from "fabric";
 import type { ToolbarStates } from "@/App";
 import { useColor } from "@/context/color/use-color";
 import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
-import { getOS } from "@/lib/helpers";
+import { getCanvasCoordinates, getOS } from "@/lib/helpers";
 
 const EXPANSION_INCREMENT_IN_PIXELS = 500;
 const CANVAS_MAX_HEIGHT_IN_PIXELS = 8000; // Set a maximum height to prevent excessive canvas size
@@ -77,9 +83,10 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
 interface CanvasProps {
   currentTool: ToolbarStates;
+  setCurrentTool: (currentTool: ToolbarStates) => void;
 }
 
-export function Canvas({ currentTool }: CanvasProps) {
+export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fcRef = useRef<FabricCanvas | null>(null);
   const { color } = useColor();
@@ -159,11 +166,54 @@ export function Canvas({ currentTool }: CanvasProps) {
         fc.isDrawingMode = true;
         break;
       }
-      case "Text":
+      case "Text": {
         fc.discardActiveObject();
         fc.requestRenderAll();
-        fc.isDrawingMode = true;
-        break;
+        fc.isDrawingMode = false;
+
+        const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
+          const { x, y } = getCanvasCoordinates(fc, e.e);
+          const activeObject = fc.getActiveObject();
+
+          if (activeObject instanceof IText && activeObject.isEditing) {
+            return; // prevent creating a new text box if currently editing an existing one
+          }
+
+          const text = new IText("", {
+            left: x,
+            top: y,
+            fontFamily: "Arial",
+            fill: color,
+            hasControls: false,
+          });
+
+          text.on("editing:exited", () => {
+            fc.off({ "mouse:down": handleMouseDown });
+
+            text.set({ hasControls: true });
+
+            // we use requestAnimationFrame here because Fabric internally clears the active object AFTER the editing:exited event is fired, so without it, it wouldn't actually set the text to be the active object because it would be cleared immediately
+            requestAnimationFrame(() => {
+              fc.setActiveObject(text);
+            });
+            setCurrentTool("Select");
+          });
+
+          fc.add(text);
+          fc.setActiveObject(text);
+
+          // we use requestAnimationFrame here to defer enterEditing until after the canvas has fully processed the newly added object, otherwise the cursor won't blink
+          requestAnimationFrame(() => {
+            text.enterEditing();
+          });
+        };
+
+        fc.on({ "mouse:down": handleMouseDown });
+
+        return () => {
+          fc.off({ "mouse:down": handleMouseDown });
+        };
+      }
       case "Frame":
         fc.discardActiveObject();
         fc.requestRenderAll();
@@ -179,6 +229,12 @@ export function Canvas({ currentTool }: CanvasProps) {
 
         const handleDeleteObject = (e: KeyboardEvent) => {
           const activeObjects = fc.getActiveObjects();
+
+          for (const object of activeObjects) {
+            if (object instanceof IText && object.isEditing) {
+              return; // skip deletion if currently editing a textbox
+            }
+          }
 
           if (activeObjects.length > 0) {
             if (e.key === "Backspace") {
@@ -205,11 +261,18 @@ export function Canvas({ currentTool }: CanvasProps) {
 
       const fc = fcRef.current;
       if (!fc) return;
+      const activeObjects = fc.getActiveObjects();
 
       const macRedoShortcut =
         e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
       const windowsOrLinuxRedoShortcut =
         e.ctrlKey && e.key.toLowerCase() === "y";
+
+      for (const object of activeObjects) {
+        if (object instanceof IText && object.isEditing) {
+          return; // skip undo/redo if currently editing a textbox
+        }
+      }
 
       // undo
       if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {

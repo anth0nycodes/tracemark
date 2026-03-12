@@ -193,22 +193,21 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
       const fc = fcRef.current;
       if (!fc) return;
+      const activeObjects = fc.getActiveObjects();
 
       const macRedoShortcut =
         e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
       const windowsOrLinuxRedoShortcut =
         e.ctrlKey && e.key.toLowerCase() === "y";
 
+      for (const object of activeObjects) {
+        if (object instanceof IText && object.isEditing) {
+          return; // skip undo/redo if currently editing a textbox
+        }
+      }
+
       // undo
       if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {
-        const activeObjects = fc.getActiveObjects();
-
-        for (const object of activeObjects) {
-          if (object instanceof IText && object.isEditing) {
-            return; // skip undo if currently editing a textbox
-          }
-        }
-
         e.preventDefault();
         await fc.undo();
       }

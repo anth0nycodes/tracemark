@@ -123,13 +123,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           text.on("editing:exited", () => {
             fc.off({ "mouse:down": handleMouseDown });
 
-            if (text.text === "") {
-              fc.remove(text);
-              fc.discardActiveObject();
-              fc.requestRenderAll();
-              return;
-            }
-
             text.set({ hasControls: true });
 
             // we use requestAnimationFrame here because Fabric internally clears the active object AFTER the editing:exited event is fired, so without it, it wouldn't actually set the text to be the active object because it would be cleared immediately

@@ -1,4 +1,4 @@
-import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
+import type { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import type { TPointerEvent } from "fabric";
 
 declare global {

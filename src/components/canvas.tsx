@@ -104,24 +104,28 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         fc.requestRenderAll();
         fc.isDrawingMode = false;
 
-        let isEditingText: boolean;
-
-        const handler = (e: TPointerEventInfo<TPointerEvent>) => {
-          if (isEditingText) {
-            isEditingText = false;
-            return;
-          }
-
+        const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
           const { x, y } = getCanvasCoordinates(fc, e.e);
+          const activeObject = fc.getActiveObject();
+
+          if (activeObject instanceof IText && activeObject.isEditing) {
+            return; // prevent creating a new text box if currently editing an existing one
+          }
 
           const text = new IText("", {
             left: x,
             top: y,
             fontFamily: "Arial",
             fill: color,
+            hasControls: false,
           });
 
           text.on("editing:exited", () => {
+            fc.off({ "mouse:down": handleMouseDown });
+            text.set({ hasControls: true });
+            requestAnimationFrame(() => {
+              fc.setActiveObject(text);
+            });
             setCurrentTool("Select");
           });
 
@@ -130,13 +134,12 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           requestAnimationFrame(() => {
             text.enterEditing();
           });
-          isEditingText = true;
         };
 
-        fc.on({ "mouse:down": handler });
+        fc.on({ "mouse:down": handleMouseDown });
 
         return () => {
-          fc.off({ "mouse:down": handler });
+          fc.off({ "mouse:down": handleMouseDown });
         };
       }
       case "Frame":

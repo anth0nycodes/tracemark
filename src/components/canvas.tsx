@@ -127,6 +127,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
               fc.remove(text);
               fc.discardActiveObject();
               fc.requestRenderAll();
+              return;
             }
 
             text.set({ hasControls: true });

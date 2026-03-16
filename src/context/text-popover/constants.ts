@@ -1,5 +1,5 @@
 import { createContext, type Dispatch, type SetStateAction } from "react";
-import type { IText } from "fabric";
+import { IText } from "fabric";
 
 export type TextAlign = NonNullable<
   ConstructorParameters<typeof IText>[1]

@@ -44,6 +44,10 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const { pencilWidth } = usePencilPopover();
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
+  const colorRef = useRef(color);
+  const pencilWidthRef = useRef(pencilWidth);
+  const eraserWidthRef = useRef(eraserWidth);
+  const textAlignmentRef = useRef(textAlignment);
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -78,6 +82,10 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   // Handle active tool logic
   useEffect(() => {
     const fc = fcRef.current;
+    colorRef.current = color;
+    pencilWidthRef.current = pencilWidth;
+    eraserWidthRef.current = eraserWidth;
+    textAlignmentRef.current = textAlignment;
 
     if (!fc) return;
 
@@ -88,22 +96,30 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         const pencil = new PencilBrush(fc);
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
-        pencil.width = pencilWidth;
-        pencil.color = color;
+        pencil.width = pencilWidthRef.current;
+        pencil.color = colorRef.current;
         break;
       }
       case "Erase": {
         fc.discardActiveObject();
         fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
-        eraser.width = eraserWidth;
+        eraser.width = eraserWidthRef.current;
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
         break;
       }
       case "Text": {
-        fc.discardActiveObject();
-        fc.requestRenderAll();
+        const currentActiveObject = fc.getActiveObject();
+        if (
+          !(
+            currentActiveObject instanceof IText &&
+            currentActiveObject.isEditing
+          )
+        ) {
+          fc.discardActiveObject();
+          fc.requestRenderAll();
+        }
         fc.isDrawingMode = false;
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
@@ -118,9 +134,9 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
             left: x,
             top: y,
             fontFamily: "Arial",
-            fill: color,
+            fill: colorRef.current,
             hasControls: false,
-            textAlign: textAlignment,
+            textAlign: textAlignmentRef.current,
             excludeFromExport: true,
           });
 
@@ -194,7 +210,19 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         };
       }
     }
-  });
+  }, [currentTool]);
+
+  // Update text alignment on active text objects when alignment changes
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc) return;
+
+    const activeObject = fc.getActiveObject();
+    if (activeObject instanceof IText) {
+      activeObject.set({ textAlign: textAlignment });
+      fc.requestRenderAll();
+    }
+  }, [textAlignment]);
 
   useEffect(() => {
     async function handleUndoAndRedo(e: KeyboardEvent) {

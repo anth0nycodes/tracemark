@@ -79,13 +79,17 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     };
   }, []);
 
-  // Handle active tool logic
+  // Sync refs with latest popover values
   useEffect(() => {
-    const fc = fcRef.current;
     colorRef.current = color;
     pencilWidthRef.current = pencilWidth;
     eraserWidthRef.current = eraserWidth;
     textAlignmentRef.current = textAlignment;
+  }, [color, pencilWidth, eraserWidth, textAlignment]);
+
+  // Handle active tool logic
+  useEffect(() => {
+    const fc = fcRef.current;
 
     if (!fc) return;
 

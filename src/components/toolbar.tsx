@@ -21,6 +21,7 @@ import { EraserPopover } from "@/components/popovers/erase-popover";
 import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { TextPopover } from "./popovers/text-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface ToolbarItemProps {
@@ -46,7 +47,12 @@ const toolbarItems: ToolbarItemsRecord = {
     tooltipText: "Erase",
     popover: <EraserPopover />,
   },
-  Text: { icon: Type, shortcut: "4", tooltipText: "Text" },
+  Text: {
+    icon: Type,
+    shortcut: "4",
+    tooltipText: "Text",
+    popover: <TextPopover />,
+  },
   Frame: { icon: Square, shortcut: "5", tooltipText: "Frame" },
   Line: { icon: Line, shortcut: "6", tooltipText: "Line" },
 } as const;

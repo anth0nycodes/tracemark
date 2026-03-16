@@ -12,6 +12,7 @@ import type { ToolbarStates } from "@/App";
 import { useColor } from "@/context/color/use-color";
 import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
+import { useTextPopover } from "@/context/text-popover/use-text-popover";
 import { getCanvasCoordinates, getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
@@ -42,6 +43,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
   const { eraserWidth } = useEraserPopover();
+  const { textAlignment } = useTextPopover();
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -112,39 +114,40 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
             return; // prevent creating a new text box if currently editing an existing one
           }
 
-          const text = new IText("", {
+          const textObject = new IText("", {
             left: x,
             top: y,
             fontFamily: "Arial",
             fill: color,
             hasControls: false,
+            textAlign: textAlignment,
+            excludeFromExport: true,
           });
 
-          text.on("editing:exited", () => {
+          textObject.on("editing:exited", () => {
             fc.off({ "mouse:down": handleMouseDown });
-            if (text.text === "") {
-              // TODO: prevent history append in fabric-history if target.excludeFromExport is true
-              text.excludeFromExport = true;
-              fc.remove(text);
+            if (textObject.text.trim() === "") {
+              fc.remove(textObject);
               fc.requestRenderAll();
+              setCurrentTool("Select");
               return;
             }
 
-            text.set({ hasControls: true });
+            textObject.set({ hasControls: true, excludeFromExport: false });
 
             // we use requestAnimationFrame here because Fabric internally clears the active object AFTER the editing:exited event is fired, so without it, it wouldn't actually set the text to be the active object because it would be cleared immediately
             requestAnimationFrame(() => {
-              fc.setActiveObject(text);
+              fc.setActiveObject(textObject);
             });
             setCurrentTool("Select");
           });
 
-          fc.add(text);
-          fc.setActiveObject(text);
+          fc.add(textObject);
+          fc.setActiveObject(textObject);
 
           // we use requestAnimationFrame here to defer enterEditing until after the canvas has fully processed the newly added object, otherwise the cursor won't blink
           requestAnimationFrame(() => {
-            text.enterEditing();
+            textObject.enterEditing();
           });
         };
 

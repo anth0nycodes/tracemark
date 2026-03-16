@@ -12,6 +12,7 @@ import type { ToolbarStates } from "@/App";
 import { useColor } from "@/context/color/use-color";
 import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
 import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
+import { useTextPopover } from "@/context/text-popover/use-text-popover";
 import { getCanvasCoordinates, getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
@@ -42,6 +43,11 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
   const { eraserWidth } = useEraserPopover();
+  const { textAlignment } = useTextPopover();
+  const colorRef = useRef(color);
+  const pencilWidthRef = useRef(pencilWidth);
+  const eraserWidthRef = useRef(eraserWidth);
+  const textAlignmentRef = useRef(textAlignment);
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -73,6 +79,14 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     };
   }, []);
 
+  // Sync refs with latest popover values
+  useEffect(() => {
+    colorRef.current = color;
+    pencilWidthRef.current = pencilWidth;
+    eraserWidthRef.current = eraserWidth;
+    textAlignmentRef.current = textAlignment;
+  }, [color, pencilWidth, eraserWidth, textAlignment]);
+
   // Handle active tool logic
   useEffect(() => {
     const fc = fcRef.current;
@@ -86,22 +100,30 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         const pencil = new PencilBrush(fc);
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
-        pencil.width = pencilWidth;
-        pencil.color = color;
+        pencil.width = pencilWidthRef.current;
+        pencil.color = colorRef.current;
         break;
       }
       case "Erase": {
         fc.discardActiveObject();
         fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
-        eraser.width = eraserWidth;
+        eraser.width = eraserWidthRef.current;
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
         break;
       }
       case "Text": {
-        fc.discardActiveObject();
-        fc.requestRenderAll();
+        const currentActiveObject = fc.getActiveObject();
+        if (
+          !(
+            currentActiveObject instanceof IText &&
+            currentActiveObject.isEditing
+          )
+        ) {
+          fc.discardActiveObject();
+          fc.requestRenderAll();
+        }
         fc.isDrawingMode = false;
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
@@ -112,32 +134,40 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
             return; // prevent creating a new text box if currently editing an existing one
           }
 
-          const text = new IText("", {
+          const textObject = new IText("", {
             left: x,
             top: y,
             fontFamily: "Arial",
-            fill: color,
+            fill: colorRef.current,
             hasControls: false,
+            textAlign: textAlignmentRef.current,
+            excludeFromExport: true,
           });
 
-          text.on("editing:exited", () => {
+          textObject.on("editing:exited", () => {
             fc.off({ "mouse:down": handleMouseDown });
+            if (textObject.text.trim() === "") {
+              fc.remove(textObject);
+              fc.requestRenderAll();
+              setCurrentTool("Select");
+              return;
+            }
 
-            text.set({ hasControls: true });
+            textObject.set({ hasControls: true, excludeFromExport: false });
 
             // we use requestAnimationFrame here because Fabric internally clears the active object AFTER the editing:exited event is fired, so without it, it wouldn't actually set the text to be the active object because it would be cleared immediately
             requestAnimationFrame(() => {
-              fc.setActiveObject(text);
+              fc.setActiveObject(textObject);
             });
             setCurrentTool("Select");
           });
 
-          fc.add(text);
-          fc.setActiveObject(text);
+          fc.add(textObject);
+          fc.setActiveObject(textObject);
 
           // we use requestAnimationFrame here to defer enterEditing until after the canvas has fully processed the newly added object, otherwise the cursor won't blink
           requestAnimationFrame(() => {
-            text.enterEditing();
+            textObject.enterEditing();
           });
         };
 
@@ -184,7 +214,19 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         };
       }
     }
-  });
+  }, [currentTool]);
+
+  // Update text alignment on active text objects when alignment changes
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc) return;
+
+    const activeObject = fc.getActiveObject();
+    if (activeObject instanceof IText) {
+      activeObject.set({ textAlign: textAlignment });
+      fc.requestRenderAll();
+    }
+  }, [textAlignment]);
 
   useEffect(() => {
     async function handleUndoAndRedo(e: KeyboardEvent) {

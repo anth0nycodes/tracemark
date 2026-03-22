@@ -18,6 +18,7 @@ import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
 import { EraserPopover } from "@/components/popovers/erase-popover";
+import { FramePopover } from "@/components/popovers/frame-popover";
 import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,12 @@ const toolbarItems: ToolbarItemsRecord = {
     tooltipText: "Text",
     popover: <TextPopover />,
   },
-  Frame: { icon: Square, shortcut: "5", tooltipText: "Frame" },
+  Frame: {
+    icon: Square,
+    shortcut: "5",
+    tooltipText: "Frame",
+    popover: <FramePopover />,
+  },
   Line: { icon: Line, shortcut: "6", tooltipText: "Line" },
 } as const;
 

@@ -4,6 +4,7 @@ import { Toolbar } from "@/components/toolbar";
 import { ColorProvider } from "@/context/color/ColorContext";
 import { EraserPopoverProvider } from "@/context/eraser-popover/PopoverProvider";
 import { PencilPopoverProvider } from "@/context/pencil-popover/PopoverProvider";
+import { FramePopoverProvider } from "@/context/frame-popover/PopoverProvider";
 import { TextPopoverProvider } from "@/context/text-popover/PopoverProvider";
 
 export type ToolbarStates =
@@ -23,11 +24,16 @@ export function App() {
       <PencilPopoverProvider>
         <EraserPopoverProvider>
           <TextPopoverProvider>
-            <Toolbar
-              currentTool={currentTool}
-              setCurrentTool={setCurrentTool}
-            />
-            <Canvas currentTool={currentTool} setCurrentTool={setCurrentTool} />
+            <FramePopoverProvider>
+              <Toolbar
+                currentTool={currentTool}
+                setCurrentTool={setCurrentTool}
+              />
+              <Canvas
+                currentTool={currentTool}
+                setCurrentTool={setCurrentTool}
+              />
+            </FramePopoverProvider>
           </TextPopoverProvider>
         </EraserPopoverProvider>
       </PencilPopoverProvider>

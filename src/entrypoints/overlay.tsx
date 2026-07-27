@@ -1,8 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { defineUnlistedScript } from "#imports";
 import { App } from "@/App";
 import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
-import styles from "../index.css?inline";
+import styles from "@/index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
 
@@ -41,7 +42,6 @@ function initTracemark() {
   rootContainer = document.createElement("div");
   rootContainer.id = "tracemark-shadow-host";
 
-  // Position the shadow host to cover the entire document
   // Reset inherited styles to prevent host page CSS from affecting our components
   Object.assign(rootContainer.style, {
     position: "absolute",
@@ -77,7 +77,6 @@ function initTracemark() {
 
 function cleanup() {
   // Prevents duplicate injection requests
-  // TODO: Fix the cleanup logic when you click the extension icon if it's already initialized
   if (rootContainer) {
     rootContainer.remove();
     rootContainer = null;
@@ -86,4 +85,7 @@ function cleanup() {
   }
 }
 
-initTracemark();
+// eslint-disable-next-line react-refresh/only-export-components
+export default defineUnlistedScript(() => {
+  initTracemark();
+});

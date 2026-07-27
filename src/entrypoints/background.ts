@@ -1,14 +1,15 @@
-import { defineBackground } from "#imports";
+import { browser, defineBackground } from "#imports";
+import type { Browser } from "wxt/browser";
 
 export default defineBackground(() => {
-  async function handleActionClick(tab: chrome.tabs.Tab) {
+  async function handleActionClick(tab: Browser.tabs.Tab) {
     const tabId = tab.id;
     if (!tabId) return;
-    await chrome.scripting.executeScript({
+    await browser.scripting.executeScript({
       target: { tabId },
-      files: ["overlay.js"],
+      files: ["/overlay.js"],
     });
   }
 
-  chrome.action.onClicked.addListener(handleActionClick);
+  browser.action.onClicked.addListener(handleActionClick);
 });

@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# WXT
+.output
+.wxt
+web-ext.config.ts
+stats.html
+stats-*.json
+
 # Claude Code
 .claude
 

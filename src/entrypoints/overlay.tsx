@@ -1,8 +1,9 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { defineUnlistedScript } from "#imports";
 import { App } from "@/App";
 import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
-import styles from "../index.css?inline";
+import styles from "@/index.css?inline";
 
 // TODO: Make this toolbar draggable and toggleable
 
@@ -86,4 +87,10 @@ function cleanup() {
   }
 }
 
-initTracemark();
+// Not listed in the manifest — bundled and injected on demand from the
+// background service worker (action click) via chrome.scripting.executeScript.
+// Keeps permissions to activeTab + scripting only (no host_permissions).
+// eslint-disable-next-line react-refresh/only-export-components
+export default defineUnlistedScript(() => {
+  initTracemark();
+});

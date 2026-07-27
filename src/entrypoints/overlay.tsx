@@ -42,7 +42,6 @@ function initTracemark() {
   rootContainer = document.createElement("div");
   rootContainer.id = "tracemark-shadow-host";
 
-  // Position the shadow host to cover the entire document
   // Reset inherited styles to prevent host page CSS from affecting our components
   Object.assign(rootContainer.style, {
     position: "absolute",
@@ -78,7 +77,6 @@ function initTracemark() {
 
 function cleanup() {
   // Prevents duplicate injection requests
-  // TODO: Fix the cleanup logic when you click the extension icon if it's already initialized
   if (rootContainer) {
     rootContainer.remove();
     rootContainer = null;
@@ -87,9 +85,6 @@ function cleanup() {
   }
 }
 
-// Not listed in the manifest — bundled and injected on demand from the
-// background service worker (action click) via chrome.scripting.executeScript.
-// Keeps permissions to activeTab + scripting only (no host_permissions).
 // eslint-disable-next-line react-refresh/only-export-components
 export default defineUnlistedScript(() => {
   initTracemark();

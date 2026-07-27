@@ -1,11 +1,19 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { defineUnlistedScript } from "#imports";
 import { App } from "@/App";
 import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
 import styles from "@/index.css?inline";
 
-// TODO: Make this toolbar draggable and toggleable
+// TODO: Make this toolbar draggable
+
+const HOST_ID = "tracemark-shadow-host";
+
+declare global {
+  interface Window {
+    __tracemark: { root: Root; host: HTMLDivElement };
+  }
+}
 
 let rootContainer: HTMLDivElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
@@ -24,23 +32,27 @@ function injectTracemarkContent(root: ShadowRoot) {
     userSelect: "none",
   });
 
-  createRoot(tracemarkContentContainer).render(
+  const tracemarkRoot = createRoot(tracemarkContentContainer);
+
+  tracemarkRoot.render(
     <StrictMode>
       <ShadowContainerProvider container={tracemarkContentContainer}>
         <App />
       </ShadowContainerProvider>
     </StrictMode>
   );
+
+  return tracemarkRoot;
 }
 
-function initTracemark() {
+function openTracemark() {
   if (rootContainer) {
     console.warn("Tracemark has already been initialized!");
     return;
   }
 
   rootContainer = document.createElement("div");
-  rootContainer.id = "tracemark-shadow-host";
+  rootContainer.id = HOST_ID;
 
   // Reset inherited styles to prevent host page CSS from affecting our components
   Object.assign(rootContainer.style, {
@@ -68,24 +80,26 @@ function initTracemark() {
   shadowRoot.appendChild(styleElement);
 
   // Inject main tracemark app content
-  injectTracemarkContent(shadowRoot);
-
+  const tracemarkRoot = injectTracemarkContent(shadowRoot);
+  window.__tracemark = { root: tracemarkRoot, host: rootContainer };
   document.body.appendChild(rootContainer);
-
-  return () => cleanup();
 }
 
-function cleanup() {
-  // Prevents duplicate injection requests
-  if (rootContainer) {
-    rootContainer.remove();
-    rootContainer = null;
-    shadowRoot = null;
-    return;
-  }
+function closeTracemark() {
+  window.__tracemark.root.unmount();
+  window.__tracemark.host.remove();
+  rootContainer = null;
+  shadowRoot = null;
+  // @ts-expect-error - clearing the toggle sentinel
+  delete window.__tracemark;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export default defineUnlistedScript(() => {
-  initTracemark();
+  const tracemarkInstance = window.__tracemark;
+  if (tracemarkInstance) {
+    closeTracemark();
+  } else {
+    openTracemark();
+  }
 });

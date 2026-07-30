@@ -25,42 +25,35 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface ToolbarItemProps {
+  name: ToolbarStates;
   icon: LucideIcon | CustomIcon;
   shortcut: string;
-  tooltipText: ToolbarStates;
   popover?: ReactNode;
 }
 
-type ToolbarItemsRecord = Record<ToolbarStates, ToolbarItemProps>;
-
-const toolbarItems: ToolbarItemsRecord = {
-  Select: { icon: MousePointer2, shortcut: "1", tooltipText: "Select" },
-  Pencil: {
+const toolbarItems: ToolbarItemProps[] = [
+  { name: "Select", icon: MousePointer2, shortcut: "1" },
+  {
+    name: "Pencil",
     icon: PencilLine,
     shortcut: "2",
-    tooltipText: "Pencil",
     popover: <PencilPopover />,
   },
-  Erase: {
+  {
+    name: "Erase",
     icon: Eraser,
     shortcut: "3",
-    tooltipText: "Erase",
     popover: <EraserPopover />,
   },
-  Text: {
+  {
+    name: "Text",
     icon: Type,
     shortcut: "4",
-    tooltipText: "Text",
     popover: <TextPopover />,
   },
-  Frame: { icon: Square, shortcut: "5", tooltipText: "Frame" },
-  Line: { icon: Line, shortcut: "6", tooltipText: "Line" },
-} as const;
-
-interface ToolbarProps {
-  currentTool: ToolbarStates;
-  setCurrentTool: (currentTool: ToolbarStates) => void;
-}
+  { name: "Frame", icon: Square, shortcut: "5" },
+  { name: "Line", icon: Line, shortcut: "6" },
+];
 
 interface ToolbarButtonProps {
   isActive: boolean;
@@ -88,11 +81,11 @@ function ToolbarButton({
       className="relative flex shrink-0 items-center justify-center"
       style={{ width: "100%", height: "100%", borderRadius: "10px" }}
       onClick={(e) => {
-        setCurrentTool(item.tooltipText);
+        setCurrentTool(item.name);
         onClick?.(e);
       }}
-      aria-label={`${item.tooltipText} (${item.shortcut})`}
-      title={`${item.tooltipText} (${item.shortcut})`}
+      aria-label={`${item.name} (${item.shortcut})`}
+      title={`${item.name} (${item.shortcut})`}
       aria-pressed={isActive}
     >
       <item.icon
@@ -130,6 +123,11 @@ function ToolbarButton({
   );
 }
 
+interface ToolbarProps {
+  currentTool: ToolbarStates;
+  setCurrentTool: (currentTool: ToolbarStates) => void;
+}
+
 export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
     null
@@ -138,7 +136,6 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
 
   useEffect(() => {
     const handleKeyShortcuts = (e: KeyboardEvent) => {
-      // Ignore typing contexts
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
@@ -147,7 +144,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
         return;
       }
 
-      // Ignore modified keys (this is susceptible to change when adding future undo/redo + copy logic)
+      // Ignore modified keys
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
         return;
       }
@@ -217,20 +214,15 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
             borderRadius: "10px",
           }}
         />
-        {Object.values(toolbarItems).map((item) => {
-          const isActive = currentTool === item.tooltipText;
+        {toolbarItems.map((item) => {
+          const isActive = currentTool === item.name;
 
           return (
-            <div
-              key={item.tooltipText}
-              style={{ width: "44px", height: "44px" }}
-            >
+            <div key={item.name} style={{ width: "44px", height: "44px" }}>
               {item.popover ? (
                 <Popover
-                  open={openPopoverId === item.tooltipText}
-                  onOpenChange={() =>
-                    handlePopoverOpen(isActive, item.tooltipText)
-                  }
+                  open={openPopoverId === item.name}
+                  onOpenChange={() => handlePopoverOpen(isActive, item.name)}
                 >
                   <PopoverTrigger asChild>
                     <ToolbarButton

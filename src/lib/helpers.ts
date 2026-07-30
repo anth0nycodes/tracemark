@@ -28,7 +28,7 @@ export async function getOS() {
   return "Unknown";
 }
 
-export const getCanvasCoordinates = (fc: FabricCanvas, e: TPointerEvent) => {
+export function getCanvasCoordinates(fc: FabricCanvas, e: TPointerEvent) {
   const { x, y } = fc.getViewportPoint(e);
   return { x, y };
-};
+}

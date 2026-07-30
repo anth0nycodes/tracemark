@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { defineUnlistedScript } from "#imports";
+import { defineContentScript } from "#imports";
 import { App } from "@/App";
 import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
 import styles from "@/index.css?inline";
@@ -14,9 +14,6 @@ declare global {
     __tracemark: { root: Root; host: HTMLDivElement };
   }
 }
-
-let rootContainer: HTMLDivElement | null = null;
-let shadowRoot: ShadowRoot | null = null;
 
 function injectTracemarkContent(root: ShadowRoot) {
   const tracemarkContentContainer = document.createElement("div");
@@ -46,12 +43,7 @@ function injectTracemarkContent(root: ShadowRoot) {
 }
 
 function openTracemark() {
-  if (rootContainer) {
-    console.warn("Tracemark has already been initialized!");
-    return;
-  }
-
-  rootContainer = document.createElement("div");
+  const rootContainer = document.createElement("div");
   rootContainer.id = HOST_ID;
 
   // Reset inherited styles to prevent host page CSS from affecting our components
@@ -72,7 +64,7 @@ function openTracemark() {
   });
 
   // Attach #shadow-root to rootContainer
-  shadowRoot = rootContainer.attachShadow({ mode: "open" });
+  const shadowRoot = rootContainer.attachShadow({ mode: "open" });
 
   // Inject tailwind styles
   const styleElement = document.createElement("style");
@@ -88,18 +80,20 @@ function openTracemark() {
 function closeTracemark() {
   window.__tracemark.root.unmount();
   window.__tracemark.host.remove();
-  rootContainer = null;
-  shadowRoot = null;
   // @ts-expect-error - clearing the toggle sentinel
   delete window.__tracemark;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export default defineUnlistedScript(() => {
-  const tracemarkInstance = window.__tracemark;
-  if (tracemarkInstance) {
-    closeTracemark();
-  } else {
-    openTracemark();
-  }
+export default defineContentScript({
+  matches: ["<all_urls>"],
+  registration: "runtime",
+  main() {
+    const tracemarkInstance = window.__tracemark;
+    if (tracemarkInstance) {
+      closeTracemark();
+    } else {
+      openTracemark();
+    }
+  },
 });

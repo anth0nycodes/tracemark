@@ -64,8 +64,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     const initCanvasDimensions = () => setupCanvas(fc);
     initCanvasDimensions();
 
-    window.addEventListener("resize", initCanvasDimensions);
-
     // Make all created paths erasable
     fc.on("object:added", (e) => {
       if (e.target) {
@@ -73,25 +71,91 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       }
     });
 
+    const handleDeleteObject = (e: KeyboardEvent) => {
+      const activeObjects = fc.getActiveObjects();
+      for (const object of activeObjects) {
+        // skip deletion if currently editing a textbox
+        if (object instanceof IText && object.isEditing) {
+          return;
+        }
+      }
+      if (activeObjects.length > 0) {
+        if (e.key === "Backspace") {
+          fc.remove(...activeObjects);
+          fc.discardActiveObject();
+          fc.requestRenderAll();
+        }
+      }
+    };
+
+    const handleUndoAndRedo = async (e: KeyboardEvent) => {
+      const os = await getOS();
+      const isMac = os === "macOS";
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+      const macRedoShortcut =
+        e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
+      const windowsOrLinuxRedoShortcut =
+        e.ctrlKey && e.key.toLowerCase() === "y";
+      const activeObjects = fc.getActiveObjects();
+
+      for (const object of activeObjects) {
+        // skip undo/redo if currently editing a textbox
+        if (object instanceof IText && object.isEditing) {
+          return;
+        }
+      }
+
+      // undo
+      if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {
+        e.preventDefault();
+        await fc.undo();
+      }
+
+      // redo
+      if (macRedoShortcut || windowsOrLinuxRedoShortcut) {
+        e.preventDefault();
+        await fc.redo();
+      }
+    };
+
+    const handleGroupObjects = (e: KeyboardEvent) => {
+      const activeObjects = fc.getActiveObjects();
+      if (e.shiftKey && e.key.toLowerCase() === "g") {
+        const activeObjectsClone = [...activeObjects];
+        const isGroupable = activeObjectsClone.length > 1;
+
+        if (isGroupable) {
+          activeObjects.forEach((obj) => fc.remove(obj));
+          const group = new Group(activeObjectsClone);
+          fc.add(group);
+          fc.setActiveObject(group);
+        }
+      }
+    };
+
+    window.addEventListener("resize", initCanvasDimensions);
+    window.addEventListener("keydown", handleDeleteObject);
+    window.addEventListener("keydown", handleUndoAndRedo);
+    window.addEventListener("keydown", handleGroupObjects);
+
     return () => {
       fc.dispose();
       window.removeEventListener("resize", initCanvasDimensions);
+      window.removeEventListener("keydown", handleDeleteObject);
+      window.removeEventListener("keydown", handleUndoAndRedo);
+      window.removeEventListener("keydown", handleGroupObjects);
     };
   }, []);
-
-  // Sync refs with latest popover values
-  useEffect(() => {
-    colorRef.current = color;
-    pencilWidthRef.current = pencilWidth;
-    eraserWidthRef.current = eraserWidth;
-    textAlignmentRef.current = textAlignment;
-  }, [color, pencilWidth, eraserWidth, textAlignment]);
 
   // Handle active tool logic
   useEffect(() => {
     const fc = fcRef.current;
-
     if (!fc) return;
+
+    colorRef.current = color;
+    pencilWidthRef.current = pencilWidth;
+    eraserWidthRef.current = eraserWidth;
+    textAlignmentRef.current = textAlignment;
 
     switch (currentTool) {
       case "Pencil": {
@@ -114,26 +178,30 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         break;
       }
       case "Text": {
-        const currentActiveObject = fc.getActiveObject();
-        if (
-          !(
-            currentActiveObject instanceof IText &&
-            currentActiveObject.isEditing
-          )
-        ) {
+        fc.isDrawingMode = false;
+        const activeObject = fc.getActiveObject();
+        const activeObjects = fc.getActiveObjects();
+        // TODO: each text object should have its own text alignment state (reference excalidraw)
+
+        if (!(activeObject instanceof IText)) {
           fc.discardActiveObject();
           fc.requestRenderAll();
         }
-        fc.isDrawingMode = false;
+
+        for (const object of activeObjects) {
+          if (object instanceof IText) {
+            object.set({ textAlign: textAlignmentRef.current });
+            fc.requestRenderAll();
+          }
+        }
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
-          const { x, y } = getCanvasCoordinates(fc, e.e);
           const activeObject = fc.getActiveObject();
 
-          if (activeObject instanceof IText && activeObject.isEditing) {
-            return; // prevent creating a new text box if currently editing an existing one
-          }
+          // prevent creating a new text object if the user is currently editing an existing one
+          if (activeObject instanceof IText && activeObject.isEditing) return;
 
+          const { x, y } = getCanvasCoordinates(fc, e.e);
           const textObject = new IText("", {
             left: x,
             top: y,
@@ -188,105 +256,18 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         fc.isDrawingMode = true;
         break;
       default: {
-        fc.isDrawingMode = false; // defaults to select tool
-
-        const handleDeleteObject = (e: KeyboardEvent) => {
-          const activeObjects = fc.getActiveObjects();
-
-          for (const object of activeObjects) {
-            if (object instanceof IText && object.isEditing) {
-              return; // skip deletion if currently editing a textbox
-            }
-          }
-
-          if (activeObjects.length > 0) {
-            if (e.key === "Backspace") {
-              fc.remove(...activeObjects);
-              fc.discardActiveObject(); // unselects active object
-              fc.requestRenderAll(); // rerenders canvas to update display
-            }
-          }
-        };
-
-        window.addEventListener("keydown", handleDeleteObject);
-        return () => {
-          window.removeEventListener("keydown", handleDeleteObject);
-        };
+        // defaults to select tool
+        fc.isDrawingMode = false;
       }
     }
-  }, [currentTool]);
-
-  // Update text alignment on active text objects when alignment changes
-  useEffect(() => {
-    const fc = fcRef.current;
-    if (!fc) return;
-
-    const activeObject = fc.getActiveObject();
-    if (activeObject instanceof IText) {
-      activeObject.set({ textAlign: textAlignment });
-      fc.requestRenderAll();
-    }
-  }, [textAlignment]);
-
-  useEffect(() => {
-    async function handleUndoAndRedo(e: KeyboardEvent) {
-      const os = await getOS();
-      const isMac = os === "macOS";
-      const mod = isMac ? e.metaKey : e.ctrlKey;
-
-      const fc = fcRef.current;
-      if (!fc) return;
-      const activeObjects = fc.getActiveObjects();
-
-      const macRedoShortcut =
-        e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
-      const windowsOrLinuxRedoShortcut =
-        e.ctrlKey && e.key.toLowerCase() === "y";
-
-      for (const object of activeObjects) {
-        if (object instanceof IText && object.isEditing) {
-          return; // skip undo/redo if currently editing a textbox
-        }
-      }
-
-      // undo
-      if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {
-        e.preventDefault();
-        await fc.undo();
-      }
-
-      // redo
-      if (macRedoShortcut || windowsOrLinuxRedoShortcut) {
-        e.preventDefault();
-        await fc.redo();
-      }
-    }
-
-    async function handleGrouping(e: KeyboardEvent) {
-      const fc = fcRef.current;
-      if (!fc) return;
-
-      if (e.shiftKey && e.key.toLowerCase() === "g") {
-        const activeObjects = fc.getActiveObjects();
-        const activeObjectsClone = [...activeObjects];
-        const isGroupable = activeObjectsClone.length > 1;
-
-        if (isGroupable) {
-          activeObjects.forEach((obj) => fc.remove(obj));
-          const group = new Group(activeObjectsClone);
-          fc.add(group);
-          fc.setActiveObject(group);
-        }
-      }
-    }
-
-    window.addEventListener("keydown", handleUndoAndRedo);
-    window.addEventListener("keydown", handleGrouping);
-    return () => {
-      window.removeEventListener("keydown", handleUndoAndRedo);
-      window.removeEventListener("keydown", handleGrouping);
-    };
-  }, []);
+  }, [
+    currentTool,
+    color,
+    pencilWidth,
+    eraserWidth,
+    textAlignment,
+    setCurrentTool,
+  ]);
 
   return (
     <canvas

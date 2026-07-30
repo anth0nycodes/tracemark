@@ -1,10 +1,7 @@
 import { useState } from "react";
+import { AppProviders } from "@/AppProviders";
 import { Canvas } from "@/components/canvas";
 import { Toolbar } from "@/components/toolbar";
-import { ColorProvider } from "@/context/color/ColorContext";
-import { EraserPopoverProvider } from "@/context/eraser-popover/PopoverProvider";
-import { PencilPopoverProvider } from "@/context/pencil-popover/PopoverProvider";
-import { TextPopoverProvider } from "@/context/text-popover/PopoverProvider";
 
 export type ToolbarStates =
   | "Select"
@@ -19,18 +16,9 @@ export function App() {
   // TODO: make it so you can't swap tools with the shortcuts if you're actively using the tool
 
   return (
-    <ColorProvider>
-      <PencilPopoverProvider>
-        <EraserPopoverProvider>
-          <TextPopoverProvider>
-            <Toolbar
-              currentTool={currentTool}
-              setCurrentTool={setCurrentTool}
-            />
-            <Canvas currentTool={currentTool} setCurrentTool={setCurrentTool} />
-          </TextPopoverProvider>
-        </EraserPopoverProvider>
-      </PencilPopoverProvider>
-    </ColorProvider>
+    <AppProviders>
+      <Toolbar currentTool={currentTool} setCurrentTool={setCurrentTool} />
+      <Canvas currentTool={currentTool} setCurrentTool={setCurrentTool} />
+    </AppProviders>
   );
 }

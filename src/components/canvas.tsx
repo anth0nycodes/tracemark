@@ -181,8 +181,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         fc.isDrawingMode = false;
         const activeObject = fc.getActiveObject();
         const activeObjects = fc.getActiveObjects();
-        // TODO: each text object should have its own text alignment
-        // TODO: exiting text edit already goes back to select tool, but it also needs to not create a new text object
+        // TODO: each text object should have its own text alignment state (reference excalidraw)
 
         if (!(activeObject instanceof IText)) {
           fc.discardActiveObject();
@@ -199,7 +198,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
           const activeObject = fc.getActiveObject();
 
-          // prevent adding a new text object if the user is currently editing an existing one
+          // prevent creating a new text object if the user is currently editing an existing one
           if (activeObject instanceof IText && activeObject.isEditing) return;
 
           const { x, y } = getCanvasCoordinates(fc, e.e);

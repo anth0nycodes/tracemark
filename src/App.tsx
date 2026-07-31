@@ -13,6 +13,7 @@ export type ToolbarStates =
 export function App() {
   const [currentTool, setCurrentTool] = useState<ToolbarStates>("Select");
   // TODO: make it so you can't swap tools with the shortcuts if you're actively using the tool
+  // also make sure to test every single tool for any bugs in relation to the TODO above
 
   return (
     <>

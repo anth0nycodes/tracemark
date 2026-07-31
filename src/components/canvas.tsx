@@ -9,10 +9,11 @@ import {
   type TPointerEventInfo,
 } from "fabric";
 import type { ToolbarStates } from "@/App";
-import { useColor } from "@/context/color/use-color";
-import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
-import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
-import { useTextPopover } from "@/context/text-popover/use-text-popover";
+import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
+import { useColor } from "@/context/toolbar/color/use-color";
+import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
+import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
+import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { getCanvasCoordinates, getOS } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
@@ -39,15 +40,11 @@ interface CanvasProps {
 
 export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const fcRef = useRef<FabricCanvas | null>(null);
+  const { fcRef, setFc } = useFabricCanvas();
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
-  const colorRef = useRef(color);
-  const pencilWidthRef = useRef(pencilWidth);
-  const eraserWidthRef = useRef(eraserWidth);
-  const textAlignmentRef = useRef(textAlignment);
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -58,8 +55,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     const fc = new FabricCanvas(canvas, {
       enableRetinaScaling: true, // Let Fabric handle DPR automatically
     });
-
-    fcRef.current = fc;
+    setFc(fc);
 
     const initCanvasDimensions = () => setupCanvas(fc);
     initCanvasDimensions();
@@ -145,17 +141,12 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       window.removeEventListener("keydown", handleUndoAndRedo);
       window.removeEventListener("keydown", handleGroupObjects);
     };
-  }, []);
+  }, [setFc]);
 
   // Handle active tool logic
   useEffect(() => {
     const fc = fcRef.current;
     if (!fc) return;
-
-    colorRef.current = color;
-    pencilWidthRef.current = pencilWidth;
-    eraserWidthRef.current = eraserWidth;
-    textAlignmentRef.current = textAlignment;
 
     switch (currentTool) {
       case "Pencil": {
@@ -164,15 +155,15 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         const pencil = new PencilBrush(fc);
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
-        pencil.width = pencilWidthRef.current;
-        pencil.color = colorRef.current;
+        pencil.width = pencilWidth;
+        pencil.color = color;
         break;
       }
       case "Erase": {
         fc.discardActiveObject();
         fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
-        eraser.width = eraserWidthRef.current;
+        eraser.width = eraserWidth;
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
         break;
@@ -190,7 +181,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
         for (const object of activeObjects) {
           if (object instanceof IText) {
-            object.set({ textAlign: textAlignmentRef.current });
+            object.set({ textAlign: textAlignment });
             fc.requestRenderAll();
           }
         }
@@ -206,9 +197,9 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
             left: x,
             top: y,
             fontFamily: "Arial",
-            fill: colorRef.current,
+            fill: color,
             hasControls: false,
-            textAlign: textAlignmentRef.current,
+            textAlign: textAlignment,
             excludeFromExport: true,
           });
 
@@ -261,6 +252,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       }
     }
   }, [
+    fcRef,
     currentTool,
     color,
     pencilWidth,

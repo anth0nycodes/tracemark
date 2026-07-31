@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { defineContentScript } from "#imports";
 import { App } from "@/App";
+import { AppProviders } from "@/AppProviders";
 import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
 import styles from "@/index.css?inline";
 
@@ -34,7 +35,9 @@ function injectTracemarkContent(root: ShadowRoot) {
   tracemarkRoot.render(
     <StrictMode>
       <ShadowContainerProvider container={tracemarkContentContainer}>
-        <App />
+        <AppProviders>
+          <App />
+        </AppProviders>
       </ShadowContainerProvider>
     </StrictMode>
   );

@@ -5,7 +5,4 @@ interface ColorContextProps {
   setColor: Dispatch<SetStateAction<string>>;
 }
 
-export const ColorContext = createContext<ColorContextProps>({
-  color: "#FF0000",
-  setColor: () => {},
-});
+export const ColorContext = createContext<ColorContextProps | null>(null);

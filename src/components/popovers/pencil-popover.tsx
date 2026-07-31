@@ -1,6 +1,6 @@
 import { LineSquiggle, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { usePencilPopover } from "@/context/pencil-popover/use-pencil-popover";
+import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { Button } from "../ui/button";
 
 interface PopoverItem {
@@ -48,7 +48,9 @@ export function PencilPopover() {
             {isActive && (
               <motion.div
                 layoutId={
-                  prefersReducedMotion ? undefined : "active-pencil-popover-item"
+                  prefersReducedMotion
+                    ? undefined
+                    : "active-pencil-popover-item"
                 }
                 className="absolute inset-0"
                 style={{
@@ -65,7 +67,9 @@ export function PencilPopover() {
             <item.icon
               strokeWidth={item.strokeWidth}
               className="relative z-10 size-5 transition-colors"
-              style={{ stroke: isActive ? "var(--color-background)" : undefined }}
+              style={{
+                stroke: isActive ? "var(--color-background)" : undefined,
+              }}
             />
           </Button>
         );

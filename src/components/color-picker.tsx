@@ -1,4 +1,4 @@
-import { useColor } from "@/context/color/use-color";
+import { useColor } from "@/context/toolbar/color/use-color";
 
 export function ColorPicker() {
   const { color, setColor } = useColor();

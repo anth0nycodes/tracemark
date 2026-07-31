@@ -5,8 +5,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import type { TextAlign } from "@/context/text-popover/constants";
-import { useTextPopover } from "@/context/text-popover/use-text-popover";
+import type { TextAlign } from "@/context/toolbar/text-popover/constants";
+import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { Button } from "../ui/button";
 
 interface PopoverItem {

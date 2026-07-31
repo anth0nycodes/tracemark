@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AppProviders } from "@/AppProviders";
 import { Canvas } from "@/components/canvas";
 import { Toolbar } from "@/components/toolbar";
 
@@ -16,9 +15,9 @@ export function App() {
   // TODO: make it so you can't swap tools with the shortcuts if you're actively using the tool
 
   return (
-    <AppProviders>
+    <>
       <Toolbar currentTool={currentTool} setCurrentTool={setCurrentTool} />
       <Canvas currentTool={currentTool} setCurrentTool={setCurrentTool} />
-    </AppProviders>
+    </>
   );
 }

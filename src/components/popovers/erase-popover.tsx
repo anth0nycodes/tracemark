@@ -1,6 +1,6 @@
 import { Dot, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useEraserPopover } from "@/context/eraser-popover/use-eraser-popover";
+import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
 import { Button } from "../ui/button";
 
 interface PopoverItem {
@@ -48,7 +48,9 @@ export function EraserPopover() {
             {isActive && (
               <motion.div
                 layoutId={
-                  prefersReducedMotion ? undefined : "active-eraser-popover-item"
+                  prefersReducedMotion
+                    ? undefined
+                    : "active-eraser-popover-item"
                 }
                 className="absolute inset-0"
                 style={{

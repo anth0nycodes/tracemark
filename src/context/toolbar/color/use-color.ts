@@ -4,7 +4,7 @@ import { ColorContext } from "./constants";
 export function useColor() {
   const context = useContext(ColorContext);
 
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useColor must be used within a ColorProvider");
   }
 

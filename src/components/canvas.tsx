@@ -45,10 +45,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const { pencilWidth } = usePencilPopover();
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
-  const colorRef = useRef(color);
-  const pencilWidthRef = useRef(pencilWidth);
-  const eraserWidthRef = useRef(eraserWidth);
-  const textAlignmentRef = useRef(textAlignment);
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -152,11 +148,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     const fc = fcRef.current;
     if (!fc) return;
 
-    colorRef.current = color;
-    pencilWidthRef.current = pencilWidth;
-    eraserWidthRef.current = eraserWidth;
-    textAlignmentRef.current = textAlignment;
-
     switch (currentTool) {
       case "Pencil": {
         fc.discardActiveObject();
@@ -164,15 +155,15 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         const pencil = new PencilBrush(fc);
         fc.freeDrawingBrush = pencil;
         fc.isDrawingMode = true;
-        pencil.width = pencilWidthRef.current;
-        pencil.color = colorRef.current;
+        pencil.width = pencilWidth;
+        pencil.color = color;
         break;
       }
       case "Erase": {
         fc.discardActiveObject();
         fc.requestRenderAll();
         const eraser = new EraserBrush(fc);
-        eraser.width = eraserWidthRef.current;
+        eraser.width = eraserWidth;
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
         break;
@@ -190,7 +181,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
         for (const object of activeObjects) {
           if (object instanceof IText) {
-            object.set({ textAlign: textAlignmentRef.current });
+            object.set({ textAlign: textAlignment });
             fc.requestRenderAll();
           }
         }
@@ -206,9 +197,9 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
             left: x,
             top: y,
             fontFamily: "Arial",
-            fill: colorRef.current,
+            fill: color,
             hasControls: false,
-            textAlign: textAlignmentRef.current,
+            textAlign: textAlignment,
             excludeFromExport: true,
           });
 

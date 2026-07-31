@@ -1,3 +1,4 @@
+import { IText } from "fabric";
 import {
   TextAlignCenter,
   TextAlignEnd,
@@ -5,6 +6,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import type { TextAlign } from "@/context/toolbar/text-popover/constants";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { Button } from "../ui/button";
@@ -30,8 +32,23 @@ const popoverItems: PopoverItem[] = [
 ];
 
 export function TextPopover() {
+  const { fcRef } = useFabricCanvas();
   const { textAlignment, setTextAlignment } = useTextPopover();
   const prefersReducedMotion = useReducedMotion();
+
+  const handleTextAlignmentChange = (alignmentOption: TextAlign) => {
+    setTextAlignment(alignmentOption);
+    const fc = fcRef.current;
+    if (!fc) return;
+
+    const activeObjects = fc.getActiveObjects();
+    for (const object of activeObjects) {
+      if (object instanceof IText) {
+        object.set({ textAlign: alignmentOption });
+      }
+    }
+    fc.requestRenderAll();
+  };
 
   return (
     <div className="flex items-center gap-1">
@@ -40,7 +57,7 @@ export function TextPopover() {
 
         return (
           <Button
-            onClick={() => setTextAlignment(item.value)}
+            onClick={() => handleTextAlignmentChange(item.value)}
             style={{ width: "36px", height: "36px", borderRadius: "8px" }}
             key={item.value}
             variant="ghost"

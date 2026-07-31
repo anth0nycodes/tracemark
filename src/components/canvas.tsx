@@ -170,24 +170,31 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       }
       case "Text": {
         fc.isDrawingMode = false;
-        const activeObject = fc.getActiveObject();
         const activeObjects = fc.getActiveObjects();
         // TODO: each text object should have its own text alignment state (reference excalidraw)
-
-        if (!(activeObject instanceof IText)) {
-          fc.discardActiveObject();
-          fc.requestRenderAll();
-        }
-
         for (const object of activeObjects) {
-          if (object instanceof IText) {
-            object.set({ textAlign: textAlignment });
+          if (!(object instanceof IText)) {
+            fc.discardActiveObject();
             fc.requestRenderAll();
           }
         }
 
+        // Fabric internally clears the active selection during mouse:down BEFORE firing the
+        // user "mouse:down" event, so by the time handleMouseDown runs
+        // getActiveObjects() is already empty. Capture the selection state on
+        // mouse:down:before (fires first)
+        let hadMultipleActiveSelection = false;
+        const handleMouseDownBefore = () => {
+          hadMultipleActiveSelection = fc.getActiveObjects().length > 1;
+        };
+
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
           const activeObject = fc.getActiveObject();
+
+          if (hadMultipleActiveSelection) {
+            setCurrentTool("Select");
+            return;
+          }
 
           // prevent creating a new text object if the user is currently editing an existing one
           if (activeObject instanceof IText && activeObject.isEditing) return;
@@ -204,7 +211,10 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           });
 
           textObject.on("editing:exited", () => {
-            fc.off({ "mouse:down": handleMouseDown });
+            fc.off({
+              "mouse:down": handleMouseDown,
+              "mouse:down:before": handleMouseDownBefore,
+            });
             if (textObject.text.trim() === "") {
               fc.remove(textObject);
               fc.requestRenderAll();
@@ -230,10 +240,16 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           });
         };
 
-        fc.on({ "mouse:down": handleMouseDown });
+        fc.on({
+          "mouse:down": handleMouseDown,
+          "mouse:down:before": handleMouseDownBefore,
+        });
 
         return () => {
-          fc.off({ "mouse:down": handleMouseDown });
+          fc.off({
+            "mouse:down": handleMouseDown,
+            "mouse:down:before": handleMouseDownBefore,
+          });
         };
       }
       case "Frame":

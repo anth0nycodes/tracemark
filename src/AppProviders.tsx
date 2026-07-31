@@ -1,9 +1,9 @@
 import type { ComponentType, ReactNode } from "react";
 import { FabricCanvasProvider } from "@/context/fabric-canvas/FabricCanvasProvider";
-import { ColorProvider } from "@/context/toolbar/color/ColorContext";
-import { EraserPopoverProvider } from "@/context/toolbar/eraser-popover/PopoverProvider";
-import { PencilPopoverProvider } from "@/context/toolbar/pencil-popover/PopoverProvider";
-import { TextPopoverProvider } from "@/context/toolbar/text-popover/PopoverProvider";
+import { ColorProvider } from "@/context/toolbar/color/ColorProvider";
+import { EraserPopoverProvider } from "@/context/toolbar/eraser-popover/EraserPopoverProvider";
+import { PencilPopoverProvider } from "@/context/toolbar/pencil-popover/PencilPopoverProvider";
+import { TextPopoverProvider } from "@/context/toolbar/text-popover/TextPopoverProvider";
 
 interface AppProvidersProps {
   children: ReactNode;

@@ -45,9 +45,9 @@ export function TextPopover() {
     for (const object of activeObjects) {
       if (object instanceof IText) {
         object.set({ textAlign: alignmentOption });
-        fc.requestRenderAll();
       }
     }
+    fc.requestRenderAll();
   };
 
   return (

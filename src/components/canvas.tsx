@@ -431,7 +431,9 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         const handleMouseUp = () => {
           if (!lineObject) return;
           fc.setActiveObject(lineObject);
-          lineObject.set({ excludeFromExport: false });
+          // turn caching back on so the finished line is drawn once and
+          // reused, instead of being redrawn on every frame
+          lineObject.set({ excludeFromExport: false, objectCaching: true });
           fc.fire("object:modified", { target: lineObject });
           isInteractingWithCanvasRef.current = false;
           fc.requestRenderAll();

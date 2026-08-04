@@ -2,12 +2,9 @@ import { useEffect, useRef } from "react";
 import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
 import {
-  Circle,
   Group,
   IText,
   PencilBrush,
-  Rect,
-  Triangle,
   type TPointerEvent,
   type TPointerEventInfo,
 } from "fabric";
@@ -15,7 +12,6 @@ import type { ToolbarStates } from "@/App";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import { useColor } from "@/context/toolbar/color/use-color";
 import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
-import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { getCanvasCoordinates, getOS } from "@/lib/helpers";
@@ -44,13 +40,11 @@ interface CanvasProps {
 
 export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isDrawingFrameRef = useRef(false);
   const { fcRef, setFc } = useFabricCanvas();
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
-  const { frame } = useFramePopover();
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -91,7 +85,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     };
 
     const handleUndoAndRedo = async (e: KeyboardEvent) => {
-      if (isDrawingFrameRef.current) return;
       const os = await getOS();
       const isMac = os === "macOS";
       const mod = isMac ? e.metaKey : e.ctrlKey;
@@ -178,6 +171,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       case "Text": {
         fc.isDrawingMode = false;
         const activeObjects = fc.getActiveObjects();
+        // TODO: each text object should have its own text alignment state (reference excalidraw)
         for (const object of activeObjects) {
           if (!(object instanceof IText)) {
             fc.discardActiveObject();
@@ -258,104 +252,11 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           });
         };
       }
-      case "Frame": {
+      case "Frame":
         fc.discardActiveObject();
         fc.requestRenderAll();
-        fc.isDrawingMode = false;
-        let startX: number;
-        let startY: number;
-        let frameObject: Rect | Triangle | Circle | null = null;
-
-        const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
-          fc.selection = false;
-          const { x, y } = getCanvasCoordinates(fc, e.e);
-          startX = x;
-          startY = y;
-
-          const frameBase = {
-            left: startX,
-            top: startY,
-            width: 0,
-            height: 0,
-            stroke: color,
-            strokeWidth: 4,
-            ...(frame === "Rect" ? { rx: 12, ry: 12 } : {}),
-            fill: "transparent",
-            excludeFromExport: true,
-          };
-
-          if (frame === "Rect") {
-            frameObject = new Rect(frameBase);
-          }
-
-          if (frame === "Triangle") {
-            frameObject = new Triangle(frameBase);
-          }
-          if (frame === "Circle") {
-            frameObject = new Circle(frameBase);
-          }
-
-          if (!frameObject) return;
-          fc.add(frameObject);
-          isDrawingFrameRef.current = true;
-        };
-
-        const handleMouseMove = (e: TPointerEventInfo<TPointerEvent>) => {
-          if (!frameObject) return;
-          const { x: endX, y: endY } = getCanvasCoordinates(fc, e.e);
-
-          if (frameObject instanceof Circle) {
-            // radius = diameter / 2
-            // diameter is the straight line (hypotenuse) from start point to end point
-            const radius = Math.hypot(endX - startX, endY - startY) / 2;
-            frameObject.set({
-              // Midpoint formula to offset properly
-              left: (startX + endX) / 2,
-              top: (startY + endY) / 2,
-              radius,
-            });
-          } else {
-            frameObject.set({
-              left: (startX + endX) / 2,
-              top: (startY + endY) / 2,
-              // Horizontal + vertical distance traveled to get width and height
-              width: Math.abs(endX - startX),
-              height: Math.abs(endY - startY),
-            });
-          }
-          fc.requestRenderAll();
-        };
-
-        const handleMouseUp = () => {
-          if (!frameObject) return;
-          frameObject.set({ excludeFromExport: false });
-          fc.setActiveObject(frameObject);
-          // The frame was added with excludeFromExport: true, so its
-          // object:added never recorded a history entry. Now that it's
-          // exportable, fire object:modified to give it its own entry -
-          // otherwise it piggybacks onto the next action's snapshot and
-          // a single undo removes both.
-          fc.fire("object:modified", { target: frameObject });
-          fc.requestRenderAll();
-          frameObject = null;
-          isDrawingFrameRef.current = false;
-          setCurrentTool("Select");
-        };
-
-        fc.on({
-          "mouse:up": handleMouseUp,
-          "mouse:down": handleMouseDown,
-          "mouse:move": handleMouseMove,
-        });
-
-        return () => {
-          fc.off({
-            "mouse:up": handleMouseUp,
-            "mouse:down": handleMouseDown,
-            "mouse:move": handleMouseMove,
-          });
-        };
-      }
+        fc.isDrawingMode = true;
+        break;
       case "Line":
         fc.discardActiveObject();
         fc.requestRenderAll();
@@ -364,7 +265,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       default: {
         // defaults to select tool
         fc.isDrawingMode = false;
-        fc.selection = true;
       }
     }
   }, [
@@ -374,7 +274,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     pencilWidth,
     eraserWidth,
     textAlignment,
-    frame,
     setCurrentTool,
   ]);
 

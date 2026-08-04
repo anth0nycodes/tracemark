@@ -22,7 +22,6 @@ import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FramePopover } from "./popovers/frame-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface ToolbarItemProps {
@@ -52,7 +51,7 @@ const toolbarItems: ToolbarItemProps[] = [
     shortcut: "4",
     popover: <TextPopover />,
   },
-  { name: "Frame", icon: Square, shortcut: "5", popover: <FramePopover /> },
+  { name: "Frame", icon: Square, shortcut: "5" },
   { name: "Line", icon: Line, shortcut: "6" },
 ];
 

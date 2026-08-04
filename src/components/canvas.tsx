@@ -44,6 +44,7 @@ interface CanvasProps {
 
 export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isDrawingFrameRef = useRef(false);
   const { fcRef, setFc } = useFabricCanvas();
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
@@ -90,6 +91,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     };
 
     const handleUndoAndRedo = async (e: KeyboardEvent) => {
+      if (isDrawingFrameRef.current) return;
       const os = await getOS();
       const isMac = os === "macOS";
       const mod = isMac ? e.metaKey : e.ctrlKey;
@@ -176,7 +178,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       case "Text": {
         fc.isDrawingMode = false;
         const activeObjects = fc.getActiveObjects();
-        // TODO: each text object should have its own text alignment state (reference excalidraw)
         for (const object of activeObjects) {
           if (!(object instanceof IText)) {
             fc.discardActiveObject();
@@ -296,6 +297,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
           if (!frameObject) return;
           fc.add(frameObject);
+          isDrawingFrameRef.current = true;
         };
 
         const handleMouseMove = (e: TPointerEventInfo<TPointerEvent>) => {
@@ -325,12 +327,18 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         };
 
         const handleMouseUp = () => {
-          fc.selection = true;
           if (!frameObject) return;
           frameObject.set({ excludeFromExport: false });
           fc.setActiveObject(frameObject);
+          // The frame was added with excludeFromExport: true, so its
+          // object:added never recorded a history entry. Now that it's
+          // exportable, fire object:modified to give it its own entry -
+          // otherwise it piggybacks onto the next action's snapshot and
+          // a single undo removes both.
+          fc.fire("object:modified", { target: frameObject });
           fc.requestRenderAll();
           frameObject = null;
+          isDrawingFrameRef.current = false;
           setCurrentTool("Select");
         };
 

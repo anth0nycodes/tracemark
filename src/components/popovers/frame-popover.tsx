@@ -1,56 +1,52 @@
-import { Dot, type LucideIcon } from "lucide-react";
+import { Circle, Square, Triangle, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
+import type { Frame } from "@/context/toolbar/frame/constants";
+import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
+import type { CustomIcon } from "../custom-icons/icons";
 import { Button } from "../ui/button";
 
 interface PopoverItem {
-  icon: LucideIcon;
-  value: number;
-  strokeWidth: number;
+  icon: LucideIcon | CustomIcon;
+  value: Frame;
 }
 
 const popoverItems: PopoverItem[] = [
   {
-    icon: Dot,
-    value: 5,
-    strokeWidth: 3,
+    icon: Square,
+    value: "Rect",
   },
   {
-    icon: Dot,
-    value: 15,
-    strokeWidth: 7,
+    icon: Triangle,
+    value: "Triangle",
   },
   {
-    icon: Dot,
-    value: 25,
-    strokeWidth: 10,
+    icon: Circle,
+    value: "Circle",
   },
 ];
 
-export function EraserPopover() {
-  const { eraserWidth, setEraserWidth } = useEraserPopover();
+export function FramePopover() {
+  const { frame, setFrame } = useFramePopover();
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex gap-1">
       {popoverItems.map((item) => {
-        const isActive = eraserWidth === item.value;
+        const isActive = frame === item.value;
 
         return (
           <Button
-            onClick={() => setEraserWidth(item.value)}
+            onClick={() => setFrame(item.value)}
             style={{ width: "36px", height: "36px", borderRadius: "8px" }}
             key={item.value}
             variant="ghost"
             className="relative"
-            aria-label={`Eraser width ${item.value}px`}
+            aria-label={`Frame ${item.value}`}
           >
             {isActive && (
               <motion.div
                 layoutId={
-                  prefersReducedMotion
-                    ? undefined
-                    : "active-eraser-popover-item"
+                  prefersReducedMotion ? undefined : "active-frame-popover-item"
                 }
                 className="absolute inset-0"
                 style={{
@@ -66,7 +62,6 @@ export function EraserPopover() {
             )}
             <item.icon
               aria-hidden="true"
-              strokeWidth={item.strokeWidth}
               className="relative z-10 size-5 transition-colors"
               style={{
                 stroke: isActive ? "var(--color-background)" : undefined,

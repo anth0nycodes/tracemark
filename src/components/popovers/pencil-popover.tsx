@@ -65,6 +65,7 @@ export function PencilPopover() {
               />
             )}
             <item.icon
+              aria-hidden="true"
               strokeWidth={item.strokeWidth}
               className="relative z-10 size-5 transition-colors"
               style={{

@@ -82,6 +82,7 @@ export function TextPopover() {
               />
             )}
             <item.icon
+              aria-hidden="true"
               className="relative z-10 size-5 transition-colors"
               style={{
                 stroke: isActive ? "var(--color-background)" : undefined,

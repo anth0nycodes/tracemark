@@ -6,6 +6,7 @@ import {
   Group,
   IText,
   PencilBrush,
+  Polyline,
   Rect,
   Triangle,
   type TPointerEvent,
@@ -37,6 +38,26 @@ function setupCanvas(fc: FabricCanvas) {
   });
 }
 
+// Flags canvas interaction on pointer down/up so undo/redo stays disabled
+// mid-stroke. Returns a cleanup fn that detaches the listeners.
+function trackCanvasInteraction(
+  fc: FabricCanvas,
+  isInteractingRef: { current: boolean }
+) {
+  const handleMouseDown = () => {
+    isInteractingRef.current = true;
+  };
+  const handleMouseUp = () => {
+    isInteractingRef.current = false;
+  };
+
+  fc.on({ "mouse:down": handleMouseDown, "mouse:up": handleMouseUp });
+
+  return () => {
+    fc.off({ "mouse:down": handleMouseDown, "mouse:up": handleMouseUp });
+  };
+}
+
 interface CanvasProps {
   currentTool: ToolbarStates;
   setCurrentTool: (currentTool: ToolbarStates) => void;
@@ -44,7 +65,7 @@ interface CanvasProps {
 
 export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isDrawingFrameRef = useRef(false);
+  const isInteractingWithCanvasRef = useRef(false);
   const { fcRef, setFc } = useFabricCanvas();
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
@@ -91,7 +112,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     };
 
     const handleUndoAndRedo = async (e: KeyboardEvent) => {
-      if (isDrawingFrameRef.current) return;
+      if (isInteractingWithCanvasRef.current) return;
       const os = await getOS();
       const isMac = os === "macOS";
       const mod = isMac ? e.metaKey : e.ctrlKey;
@@ -164,7 +185,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         fc.isDrawingMode = true;
         pencil.width = pencilWidth;
         pencil.color = color;
-        break;
+
+        return trackCanvasInteraction(fc, isInteractingWithCanvasRef);
       }
       case "Erase": {
         fc.discardActiveObject();
@@ -173,7 +195,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         eraser.width = eraserWidth;
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
-        break;
+
+        return trackCanvasInteraction(fc, isInteractingWithCanvasRef);
       }
       case "Text": {
         fc.isDrawingMode = false;
@@ -297,7 +320,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
           if (!frameObject) return;
           fc.add(frameObject);
-          isDrawingFrameRef.current = true;
+          isInteractingWithCanvasRef.current = true;
         };
 
         const handleMouseMove = (e: TPointerEventInfo<TPointerEvent>) => {
@@ -338,7 +361,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           fc.fire("object:modified", { target: frameObject });
           fc.requestRenderAll();
           frameObject = null;
-          isDrawingFrameRef.current = false;
+          isInteractingWithCanvasRef.current = false;
           setCurrentTool("Select");
         };
 
@@ -356,11 +379,82 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           });
         };
       }
-      case "Line":
+      case "Line": {
         fc.discardActiveObject();
         fc.requestRenderAll();
-        fc.isDrawingMode = true;
-        break;
+        fc.isDrawingMode = false;
+        let lineObject: Polyline | null = null;
+        let startX: number;
+        let startY: number;
+
+        const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
+          isInteractingWithCanvasRef.current = true;
+          fc.selection = false;
+          const { x, y } = getCanvasCoordinates(fc, e.e);
+          startX = x;
+          startY = y;
+
+          lineObject = new Polyline(
+            [
+              { x: startX, y: startY },
+              { x: startX, y: startY },
+            ],
+            {
+              stroke: color,
+              strokeWidth: 4,
+              fill: "transparent",
+              // let Fabric derive position/bbox from points instead of
+              // overriding with a manual left/top
+              objectCaching: false,
+              excludeFromExport: true,
+            }
+          );
+          fc.add(lineObject);
+        };
+
+        const handleMouseMove = (e: TPointerEventInfo<TPointerEvent>) => {
+          const { x: endX, y: endY } = getCanvasCoordinates(fc, e.e);
+          if (!lineObject) return;
+
+          const updatedCoordinates = [
+            { x: startX, y: startY },
+            { x: endX, y: endY },
+          ];
+
+          lineObject.set({ points: updatedCoordinates });
+          // recompute bounding box/pathOffset after mutating points,
+          // otherwise controls + hit area stay stale
+          lineObject.setBoundingBox(true);
+          fc.requestRenderAll();
+        };
+
+        const handleMouseUp = () => {
+          if (!lineObject) return;
+          fc.setActiveObject(lineObject);
+          // turn caching back on so the finished line is drawn once and
+          // reused, instead of being redrawn on every frame
+          lineObject.set({ excludeFromExport: false, objectCaching: true });
+          fc.fire("object:modified", { target: lineObject });
+          isInteractingWithCanvasRef.current = false;
+          fc.requestRenderAll();
+          lineObject = null;
+          setCurrentTool("Select");
+        };
+
+        fc.on({
+          "mouse:up": handleMouseUp,
+          "mouse:down": handleMouseDown,
+          "mouse:move": handleMouseMove,
+        });
+
+        return () => {
+          fc.off({
+            "mouse:up": handleMouseUp,
+            "mouse:down": handleMouseDown,
+            "mouse:move": handleMouseMove,
+          });
+        };
+      }
       default: {
         // defaults to select tool
         fc.isDrawingMode = false;

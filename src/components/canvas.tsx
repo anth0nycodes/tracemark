@@ -303,6 +303,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           const { x: endX, y: endY } = getCanvasCoordinates(fc, e.e);
 
           if (frameObject instanceof Circle) {
+            // radius = diameter / 2
+            // diameter is the straight line (hypotenuse) from start point to end point
             const radius = Math.hypot(endX - startX, endY - startY) / 2;
             frameObject.set({
               // Midpoint formula to offset properly

@@ -79,7 +79,7 @@ export function Waitlist() {
               {...field}
               id={field.name}
               aria-invalid={fieldState.invalid}
-              className="bg-accent focus:ring-input! hover:border-input border-transparent text-lg! transition-colors placeholder:text-lg hover:cursor-pointer focus:ring-1! focus-visible:border-transparent!"
+              className="bg-accent focus:ring-input! hover:border-input border-transparent text-lg! transition-colors hover:cursor-pointer focus:ring-1!"
               placeholder="Enter email"
               autoComplete="off"
             />
@@ -94,7 +94,7 @@ export function Waitlist() {
         size={null}
         disabled={isLoading}
         className={cn(
-          "text-background bg-[#57A3FA] px-4 py-2 text-lg transition-colors hover:bg-[#3993F9] has-[>svg]:px-3",
+          "text-background bg-[#E691D2] px-4 py-2 text-lg transition-colors hover:bg-[#E691C1]",
           !isLoading ? "h-full" : ""
         )}
       >

@@ -46,9 +46,7 @@ export function FramePopover() {
             {isActive && (
               <motion.div
                 layoutId={
-                  prefersReducedMotion
-                    ? undefined
-                    : "active-eraser-popover-item"
+                  prefersReducedMotion ? undefined : "active-frame-popover-item"
                 }
                 className="absolute inset-0"
                 style={{

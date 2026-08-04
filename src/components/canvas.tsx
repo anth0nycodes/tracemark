@@ -364,6 +364,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       default: {
         // defaults to select tool
         fc.isDrawingMode = false;
+        fc.selection = true;
       }
     }
   }, [

@@ -21,6 +21,8 @@ stats-*.json
 
 # Claude Code
 .claude
+CLAUDE.md
+
 
 # Editor directories and files
 .vscode/*

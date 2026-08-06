@@ -175,6 +175,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
   useEffect(() => {
     const fc = fcRef.current;
     if (!fc) return;
+    fc.skipTargetFind = currentTool !== "Select";
+    fc.selection = currentTool === "Select";
 
     switch (currentTool) {
       case "Pencil": {
@@ -290,7 +292,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         let frameObject: Rect | Triangle | Circle | null = null;
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
-          fc.selection = false;
           const { x, y } = getCanvasCoordinates(fc, e.e);
           startX = x;
           startY = y;
@@ -389,7 +390,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
           isInteractingWithCanvasRef.current = true;
-          fc.selection = false;
           const { x, y } = getCanvasCoordinates(fc, e.e);
           startX = x;
           startY = y;
@@ -458,7 +458,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       default: {
         // defaults to select tool
         fc.isDrawingMode = false;
-        fc.selection = true;
       }
     }
   }, [

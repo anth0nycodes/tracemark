@@ -72,7 +72,6 @@ interface SecondaryToolbarItem {
   name: string;
   description: string;
   icon: LucideIcon;
-  shortcut?: string;
   onClick: (
     fcRef: RefObject<FabricCanvas | null>,
     toolbarRef: RefObject<HTMLDivElement | null>
@@ -84,7 +83,6 @@ const secondaryToolbarItems: SecondaryToolbarItem[] = [
     name: "Copy",
     description: "Copy canvas to clipboard",
     icon: Copy,
-    shortcut: "⌘C",
     onClick: handleCopyToClipboard,
   },
 
@@ -338,12 +336,6 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
                   item.name === "Clear" && "text-destructive"
                 )}
               />
-              {item.shortcut && (
-                // TODO: tweak shortcut position for better alignment with icon
-                <sub className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold">
-                  {item.shortcut}
-                </sub>
-              )}
             </Button>
           ))}
         </div>

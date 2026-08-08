@@ -1,15 +1,21 @@
 import {
   useEffect,
+  useRef,
   useState,
   type MouseEventHandler,
   type ReactNode,
   type Ref,
+  type RefObject,
 } from "react";
+import type { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import {
+  Copy,
+  Download,
   Eraser,
   MousePointer2,
   PencilLine,
   Square,
+  Trash2,
   Type,
   type LucideIcon,
 } from "lucide-react";
@@ -21,6 +27,12 @@ import { EraserPopover } from "@/components/popovers/erase-popover";
 import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
+import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
+import {
+  handleClearCanvas,
+  handleCopyToClipboard,
+  handleExportAsPNG,
+} from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { FramePopover } from "./popovers/frame-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -54,6 +66,38 @@ const toolbarItems: ToolbarItemProps[] = [
   },
   { name: "Frame", icon: Square, shortcut: "5", popover: <FramePopover /> },
   { name: "Line", icon: Line, shortcut: "6" },
+];
+
+interface SecondaryToolbarItem {
+  name: string;
+  description: string;
+  icon: LucideIcon;
+  onClick: (
+    fcRef: RefObject<FabricCanvas | null>,
+    toolbarRef: RefObject<HTMLDivElement | null>
+  ) => void;
+}
+
+const secondaryToolbarItems: SecondaryToolbarItem[] = [
+  {
+    name: "Copy",
+    description: "Copy canvas to clipboard",
+    icon: Copy,
+    onClick: handleCopyToClipboard,
+  },
+
+  {
+    name: "Export",
+    description: "Export canvas as PNG",
+    icon: Download,
+    onClick: handleExportAsPNG,
+  },
+  {
+    name: "Clear",
+    description: "Clear canvas content",
+    icon: Trash2,
+    onClick: handleClearCanvas,
+  },
 ];
 
 interface ToolbarButtonProps {
@@ -134,6 +178,8 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     null
   );
   const prefersReducedMotion = useReducedMotion();
+  const { fcRef } = useFabricCanvas();
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleKeyShortcuts = (e: KeyboardEvent) => {
@@ -170,7 +216,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, []);
+  }, [setCurrentTool]);
 
   useEffect(() => {
     if (currentTool !== openPopoverId) {
@@ -186,6 +232,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
 
   return (
     <div
+      ref={toolbarRef}
       className="z-2147483647"
       style={{
         position: "fixed",
@@ -267,6 +314,31 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
             </div>
           );
         })}
+
+        <div className="h-8 w-0.5 rounded-lg bg-[#C2C7CB]" />
+        <div className="flex gap-2">
+          {secondaryToolbarItems.map((item) => (
+            <Button
+              key={item.name}
+              variant="ghost"
+              onClick={() => {
+                setOpenPopoverId(null);
+                item.onClick(fcRef, toolbarRef);
+              }}
+              className="relative h-11"
+              aria-label={item.description}
+              title={item.description}
+            >
+              <item.icon
+                aria-hidden="true"
+                className={cn(
+                  "size-5",
+                  item.name === "Clear" && "text-destructive"
+                )}
+              />
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   );

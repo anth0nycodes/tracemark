@@ -1,4 +1,6 @@
+import type { RefObject } from "react";
 import type { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
+import { browser } from "#imports";
 import type { TPointerEvent } from "fabric";
 
 declare global {
@@ -31,4 +33,91 @@ export async function getOS() {
 export function getCanvasCoordinates(fc: FabricCanvas, e: TPointerEvent) {
   const { x, y } = fc.getViewportPoint(e);
   return { x, y };
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function nextPaint() {
+  return new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  );
+}
+
+async function captureActiveTab(
+  fcRef: RefObject<FabricCanvas | null>,
+  toolbarRef: RefObject<HTMLDivElement | null>
+) {
+  const fc = fcRef.current;
+  const toolbar = toolbarRef.current;
+  if (!fc || !toolbar) return;
+
+  const elementsToHide: HTMLDivElement[] = [];
+  elementsToHide.push(toolbar);
+  const root = toolbar.getRootNode();
+  if (root instanceof ShadowRoot || root instanceof Document) {
+    elementsToHide.push(
+      ...root.querySelectorAll<HTMLDivElement>('[data-slot="popover-content"]')
+    );
+  }
+  elementsToHide.forEach((el) => (el.style.display = "none"));
+  fc.discardActiveObject();
+  fc.requestRenderAll();
+
+  // wait for the next paint to ensure that the toolbar and popover content are hidden before capturing the tab
+  await nextPaint();
+
+  try {
+    const dataUrl: string = await browser.runtime.sendMessage({
+      type: "CAPTURE_VISIBLE_TAB",
+    });
+    return dataUrl;
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    console.error("Error capturing active tab:", errorMessage);
+  } finally {
+    elementsToHide.forEach((el) => (el.style.display = ""));
+  }
+}
+
+export async function handleCopyToClipboard(
+  fcRef: RefObject<FabricCanvas | null>,
+  toolbarRef: RefObject<HTMLDivElement | null>
+) {
+  try {
+    const dataUrl = await captureActiveTab(fcRef, toolbarRef);
+    if (!dataUrl) return;
+    const blob = await (await fetch(dataUrl)).blob();
+    const item = new ClipboardItem({ "image/png": blob });
+    await navigator.clipboard.write([item]);
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    console.error("Error copying to clipboard:", errorMessage);
+  }
+}
+
+export async function handleExportAsPNG(
+  fcRef: RefObject<FabricCanvas | null>,
+  toolbarRef: RefObject<HTMLDivElement | null>
+) {
+  try {
+    const dataUrl = await captureActiveTab(fcRef, toolbarRef);
+    if (!dataUrl) return;
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "tracemark-canvas.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    console.error("Error exporting as PNG:", errorMessage);
+  }
+}
+
+export function handleClearCanvas(fcRef: RefObject<FabricCanvas | null>) {
+  const fc = fcRef.current;
+  if (!fc) return;
+  fc.clearCanvas();
 }

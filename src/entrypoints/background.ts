@@ -12,4 +12,10 @@ export default defineBackground(() => {
   }
 
   browser.action.onClicked.addListener(handleActionClick);
+
+  browser.runtime.onMessage.addListener((message) => {
+    if (message?.type === "CAPTURE_VISIBLE_TAB") {
+      return browser.tabs.captureVisibleTab({ format: "png" });
+    }
+  });
 });

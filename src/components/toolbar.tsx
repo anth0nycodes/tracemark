@@ -125,8 +125,7 @@ function ToolbarButton({
       {...props}
       ref={ref}
       variant={isActive ? null : "ghost"}
-      className="relative flex shrink-0 items-center justify-center"
-      style={{ width: "100%", height: "100%", borderRadius: "10px" }}
+      className="relative flex size-full shrink-0 items-center justify-center rounded-[10px]"
       onClick={(e) => {
         setCurrentTool(item.name);
         onClick?.(e);
@@ -137,16 +136,17 @@ function ToolbarButton({
     >
       <item.icon
         aria-hidden="true"
-        className={cn("z-10 transition-colors", isActive && "text-background")}
-        style={{ width: "20px", height: "20px" }}
+        className={cn(
+          "z-10 size-5 transition-colors",
+          isActive && "text-background"
+        )}
       />
 
       <span
         className={cn(
-          "text-muted-foreground/60 dark:text-foreground absolute z-10 font-semibold transition-colors",
+          "text-muted-foreground/60 dark:text-foreground absolute right-1.5 bottom-1 z-10 text-[9px] font-semibold transition-colors",
           isActive && "text-background"
         )}
-        style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
         aria-hidden="true"
       >
         {item.shortcut}
@@ -155,10 +155,7 @@ function ToolbarButton({
       {isActive && (
         <motion.div
           layoutId={prefersReducedMotion ? undefined : "active-toolbar-item"}
-          className="bg-foreground absolute inset-0"
-          style={{
-            borderRadius: "10px",
-          }}
+          className="bg-foreground absolute inset-0 rounded-[10px]"
           transition={
             prefersReducedMotion
               ? { duration: 0 }
@@ -280,40 +277,19 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   return (
     <div
       ref={toolbarRef}
-      className="z-2147483647"
       style={{
-        position: "fixed",
-        bottom: "20px",
-        left: "50%",
         transform: "translateX(-50%)",
       }}
+      className="fixed bottom-5 left-1/2 z-2147483647"
     >
-      <div
-        className="bg-background text-foreground relative flex items-center shadow-2xl"
-        style={{
-          width: "max-content",
-          height: "max-content",
-          gap: "8px",
-          padding: "6px",
-          borderWidth: "2px",
-          borderRadius: "10px",
-          borderColor: "var(--color-border)",
-        }}
-      >
+      <div className="bg-background text-foreground border-border relative flex h-max w-max items-center gap-2 rounded-[10px] border-2 p-1.5 shadow-md">
         <ColorPicker />
-        <div
-          style={{
-            backgroundColor: "#C2C7CB",
-            height: "32px",
-            width: "2px",
-            borderRadius: "10px",
-          }}
-        />
+        <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
         {toolbarItems.map((item) => {
           const isActive = currentTool === item.name;
 
           return (
-            <div key={item.name} style={{ width: "44px", height: "44px" }}>
+            <div key={item.name} className="size-11">
               {item.popover ? (
                 <Popover
                   open={openPopoverId === item.name}
@@ -344,13 +320,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
                   layoutId={
                     prefersReducedMotion ? undefined : "active-toolbar-item-bar"
                   }
-                  style={{
-                    position: "absolute",
-                    top: "-2px",
-                    backgroundColor: "#2b7fff",
-                    width: "44px",
-                    height: "2px",
-                  }}
+                  className="absolute -top-0.5 h-0.5 w-11 bg-[#2b7fff]"
                   transition={
                     prefersReducedMotion
                       ? { duration: 0 }
@@ -362,7 +332,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           );
         })}
 
-        <div className="h-8 w-0.5 rounded-lg bg-[#C2C7CB]" />
+        <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
         <div className="flex gap-2">
           {secondaryToolbarItems.map((item) => (
             <Button

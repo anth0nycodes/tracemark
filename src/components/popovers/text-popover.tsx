@@ -9,6 +9,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import type { TextAlign } from "@/context/toolbar/text-popover/constants";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
+import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
 interface PopoverItem {
@@ -58,10 +59,9 @@ export function TextPopover() {
         return (
           <Button
             onClick={() => handleTextAlignmentChange(item.value)}
-            style={{ width: "36px", height: "36px", borderRadius: "8px" }}
             key={item.value}
             variant="ghost"
-            className="relative"
+            className="relative size-9 rounded-lg"
             aria-label={`Text alignment: ${item.value}`}
           >
             {isActive && (
@@ -69,11 +69,7 @@ export function TextPopover() {
                 layoutId={
                   prefersReducedMotion ? undefined : "active-text-popover-item"
                 }
-                className="absolute inset-0"
-                style={{
-                  borderRadius: "8px",
-                  backgroundColor: "var(--color-foreground)",
-                }}
+                className="bg-foreground absolute inset-0 rounded-lg"
                 transition={
                   prefersReducedMotion
                     ? { duration: 0 }
@@ -83,10 +79,10 @@ export function TextPopover() {
             )}
             <item.icon
               aria-hidden="true"
-              className="relative z-10 size-5 transition-colors"
-              style={{
-                stroke: isActive ? "var(--color-background)" : undefined,
-              }}
+              className={cn(
+                "relative z-10 size-5 transition-colors",
+                isActive && "stroke-background"
+              )}
             />
           </Button>
         );

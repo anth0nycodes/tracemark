@@ -2,6 +2,7 @@ import { Circle, Square, Triangle, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import type { Frame } from "@/context/toolbar/frame/constants";
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
+import { cn } from "@/lib/utils";
 import type { CustomIcon } from "../custom-icons/icons";
 import { Button } from "../ui/button";
 
@@ -37,10 +38,9 @@ export function FramePopover() {
         return (
           <Button
             onClick={() => setFrame(item.value)}
-            style={{ width: "36px", height: "36px", borderRadius: "8px" }}
             key={item.value}
             variant="ghost"
-            className="relative"
+            className="relative size-9 rounded-lg"
             aria-label={`Frame ${item.value}`}
           >
             {isActive && (
@@ -48,11 +48,7 @@ export function FramePopover() {
                 layoutId={
                   prefersReducedMotion ? undefined : "active-frame-popover-item"
                 }
-                className="absolute inset-0"
-                style={{
-                  borderRadius: "8px",
-                  backgroundColor: "var(--color-foreground)",
-                }}
+                className="bg-foreground absolute inset-0 rounded-lg"
                 transition={
                   prefersReducedMotion
                     ? { duration: 0 }
@@ -62,10 +58,10 @@ export function FramePopover() {
             )}
             <item.icon
               aria-hidden="true"
-              className="relative z-10 size-5 transition-colors"
-              style={{
-                stroke: isActive ? "var(--color-background)" : undefined,
-              }}
+              className={cn(
+                "relative z-10 size-5 transition-colors",
+                isActive && "stroke-background"
+              )}
             />
           </Button>
         );

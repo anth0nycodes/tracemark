@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -29,6 +30,7 @@ import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import {
+  getOS,
   handleClearCanvas,
   handleCopyToClipboard,
   handleExportAsPNG,
@@ -123,8 +125,7 @@ function ToolbarButton({
       {...props}
       ref={ref}
       variant={isActive ? null : "ghost"}
-      className="relative flex shrink-0 items-center justify-center"
-      style={{ width: "100%", height: "100%", borderRadius: "10px" }}
+      className="relative flex size-full shrink-0 items-center justify-center rounded-[10px]"
       onClick={(e) => {
         setCurrentTool(item.name);
         onClick?.(e);
@@ -135,16 +136,17 @@ function ToolbarButton({
     >
       <item.icon
         aria-hidden="true"
-        className={cn("z-10 transition-colors", isActive && "text-background")}
-        style={{ width: "20px", height: "20px" }}
+        className={cn(
+          "z-10 size-5 transition-colors",
+          isActive && "text-background"
+        )}
       />
 
       <span
         className={cn(
-          "text-muted-foreground/60 dark:text-foreground absolute z-10 font-semibold transition-colors",
+          "text-muted-foreground/60 dark:text-foreground absolute right-1.5 bottom-1 z-10 text-[9px] font-semibold transition-colors",
           isActive && "text-background"
         )}
-        style={{ fontSize: "9px", bottom: "4px", right: "6px" }}
         aria-hidden="true"
       >
         {item.shortcut}
@@ -153,10 +155,7 @@ function ToolbarButton({
       {isActive && (
         <motion.div
           layoutId={prefersReducedMotion ? undefined : "active-toolbar-item"}
-          className="bg-foreground absolute inset-0"
-          style={{
-            borderRadius: "10px",
-          }}
+          className="bg-foreground absolute inset-0 rounded-[10px]"
           transition={
             prefersReducedMotion
               ? { duration: 0 }
@@ -174,12 +173,50 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
+  const [prevTool, setPrevTool] = useState(currentTool);
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
     null
   );
+  const [cooldowns, setCooldowns] = useState<ReadonlySet<string>>(new Set());
+  const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
   const toolbarRef = useRef<HTMLDivElement | null>(null);
+  // One timer per button so rapid clicks don't cancel each other's cooldown
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  );
+
+  const startCooldown = useCallback((name: string) => {
+    clearTimeout(timersRef.current.get(name));
+    // new Set().add() returns the set itself, so that's why we can one-line it
+    setCooldowns((prev) => new Set(prev).add(name));
+
+    const id = setTimeout(() => {
+      setCooldowns((prev) => {
+        const next = new Set(prev);
+        // new Set().delete() returns a boolean, so that's why we have to return `next`
+        next.delete(name);
+        return next;
+      });
+      timersRef.current.delete(name);
+    }, 1500);
+
+    timersRef.current.set(name, id);
+  }, []);
+
+  useEffect(() => {
+    // Resolve the copy shortcut label based on the user's OS
+    const resolveShortcut = async () => {
+      const os = await getOS();
+      setShortcut(os === "macOS" ? "⌘C" : "Ctrl+C");
+    };
+    resolveShortcut();
+
+    // Clear any pending cooldown timers on unmount
+    const timers = timersRef.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     const handleKeyShortcuts = (e: KeyboardEvent) => {
@@ -188,6 +225,16 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
         e.target instanceof HTMLTextAreaElement ||
         (e.target as HTMLElement).isContentEditable
       ) {
+        return;
+      }
+
+      // Copy needs a modifier, so handle before the bare-key bail
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "c") {
+        e.preventDefault();
+        if (!timersRef.current.has("Copy")) {
+          startCooldown("Copy");
+          handleCopyToClipboard(fcRef, toolbarRef);
+        }
         return;
       }
 
@@ -216,57 +263,35 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool]);
+  }, [setCurrentTool, fcRef, startCooldown]);
 
-  useEffect(() => {
-    if (currentTool !== openPopoverId) {
-      setOpenPopoverId(null);
-    }
-  }, [currentTool, openPopoverId]);
+  if (prevTool !== currentTool) {
+    setPrevTool(currentTool);
+    setOpenPopoverId(null);
+  }
 
-  function handlePopoverOpen(isActive: boolean, tooltipText: ToolbarStates) {
+  function handlePopoverOpen(isActive: boolean, toolName: ToolbarStates) {
     if (isActive) {
-      setOpenPopoverId((prev) => (prev === tooltipText ? null : tooltipText));
+      setOpenPopoverId((prev) => (prev === toolName ? null : toolName));
     }
   }
 
   return (
     <div
       ref={toolbarRef}
-      className="z-2147483647"
       style={{
-        position: "fixed",
-        bottom: "20px",
-        left: "50%",
         transform: "translateX(-50%)",
       }}
+      className="fixed bottom-5 left-1/2 z-2147483647"
     >
-      <div
-        className="bg-background text-foreground relative flex items-center shadow-2xl"
-        style={{
-          width: "max-content",
-          height: "max-content",
-          gap: "8px",
-          padding: "6px",
-          borderWidth: "2px",
-          borderRadius: "10px",
-          borderColor: "var(--color-border)",
-        }}
-      >
+      <div className="bg-background text-foreground border-border relative flex h-max w-max items-center gap-2 rounded-[10px] border-2 p-1.5 shadow-md">
         <ColorPicker />
-        <div
-          style={{
-            backgroundColor: "#C2C7CB",
-            height: "32px",
-            width: "2px",
-            borderRadius: "10px",
-          }}
-        />
+        <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
         {toolbarItems.map((item) => {
           const isActive = currentTool === item.name;
 
           return (
-            <div key={item.name} style={{ width: "44px", height: "44px" }}>
+            <div key={item.name} className="size-11">
               {item.popover ? (
                 <Popover
                   open={openPopoverId === item.name}
@@ -297,13 +322,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
                   layoutId={
                     prefersReducedMotion ? undefined : "active-toolbar-item-bar"
                   }
-                  style={{
-                    position: "absolute",
-                    top: "-2px",
-                    backgroundColor: "#2b7fff",
-                    width: "44px",
-                    height: "2px",
-                  }}
+                  className="absolute -top-0.5 h-0.5 w-11 bg-[#2b7fff]"
                   transition={
                     prefersReducedMotion
                       ? { duration: 0 }
@@ -315,27 +334,48 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
           );
         })}
 
-        <div className="h-8 w-0.5 rounded-lg bg-[#C2C7CB]" />
+        <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
         <div className="flex gap-2">
           {secondaryToolbarItems.map((item) => (
             <Button
               key={item.name}
               variant="ghost"
+              disabled={cooldowns.has(item.name)}
               onClick={() => {
+                startCooldown(item.name);
                 setOpenPopoverId(null);
                 item.onClick(fcRef, toolbarRef);
               }}
-              className="relative h-11"
+              className="relative size-11"
               aria-label={item.description}
               title={item.description}
             >
-              <item.icon
-                aria-hidden="true"
-                className={cn(
-                  "size-5",
-                  item.name === "Clear" && "text-destructive"
-                )}
-              />
+              {item.name === "Clear" ? (
+                <motion.div
+                  animate={
+                    cooldowns.has("Clear")
+                      ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
+                      : {}
+                  }
+                  className="flex size-full items-center justify-center"
+                  transition={{ duration: 0.6 }}
+                >
+                  <item.icon
+                    aria-hidden="true"
+                    className="text-destructive size-5"
+                  />
+                </motion.div>
+              ) : (
+                <item.icon aria-hidden="true" className="size-5" />
+              )}
+              {item.name === "Copy" && (
+                <sub
+                  className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
+                  aria-hidden="true"
+                >
+                  {shortcut}
+                </sub>
+              )}
             </Button>
           ))}
         </div>

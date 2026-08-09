@@ -19,7 +19,7 @@ import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-po
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
-import { getCanvasCoordinates, getOS } from "@/lib/helpers";
+import { getCanvasCoordinates } from "@/lib/helpers";
 
 function setupCanvas(fc: FabricCanvas) {
   // Get the full document dimensions
@@ -27,6 +27,7 @@ function setupCanvas(fc: FabricCanvas) {
     document.documentElement.clientWidth,
     document.body.clientWidth
   );
+  // TODO: swap out clientHeight for a more scalable approach because this will be very laggy for long pages.
   const contentHeight = Math.max(
     document.documentElement.clientHeight,
     document.body.clientHeight
@@ -111,11 +112,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       }
     };
 
-    const handleUndoAndRedo = async (e: KeyboardEvent) => {
+    const handleUndoAndRedo = (e: KeyboardEvent) => {
       if (isInteractingWithCanvasRef.current) return;
-      const os = await getOS();
-      const isMac = os === "macOS";
-      const mod = isMac ? e.metaKey : e.ctrlKey;
       const macRedoShortcut =
         e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
       const windowsOrLinuxRedoShortcut =
@@ -130,21 +128,26 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       }
 
       // undo
-      if (mod && e.key.toLowerCase() === "z" && !e.shiftKey) {
+      if (
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "z" &&
+        !e.shiftKey
+      ) {
         e.preventDefault();
-        await fc.undo();
+        fc.undo();
       }
 
       // redo
       if (macRedoShortcut || windowsOrLinuxRedoShortcut) {
         e.preventDefault();
-        await fc.redo();
+        fc.redo();
       }
     };
 
     const handleGroupObjects = (e: KeyboardEvent) => {
       const activeObjects = fc.getActiveObjects();
-      if (e.shiftKey && e.key.toLowerCase() === "g") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "g") {
+        e.preventDefault();
         const activeObjectsClone = [...activeObjects];
         const isGroupable = activeObjectsClone.length > 1;
 

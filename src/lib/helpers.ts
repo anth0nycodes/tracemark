@@ -35,7 +35,7 @@ export function getCanvasCoordinates(fc: FabricCanvas, e: TPointerEvent) {
   return { x, y };
 }
 
-function getErrorMessage(error: unknown) {
+export function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 

@@ -204,16 +204,16 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   }, []);
 
   useEffect(() => {
-    const timers = timersRef.current;
-    return () => timers.forEach(clearTimeout);
-  }, []);
-
-  useEffect(() => {
+    // Resolve the copy shortcut label based on the user's OS
     const resolveShortcut = async () => {
       const os = await getOS();
       setShortcut(os === "macOS" ? "⌘C" : "Ctrl+C");
     };
     resolveShortcut();
+
+    // Clear any pending cooldown timers on unmount
+    const timers = timersRef.current;
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   useEffect(() => {

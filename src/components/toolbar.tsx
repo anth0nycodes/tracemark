@@ -29,6 +29,7 @@ import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import {
+  getOS,
   handleClearCanvas,
   handleCopyToClipboard,
   handleExportAsPNG,
@@ -174,12 +175,32 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
+  const [prevTool, setPrevTool] = useState(currentTool);
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
     null
   );
+  const [shaking, setShaking] = useState(false);
+  const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
   const toolbarRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const resolveShortcut = async () => {
+      const os = await getOS();
+      setShortcut(os === "macOS" ? "⌘C" : "Ctrl+C");
+    };
+    resolveShortcut();
+  }, []);
+
+  useEffect(() => {
+    if (!shaking) return;
+    const timeout = setTimeout(() => {
+      setShaking(false);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [shaking]);
 
   useEffect(() => {
     const handleKeyShortcuts = (e: KeyboardEvent) => {
@@ -188,6 +209,13 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
         e.target instanceof HTMLTextAreaElement ||
         (e.target as HTMLElement).isContentEditable
       ) {
+        return;
+      }
+
+      // Copy needs a modifier, so handle before the bare-key bail
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "c") {
+        e.preventDefault();
+        handleCopyToClipboard(fcRef, toolbarRef);
         return;
       }
 
@@ -216,17 +244,16 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool]);
+  }, [setCurrentTool, fcRef]);
 
-  useEffect(() => {
-    if (currentTool !== openPopoverId) {
-      setOpenPopoverId(null);
-    }
-  }, [currentTool, openPopoverId]);
+  if (prevTool !== currentTool) {
+    setPrevTool(currentTool);
+    setOpenPopoverId(null);
+  }
 
-  function handlePopoverOpen(isActive: boolean, tooltipText: ToolbarStates) {
+  function handlePopoverOpen(isActive: boolean, toolName: ToolbarStates) {
     if (isActive) {
-      setOpenPopoverId((prev) => (prev === tooltipText ? null : tooltipText));
+      setOpenPopoverId((prev) => (prev === toolName ? null : toolName));
     }
   }
 
@@ -321,21 +348,42 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
             <Button
               key={item.name}
               variant="ghost"
+              disabled={item.name === "Clear" && shaking}
               onClick={() => {
+                if (item.name === "Clear") {
+                  setShaking(true);
+                }
                 setOpenPopoverId(null);
                 item.onClick(fcRef, toolbarRef);
               }}
-              className="relative h-11"
+              className="relative size-11"
               aria-label={item.description}
               title={item.description}
             >
-              <item.icon
-                aria-hidden="true"
-                className={cn(
-                  "size-5",
-                  item.name === "Clear" && "text-destructive"
-                )}
-              />
+              {item.name === "Clear" ? (
+                <motion.div
+                  animate={
+                    shaking ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] } : {}
+                  }
+                  className="flex size-full items-center justify-center"
+                  transition={{ duration: 0.6 }}
+                >
+                  <item.icon
+                    aria-hidden="true"
+                    className="text-destructive size-5"
+                  />
+                </motion.div>
+              ) : (
+                <item.icon aria-hidden="true" className="size-5" />
+              )}
+              {item.name === "Copy" && (
+                <sub
+                  className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
+                  aria-hidden="true"
+                >
+                  {shortcut}
+                </sub>
+              )}
             </Button>
           ))}
         </div>

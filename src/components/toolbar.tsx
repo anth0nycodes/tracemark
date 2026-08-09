@@ -189,11 +189,13 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
 
   const startCooldown = useCallback((name: string) => {
     clearTimeout(timersRef.current.get(name));
+    // new Set().add() returns the set itself, so that's why we can one-line it
     setCooldowns((prev) => new Set(prev).add(name));
 
     const id = setTimeout(() => {
       setCooldowns((prev) => {
         const next = new Set(prev);
+        // new Set().delete() returns a boolean, so that's why we have to return `next`
         next.delete(name);
         return next;
       });

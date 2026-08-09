@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -30,6 +29,7 @@ import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import {
+  getErrorMessage,
   getOS,
   handleClearCanvas,
   handleCopyToClipboard,
@@ -182,40 +182,35 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
   const toolbarRef = useRef<HTMLDivElement | null>(null);
-  // One timer per button so rapid clicks don't cancel each other's cooldown
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
   );
 
-  const startCooldown = useCallback((name: string) => {
+  const startCooldown = (name: string) => {
     clearTimeout(timersRef.current.get(name));
-    // new Set().add() returns the set itself, so that's why we can one-line it
     setCooldowns((prev) => new Set(prev).add(name));
 
-    const id = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setCooldowns((prev) => {
         const next = new Set(prev);
-        // new Set().delete() returns a boolean, so that's why we have to return `next`
         next.delete(name);
         return next;
       });
       timersRef.current.delete(name);
     }, 1500);
 
-    timersRef.current.set(name, id);
-  }, []);
+    timersRef.current.set(name, timeoutId);
+  };
 
   useEffect(() => {
-    // Resolve the copy shortcut label based on the user's OS
     const resolveShortcut = async () => {
       const os = await getOS();
       setShortcut(os === "macOS" ? "⌘C" : "Ctrl+C");
     };
     resolveShortcut();
 
-    // Clear any pending cooldown timers on unmount
     const timers = timersRef.current;
-    return () => timers.forEach(clearTimeout);
+    return () => timers.forEach((timer) => clearTimeout(timer));
   }, []);
 
   useEffect(() => {
@@ -228,12 +223,14 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
         return;
       }
 
-      // Copy needs a modifier, so handle before the bare-key bail
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "c") {
         e.preventDefault();
         if (!timersRef.current.has("Copy")) {
           startCooldown("Copy");
-          handleCopyToClipboard(fcRef, toolbarRef);
+          handleCopyToClipboard(fcRef, toolbarRef).catch((error: unknown) => {
+            const errorMessage = getErrorMessage(error);
+            console.error("Error copying to clipboard:", errorMessage);
+          });
         }
         return;
       }
@@ -263,7 +260,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool, fcRef, startCooldown]);
+  }, [setCurrentTool, fcRef]);
 
   if (prevTool !== currentTool) {
     setPrevTool(currentTool);
@@ -272,6 +269,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
 
   function handlePopoverOpen(isActive: boolean, toolName: ToolbarStates) {
     if (isActive) {
+      // if you click on the same active tool, it toggles the popover, otherwise it opens the popover for the new active tool
       setOpenPopoverId((prev) => (prev === toolName ? null : toolName));
     }
   }

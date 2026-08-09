@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -179,11 +180,36 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
     null
   );
-  const [shaking, setShaking] = useState(false);
+  const [cooldowns, setCooldowns] = useState<ReadonlySet<string>>(new Set());
   const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
   const toolbarRef = useRef<HTMLDivElement | null>(null);
+  // One timer per button so rapid clicks don't cancel each other's cooldown
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  );
+
+  const startCooldown = useCallback((name: string) => {
+    clearTimeout(timersRef.current.get(name));
+    setCooldowns((prev) => new Set(prev).add(name));
+
+    const id = setTimeout(() => {
+      setCooldowns((prev) => {
+        const next = new Set(prev);
+        next.delete(name);
+        return next;
+      });
+      timersRef.current.delete(name);
+    }, 1500);
+
+    timersRef.current.set(name, id);
+  }, []);
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   useEffect(() => {
     const resolveShortcut = async () => {
@@ -192,15 +218,6 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     };
     resolveShortcut();
   }, []);
-
-  useEffect(() => {
-    if (!shaking) return;
-    const timeout = setTimeout(() => {
-      setShaking(false);
-    }, 1500);
-
-    return () => clearTimeout(timeout);
-  }, [shaking]);
 
   useEffect(() => {
     const handleKeyShortcuts = (e: KeyboardEvent) => {
@@ -215,7 +232,10 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
       // Copy needs a modifier, so handle before the bare-key bail
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "c") {
         e.preventDefault();
-        handleCopyToClipboard(fcRef, toolbarRef);
+        if (!timersRef.current.has("Copy")) {
+          startCooldown("Copy");
+          handleCopyToClipboard(fcRef, toolbarRef);
+        }
         return;
       }
 
@@ -244,7 +264,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool, fcRef]);
+  }, [setCurrentTool, fcRef, startCooldown]);
 
   if (prevTool !== currentTool) {
     setPrevTool(currentTool);
@@ -348,11 +368,9 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
             <Button
               key={item.name}
               variant="ghost"
-              disabled={item.name === "Clear" && shaking}
+              disabled={cooldowns.has(item.name)}
               onClick={() => {
-                if (item.name === "Clear") {
-                  setShaking(true);
-                }
+                startCooldown(item.name);
                 setOpenPopoverId(null);
                 item.onClick(fcRef, toolbarRef);
               }}
@@ -363,7 +381,9 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
               {item.name === "Clear" ? (
                 <motion.div
                   animate={
-                    shaking ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] } : {}
+                    cooldowns.has("Clear")
+                      ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
+                      : {}
                   }
                   className="flex size-full items-center justify-center"
                   transition={{ duration: 0.6 }}

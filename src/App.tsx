@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Canvas } from "@/components/canvas";
 import { Toolbar } from "@/components/toolbar";
 
 export type ToolbarStates =
+  | "Interact"
   | "Select"
   | "Pencil"
   | "Erase"
@@ -12,13 +13,22 @@ export type ToolbarStates =
 
 export function App() {
   const [currentTool, setCurrentTool] = useState<ToolbarStates>("Select");
-  // TODO: make it so you can't swap tools with the shortcuts if you're actively using the tool
-  // also make sure to test every single tool for any bugs in relation to the TODO above
+  // True while the user is mid-interaction with a tool (e.g. drawing a stroke),
+  // so shortcuts can't swap tools out from under an in-progress action.
+  const isUsingToolRef = useRef(false);
 
   return (
     <>
-      <Toolbar currentTool={currentTool} setCurrentTool={setCurrentTool} />
-      <Canvas currentTool={currentTool} setCurrentTool={setCurrentTool} />
+      <Toolbar
+        currentTool={currentTool}
+        setCurrentTool={setCurrentTool}
+        isUsingToolRef={isUsingToolRef}
+      />
+      <Canvas
+        currentTool={currentTool}
+        setCurrentTool={setCurrentTool}
+        isUsingToolRef={isUsingToolRef}
+      />
     </>
   );
 }

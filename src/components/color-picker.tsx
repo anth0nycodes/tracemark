@@ -16,6 +16,8 @@ export function ColorPicker() {
           type="color"
           value={color}
           onChange={(e) => setColor(e.target.value)}
+          aria-label="Color"
+          title="Color"
           className="size-full cursor-pointer appearance-none overflow-hidden rounded-full p-0 [&::-moz-color-swatch]:rounded-full [&::-moz-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch-wrapper]:p-0"
         />
       </div>

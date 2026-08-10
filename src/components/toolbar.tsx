@@ -12,6 +12,8 @@ import {
   Copy,
   Download,
   Eraser,
+  GripVertical,
+  Hand,
   MousePointer2,
   PencilLine,
   Square,
@@ -19,7 +21,7 @@ import {
   Type,
   type LucideIcon,
 } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useDragControls, useReducedMotion } from "motion/react";
 import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
@@ -47,27 +49,28 @@ interface ToolbarItemProps {
 }
 
 const toolbarItems: ToolbarItemProps[] = [
-  { name: "Select", icon: MousePointer2, shortcut: "1" },
+  { name: "Interact", icon: Hand, shortcut: "1" },
+  { name: "Select", icon: MousePointer2, shortcut: "2" },
   {
     name: "Pencil",
     icon: PencilLine,
-    shortcut: "2",
+    shortcut: "3",
     popover: <PencilPopover />,
   },
   {
     name: "Erase",
     icon: Eraser,
-    shortcut: "3",
+    shortcut: "4",
     popover: <EraserPopover />,
   },
   {
     name: "Text",
     icon: Type,
-    shortcut: "4",
+    shortcut: "5",
     popover: <TextPopover />,
   },
-  { name: "Frame", icon: Square, shortcut: "5", popover: <FramePopover /> },
-  { name: "Line", icon: Line, shortcut: "6" },
+  { name: "Frame", icon: Square, shortcut: "6", popover: <FramePopover /> },
+  { name: "Line", icon: Line, shortcut: "7" },
 ];
 
 interface SecondaryToolbarItem {
@@ -170,9 +173,14 @@ function ToolbarButton({
 interface ToolbarProps {
   currentTool: ToolbarStates;
   setCurrentTool: (currentTool: ToolbarStates) => void;
+  isUsingToolRef: RefObject<boolean>;
 }
 
-export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
+export function Toolbar({
+  currentTool,
+  setCurrentTool,
+  isUsingToolRef,
+}: ToolbarProps) {
   const [prevTool, setPrevTool] = useState(currentTool);
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
     null
@@ -182,6 +190,8 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
   const toolbarRef = useRef<HTMLDivElement | null>(null);
+  const dragConstraintsRef = useRef<HTMLDivElement | null>(null);
+  const dragControls = useDragControls();
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
   );
@@ -241,16 +251,20 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
       }
 
       const keyMap: Record<string, ToolbarStates> = {
-        "1": "Select",
-        "2": "Pencil",
-        "3": "Erase",
-        "4": "Text",
-        "5": "Frame",
-        "6": "Line",
+        "1": "Interact",
+        "2": "Select",
+        "3": "Pencil",
+        "4": "Erase",
+        "5": "Text",
+        "6": "Frame",
+        "7": "Line",
       };
 
       const tool = keyMap[e.key];
       if (!tool) return;
+
+      // Don't swap tools mid-interaction (e.g. while drawing a stroke)
+      if (isUsingToolRef.current) return;
 
       e.preventDefault();
       setCurrentTool(tool);
@@ -260,7 +274,7 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool, fcRef]);
+  }, [setCurrentTool, fcRef, isUsingToolRef]);
 
   if (prevTool !== currentTool) {
     setPrevTool(currentTool);
@@ -275,111 +289,139 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
   }
 
   return (
-    <div
-      ref={toolbarRef}
-      style={{
-        transform: "translateX(-50%)",
-      }}
-      className="fixed bottom-5 left-1/2 z-2147483647"
-    >
-      <div className="bg-background text-foreground border-border relative flex h-max w-max items-center gap-2 rounded-[10px] border-2 p-1.5 shadow-md">
-        <ColorPicker />
-        <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
-        {toolbarItems.map((item) => {
-          const isActive = currentTool === item.name;
+    <>
+      {/* Invisible full-viewport box the toolbar is kept inside while dragging */}
+      <div
+        ref={dragConstraintsRef}
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-2"
+      />
+      <div
+        ref={toolbarRef}
+        style={{
+          transform: "translateX(-50%)",
+        }}
+        className="pointer-events-auto fixed bottom-5 left-1/2 z-2147483647"
+      >
+        <motion.div
+          drag
+          dragListener={false}
+          dragControls={dragControls}
+          dragConstraints={dragConstraintsRef}
+          dragMomentum={false}
+          className="bg-background text-foreground border-border relative flex h-max w-max items-center gap-2 rounded-[10px] border-2 p-1.5 shadow-md"
+        >
+          {/* Drag handle — only this grabs the bar, so buttons still click normally */}
+          <div
+            onPointerDown={(e) => dragControls.start(e)}
+            role="button"
+            tabIndex={0}
+            aria-label="Drag to move toolbar"
+            title="Drag to move toolbar"
+            className="text-muted-foreground flex h-11 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
+          >
+            <GripVertical aria-hidden="true" className="size-5" />
+          </div>
+          <ColorPicker />
+          <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
+          {toolbarItems.map((item) => {
+            const isActive = currentTool === item.name;
 
-          return (
-            <div key={item.name} className="size-11">
-              {item.popover ? (
-                <Popover
-                  open={openPopoverId === item.name}
-                  onOpenChange={() => handlePopoverOpen(isActive, item.name)}
-                >
-                  <PopoverTrigger
-                    render={
-                      <ToolbarButton
-                        isActive={isActive}
-                        item={item}
-                        prefersReducedMotion={prefersReducedMotion}
-                        setCurrentTool={setCurrentTool}
-                      />
+            return (
+              <div key={item.name} className="size-11">
+                {item.popover ? (
+                  <Popover
+                    open={openPopoverId === item.name}
+                    onOpenChange={() => handlePopoverOpen(isActive, item.name)}
+                  >
+                    <PopoverTrigger
+                      render={
+                        <ToolbarButton
+                          isActive={isActive}
+                          item={item}
+                          prefersReducedMotion={prefersReducedMotion}
+                          setCurrentTool={setCurrentTool}
+                        />
+                      }
+                    />
+                    <PopoverContent className="w-max p-1" sideOffset={16}>
+                      {item.popover}
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <ToolbarButton
+                    isActive={isActive}
+                    item={item}
+                    prefersReducedMotion={prefersReducedMotion}
+                    setCurrentTool={setCurrentTool}
+                  />
+                )}
+                {isActive && (
+                  <motion.div
+                    layoutId={
+                      prefersReducedMotion
+                        ? undefined
+                        : "active-toolbar-item-bar"
+                    }
+                    className="absolute -top-0.5 h-0.5 w-11 bg-[#2b7fff]"
+                    transition={
+                      prefersReducedMotion
+                        ? { duration: 0 }
+                        : { type: "spring", damping: 50, stiffness: 600 }
                     }
                   />
-                  <PopoverContent className="w-max p-1" sideOffset={16}>
-                    {item.popover}
-                  </PopoverContent>
-                </Popover>
-              ) : (
-                <ToolbarButton
-                  isActive={isActive}
-                  item={item}
-                  prefersReducedMotion={prefersReducedMotion}
-                  setCurrentTool={setCurrentTool}
-                />
-              )}
-              {isActive && (
-                <motion.div
-                  layoutId={
-                    prefersReducedMotion ? undefined : "active-toolbar-item-bar"
-                  }
-                  className="absolute -top-0.5 h-0.5 w-11 bg-[#2b7fff]"
-                  transition={
-                    prefersReducedMotion
-                      ? { duration: 0 }
-                      : { type: "spring", damping: 50, stiffness: 600 }
-                  }
-                />
-              )}
-            </div>
-          );
-        })}
+                )}
+              </div>
+            );
+          })}
 
-        <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
-        <div className="flex gap-2">
-          {secondaryToolbarItems.map((item) => (
-            <Button
-              key={item.name}
-              variant="ghost"
-              disabled={cooldowns.has(item.name)}
-              onClick={() => {
-                startCooldown(item.name);
-                setOpenPopoverId(null);
-                item.onClick(fcRef, toolbarRef);
-              }}
-              className="relative size-11"
-              aria-label={item.description}
-              title={item.description}
-            >
-              {item.name === "Clear" ? (
-                <motion.div
-                  animate={
-                    cooldowns.has("Clear")
-                      ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
-                      : {}
-                  }
-                  className="flex size-full items-center justify-center"
-                  transition={{ duration: 0.6 }}
-                >
-                  <item.icon
+          <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
+          <div className="flex gap-2">
+            {secondaryToolbarItems.map((item) => (
+              <Button
+                key={item.name}
+                variant="ghost"
+                disabled={cooldowns.has(item.name)}
+                onClick={() => {
+                  startCooldown(item.name);
+                  setOpenPopoverId(null);
+                  item.onClick(fcRef, toolbarRef);
+                }}
+                className="relative size-11"
+                aria-label={item.description}
+                title={item.description}
+              >
+                {item.name === "Clear" ? (
+                  <motion.div
+                    animate={
+                      cooldowns.has("Clear")
+                        ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
+                        : {}
+                    }
+                    className="flex size-full items-center justify-center"
+                    transition={{ duration: 0.6 }}
+                  >
+                    <item.icon
+                      aria-hidden="true"
+                      className="text-destructive size-5"
+                    />
+                  </motion.div>
+                ) : (
+                  <item.icon aria-hidden="true" className="size-5" />
+                )}
+                {item.name === "Copy" && (
+                  <sub
+                    className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
                     aria-hidden="true"
-                    className="text-destructive size-5"
-                  />
-                </motion.div>
-              ) : (
-                <item.icon aria-hidden="true" className="size-5" />
-              )}
-              {item.name === "Copy" && (
-                <sub
-                  className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
-                  aria-hidden="true"
-                >
-                  {shortcut}
-                </sub>
-              )}
-            </Button>
-          ))}
-        </div>
+                  >
+                    {shortcut}
+                  </sub>
+                )}
+              </Button>
+            ))}
+          </div>
+        </motion.div>
       </div>
-    </div>
+    </>
   );
 }

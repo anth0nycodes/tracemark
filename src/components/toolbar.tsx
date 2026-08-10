@@ -295,14 +295,16 @@ export function Toolbar({ currentTool, setCurrentTool }: ToolbarProps) {
                   open={openPopoverId === item.name}
                   onOpenChange={() => handlePopoverOpen(isActive, item.name)}
                 >
-                  <PopoverTrigger asChild>
-                    <ToolbarButton
-                      isActive={isActive}
-                      item={item}
-                      prefersReducedMotion={prefersReducedMotion}
-                      setCurrentTool={setCurrentTool}
-                    />
-                  </PopoverTrigger>
+                  <PopoverTrigger
+                    render={
+                      <ToolbarButton
+                        isActive={isActive}
+                        item={item}
+                        prefersReducedMotion={prefersReducedMotion}
+                        setCurrentTool={setCurrentTool}
+                      />
+                    }
+                  />
                   <PopoverContent className="w-max p-1" sideOffset={16}>
                     {item.popover}
                   </PopoverContent>

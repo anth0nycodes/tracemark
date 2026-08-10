@@ -54,6 +54,7 @@ function openTracemark() {
     left: "0",
     width: "100%",
     height: "100%",
+    pointerEvents: "none",
     fontSize: "16px",
     fontFamily:
       'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',

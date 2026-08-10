@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
 import {
@@ -14,6 +14,7 @@ import {
 } from "fabric";
 import type { ToolbarStates } from "@/App";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
+import { useShadowContainer } from "@/context/shadow-dom/use-shadow-container";
 import { useColor } from "@/context/toolbar/color/use-color";
 import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
@@ -27,6 +28,7 @@ const ADJUSTMENT_BUFFER = 25;
 let stopIncrementingCanvasHeight = false;
 
 function initializeCanvasDimensions(fc: FabricCanvas) {
+  stopIncrementingCanvasHeight = false;
   const contentWidth = Math.max(
     document.documentElement.clientWidth,
     document.body.clientWidth
@@ -100,13 +102,13 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
 function trackCanvasInteraction(
   fc: FabricCanvas,
-  isInteractingRef: { current: boolean }
+  isUsingToolRef: RefObject<boolean>
 ) {
   const handleMouseDown = () => {
-    isInteractingRef.current = true;
+    isUsingToolRef.current = true;
   };
   const handleMouseUp = () => {
-    isInteractingRef.current = false;
+    isUsingToolRef.current = false;
   };
 
   fc.on({ "mouse:down": handleMouseDown, "mouse:up": handleMouseUp });
@@ -119,17 +121,22 @@ function trackCanvasInteraction(
 interface CanvasProps {
   currentTool: ToolbarStates;
   setCurrentTool: (currentTool: ToolbarStates) => void;
+  isUsingToolRef: RefObject<boolean>;
 }
 
-export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
+export function Canvas({
+  currentTool,
+  setCurrentTool,
+  isUsingToolRef,
+}: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const isInteractingWithCanvasRef = useRef(false);
   const { fcRef, setFc } = useFabricCanvas();
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
   const { frame } = useFramePopover();
+  const shadowContainer = useShadowContainer();
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -167,7 +174,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     };
 
     const handleUndoAndRedo = (e: KeyboardEvent) => {
-      if (isInteractingWithCanvasRef.current) return;
+      if (isUsingToolRef.current) return;
       const macRedoShortcut =
         e.metaKey && e.shiftKey && e.key.toLowerCase() === "z";
       const windowsOrLinuxRedoShortcut =
@@ -245,7 +252,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       window.removeEventListener("keydown", handleUndoAndRedo);
       window.removeEventListener("keydown", handleGroupObjects);
     };
-  }, [setFc]);
+  }, [setFc, isUsingToolRef]);
 
   // Handle active tool logic
   useEffect(() => {
@@ -254,7 +261,23 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     fc.skipTargetFind = currentTool !== "Select";
     fc.selection = currentTool === "Select";
 
+    const passThrough = currentTool === "Interact" ? "none" : "";
+    const layers = [
+      shadowContainer,
+      fc.wrapperEl,
+      fc.upperCanvasEl,
+      fc.lowerCanvasEl,
+    ];
+    for (const el of layers) {
+      if (el) el.style.pointerEvents = passThrough;
+    }
+
     switch (currentTool) {
+      case "Interact": {
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        break;
+      }
       case "Pencil": {
         fc.discardActiveObject();
         fc.requestRenderAll();
@@ -264,7 +287,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         pencil.width = pencilWidth;
         pencil.color = color;
 
-        return trackCanvasInteraction(fc, isInteractingWithCanvasRef);
+        return trackCanvasInteraction(fc, isUsingToolRef);
       }
       case "Erase": {
         fc.discardActiveObject();
@@ -274,7 +297,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         fc.setEraserBrush(eraser);
         fc.isDrawingMode = true;
 
-        return trackCanvasInteraction(fc, isInteractingWithCanvasRef);
+        return trackCanvasInteraction(fc, isUsingToolRef);
       }
       case "Text": {
         fc.isDrawingMode = false;
@@ -397,7 +420,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
           if (!frameObject) return;
           fc.add(frameObject);
-          isInteractingWithCanvasRef.current = true;
+          isUsingToolRef.current = true;
         };
 
         const handleMouseMove = (e: TPointerEventInfo<TPointerEvent>) => {
@@ -438,7 +461,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           fc.fire("object:modified", { target: frameObject });
           fc.requestRenderAll();
           frameObject = null;
-          isInteractingWithCanvasRef.current = false;
+          isUsingToolRef.current = false;
           setCurrentTool("Select");
         };
 
@@ -465,7 +488,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
         let startY: number;
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
-          isInteractingWithCanvasRef.current = true;
+          isUsingToolRef.current = true;
           const { x, y } = getCanvasCoordinates(fc, e.e);
           startX = x;
           startY = y;
@@ -511,7 +534,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
           // reused, instead of being redrawn on every frame
           lineObject.set({ excludeFromExport: false, objectCaching: true });
           fc.fire("object:modified", { target: lineObject });
-          isInteractingWithCanvasRef.current = false;
+          isUsingToolRef.current = false;
           fc.requestRenderAll();
           lineObject = null;
           setCurrentTool("Select");
@@ -534,6 +557,7 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       default: {
         // defaults to select tool
         fc.isDrawingMode = false;
+        return trackCanvasInteraction(fc, isUsingToolRef);
       }
     }
   }, [
@@ -545,6 +569,8 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
     textAlignment,
     frame,
     setCurrentTool,
+    shadowContainer,
+    isUsingToolRef,
   ]);
 
   return (

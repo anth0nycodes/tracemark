@@ -6,8 +6,6 @@ import { AppProviders } from "@/AppProviders";
 import { ShadowContainerProvider } from "@/context/shadow-dom/ShadowContainerProvider";
 import styles from "@/index.css?inline";
 
-// TODO: Make this toolbar draggable
-
 const HOST_ID = "tracemark-shadow-host";
 
 declare global {

@@ -19,7 +19,7 @@ import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-po
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
-import { clamp, getCanvasCoordinates } from "@/lib/helpers";
+import { getCanvasCoordinates } from "@/lib/helpers";
 
 const CANVAS_HEIGHT_LIMIT = 16000;
 const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
@@ -75,7 +75,7 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
   if (currentCanvasHeight >= CANVAS_HEIGHT_LIMIT) {
     alert(
-      `Tracemark does not support pages taller than ${CANVAS_HEIGHT_LIMIT}px. Please try a shorter page.`
+      `Tracemark supports pages up to ${CANVAS_HEIGHT_LIMIT}px. The canvas will be capped at ${CANVAS_HEIGHT_LIMIT - ADJUSTMENT_BUFFER}px.`
     );
     fc.setDimensions({ height: CANVAS_HEIGHT_LIMIT - ADJUSTMENT_BUFFER });
     stopIncrementingCanvasHeight = true;
@@ -93,9 +93,8 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
   if (updatedCanvasHeight > currentCanvasHeight) {
     fc.setDimensions({
-      height: clamp(
+      height: Math.min(
         Math.max(updatedCanvasHeight, heightUpUntilViewportBottom),
-        currentCanvasHeight,
         CANVAS_HEIGHT_LIMIT
       ),
     });

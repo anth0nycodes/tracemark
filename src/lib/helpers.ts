@@ -30,6 +30,15 @@ export async function getOS() {
   return "Unknown";
 }
 
+export function clamp(value: number, min: number, max: number) {
+  if (min > max) {
+    throw new Error(
+      `Invalid clamp range: min (${min}) cannot be greater than max (${max})`
+    );
+  }
+  return Math.max(min, Math.min(value, max));
+}
+
 export function getCanvasCoordinates(fc: FabricCanvas, e: TPointerEvent) {
   const { x, y } = fc.getViewportPoint(e);
   return { x, y };

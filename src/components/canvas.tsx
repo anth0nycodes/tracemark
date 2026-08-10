@@ -19,24 +19,87 @@ import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-po
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
-import { getCanvasCoordinates } from "@/lib/helpers";
+import { clamp, getCanvasCoordinates } from "@/lib/helpers";
 
-function setupCanvas(fc: FabricCanvas) {
-  // Get the full document dimensions
+const CANVAS_HEIGHT_LIMIT = 16000;
+const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
+const ADJUSTMENT_BUFFER = 25;
+let stopIncrementingCanvasHeight = false;
+
+function initializeCanvasDimensions(fc: FabricCanvas) {
   const contentWidth = Math.max(
     document.documentElement.clientWidth,
     document.body.clientWidth
   );
-  // TODO: swap out clientHeight for a more scalable approach because this will be very laggy for long pages.
   const contentHeight = Math.max(
     document.documentElement.clientHeight,
     document.body.clientHeight
   );
+  const { scrollY, innerHeight: viewportHeight } = window;
+  const heightUpUntilViewportBottom = viewportHeight + scrollY;
+
+  // Edge case for sites that are taller than the limit for when
+  // we don't initialize the extension from the top of the page
+  if (contentHeight > CANVAS_HEIGHT_LIMIT) {
+    fc.setDimensions({
+      width: contentWidth,
+      height:
+        heightUpUntilViewportBottom < CANVAS_HEIGHT_LIMIT
+          ? heightUpUntilViewportBottom
+          : viewportHeight,
+    });
+    return;
+  }
 
   fc.setDimensions({
     width: contentWidth,
     height: contentHeight,
   });
+}
+
+function updateDynamicCanvasHeight(fc: FabricCanvas) {
+  const { scrollY, innerHeight: viewportHeight } = window;
+  const currentCanvasHeight = fc.getHeight();
+  let updatedCanvasHeight = currentCanvasHeight;
+
+  const heightUpUntilViewportBottom = viewportHeight + scrollY;
+
+  const contentHeight = Math.max(
+    document.documentElement.clientHeight,
+    document.body.clientHeight
+  );
+
+  // No need to update if content height is less than the limit
+  if (contentHeight < CANVAS_HEIGHT_LIMIT || stopIncrementingCanvasHeight)
+    return;
+
+  if (currentCanvasHeight >= CANVAS_HEIGHT_LIMIT) {
+    alert(
+      `Tracemark does not support pages taller than ${CANVAS_HEIGHT_LIMIT}px. Please try a shorter page.`
+    );
+    fc.setDimensions({ height: CANVAS_HEIGHT_LIMIT - ADJUSTMENT_BUFFER });
+    stopIncrementingCanvasHeight = true;
+    return;
+  }
+
+  while (
+    updatedCanvasHeight < CANVAS_HEIGHT_LIMIT &&
+    updatedCanvasHeight < heightUpUntilViewportBottom &&
+    heightUpUntilViewportBottom <= contentHeight &&
+    !stopIncrementingCanvasHeight
+  ) {
+    updatedCanvasHeight += CANVAS_HEIGHT_INCREMENT_AMOUNT;
+  }
+
+  if (updatedCanvasHeight > currentCanvasHeight) {
+    fc.setDimensions({
+      height: clamp(
+        Math.max(updatedCanvasHeight, heightUpUntilViewportBottom),
+        currentCanvasHeight,
+        CANVAS_HEIGHT_LIMIT
+      ),
+    });
+  }
 }
 
 // Flags canvas interaction on pointer down/up so undo/redo stays disabled
@@ -84,9 +147,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       enableRetinaScaling: true, // Let Fabric handle DPR automatically
     });
     setFc(fc);
-
-    const initCanvasDimensions = () => setupCanvas(fc);
-    initCanvasDimensions();
 
     // Make all created paths erasable
     fc.on("object:added", (e) => {
@@ -160,14 +220,34 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
       }
     };
 
-    window.addEventListener("resize", initCanvasDimensions);
+    // Set initial dimensions
+    initializeCanvasDimensions(fc);
+
+    // Re-initialize dimensions on resize
+    const handleResizeDimensions = () => initializeCanvasDimensions(fc);
+
+    // Update height of canvas on scroll
+    const handleScroll = () => updateDynamicCanvasHeight(fc);
+
+    let resizeTimeoutId: ReturnType<typeof setTimeout>;
+    const resizeObserver = new ResizeObserver(() => {
+      clearTimeout(resizeTimeoutId);
+      resizeTimeoutId = setTimeout(handleResizeDimensions, 50);
+    });
+
+    resizeObserver.observe(document.body);
+    resizeObserver.observe(document.documentElement);
+
+    window.addEventListener("scroll", handleScroll);
     window.addEventListener("keydown", handleDeleteObject);
     window.addEventListener("keydown", handleUndoAndRedo);
     window.addEventListener("keydown", handleGroupObjects);
 
     return () => {
       fc.dispose();
-      window.removeEventListener("resize", initCanvasDimensions);
+      clearTimeout(resizeTimeoutId);
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("keydown", handleDeleteObject);
       window.removeEventListener("keydown", handleUndoAndRedo);
       window.removeEventListener("keydown", handleGroupObjects);

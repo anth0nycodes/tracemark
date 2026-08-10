@@ -38,8 +38,6 @@ function initializeCanvasDimensions(fc: FabricCanvas) {
   const { scrollY, innerHeight: viewportHeight } = window;
   const heightUpUntilViewportBottom = viewportHeight + scrollY;
 
-  // Edge case for sites that are taller than the limit for when
-  // we don't initialize the extension from the top of the page
   if (contentHeight > CANVAS_HEIGHT_LIMIT) {
     fc.setDimensions({
       width: contentWidth,
@@ -69,7 +67,6 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
     document.body.clientHeight
   );
 
-  // No need to update if content height is less than the limit
   if (contentHeight < CANVAS_HEIGHT_LIMIT || stopIncrementingCanvasHeight)
     return;
 
@@ -101,8 +98,6 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
   }
 }
 
-// Flags canvas interaction on pointer down/up so undo/redo stays disabled
-// mid-stroke. Returns a cleanup fn that detaches the listeners.
 function trackCanvasInteraction(
   fc: FabricCanvas,
   isInteractingRef: { current: boolean }
@@ -236,7 +231,6 @@ export function Canvas({ currentTool, setCurrentTool }: CanvasProps) {
 
     resizeObserver.observe(document.body);
     resizeObserver.observe(document.documentElement);
-
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("keydown", handleDeleteObject);
     window.addEventListener("keydown", handleUndoAndRedo);

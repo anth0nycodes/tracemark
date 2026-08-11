@@ -1,6 +1,6 @@
-import { defineConfig } from "wxt";
-import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "wxt";
 
 // https://wxt.dev/api/config.html
 export default defineConfig({
@@ -14,7 +14,7 @@ export default defineConfig({
   manifest: {
     name: "Tracemark",
     description:
-      "A Chrome extension that lets you draw over any webpage and copy the result as an image.",
+      "A Chrome extension that lets you draw over any webpage and export/copy the result as an image.",
     version: "1.0",
     action: {
       default_title: "Open Tracemark",

@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -9,6 +10,7 @@ import {
 } from "react";
 import type { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import {
+  Check,
   Copy,
   Download,
   Eraser,
@@ -21,7 +23,12 @@ import {
   Type,
   type LucideIcon,
 } from "lucide-react";
-import { motion, useDragControls, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useDragControls,
+  useReducedMotion,
+} from "motion/react";
 import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
@@ -186,6 +193,7 @@ export function Toolbar({
     null
   );
   const [cooldowns, setCooldowns] = useState<ReadonlySet<string>>(new Set());
+  const [copied, setCopied] = useState(false);
   const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
@@ -195,6 +203,23 @@ export function Toolbar({
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
   );
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+
+  const copyToClipboard = useCallback(() => {
+    handleCopyToClipboard(fcRef, toolbarRef)
+      .then((didCopy) => {
+        if (!didCopy) return;
+        clearTimeout(copiedTimerRef.current);
+        setCopied(true);
+        copiedTimerRef.current = setTimeout(() => setCopied(false), 1500);
+      })
+      .catch((error: unknown) => {
+        const errorMessage = getErrorMessage(error);
+        console.error("Error copying to clipboard:", errorMessage);
+      });
+  }, [fcRef]);
 
   const startCooldown = (name: string) => {
     clearTimeout(timersRef.current.get(name));
@@ -220,7 +245,10 @@ export function Toolbar({
     resolveShortcut();
 
     const timers = timersRef.current;
-    return () => timers.forEach((timer) => clearTimeout(timer));
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+      clearTimeout(copiedTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -237,10 +265,7 @@ export function Toolbar({
         e.preventDefault();
         if (!timersRef.current.has("Copy")) {
           startCooldown("Copy");
-          handleCopyToClipboard(fcRef, toolbarRef).catch((error: unknown) => {
-            const errorMessage = getErrorMessage(error);
-            console.error("Error copying to clipboard:", errorMessage);
-          });
+          copyToClipboard();
         }
         return;
       }
@@ -274,7 +299,7 @@ export function Toolbar({
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool, fcRef, isUsingToolRef]);
+  }, [setCurrentTool, fcRef, isUsingToolRef, copyToClipboard]);
 
   if (prevTool !== currentTool) {
     setPrevTool(currentTool);
@@ -377,49 +402,91 @@ export function Toolbar({
 
           <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
           <div className="flex gap-2">
-            {secondaryToolbarItems.map((item) => (
-              <Button
-                key={item.name}
-                variant="ghost"
-                disabled={cooldowns.has(item.name)}
-                onClick={() => {
-                  startCooldown(item.name);
-                  setOpenPopoverId(null);
-                  item.onClick(fcRef, toolbarRef);
-                }}
-                className="relative size-11"
-                aria-label={item.description}
-                title={item.description}
-              >
-                {item.name === "Clear" ? (
-                  <motion.div
-                    animate={
-                      cooldowns.has("Clear")
-                        ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
-                        : {}
+            {secondaryToolbarItems.map((item) => {
+              const isCopyConfirming = item.name === "Copy" && copied;
+              const label = isCopyConfirming
+                ? "Copied canvas to clipboard"
+                : item.description;
+
+              return (
+                <Button
+                  key={item.name}
+                  variant="ghost"
+                  disabled={cooldowns.has(item.name)}
+                  onClick={() => {
+                    startCooldown(item.name);
+                    setOpenPopoverId(null);
+                    if (item.name === "Copy") {
+                      copyToClipboard();
+                      return;
                     }
-                    className="flex size-full items-center justify-center"
-                    transition={{ duration: 0.6 }}
-                  >
-                    <item.icon
+                    item.onClick(fcRef, toolbarRef);
+                  }}
+                  className={cn(
+                    "relative size-11",
+                  
+                    isCopyConfirming && "disabled:opacity-100"
+                  )}
+                  aria-label={label}
+                  title={label}
+                >
+                  {item.name === "Clear" ? (
+                    <motion.div
+                      animate={
+                        cooldowns.has("Clear")
+                          ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
+                          : {}
+                      }
+                      className="flex size-full items-center justify-center"
+                      transition={{ duration: 0.6 }}
+                    >
+                      <item.icon
+                        aria-hidden="true"
+                        className="text-destructive size-5"
+                      />
+                    </motion.div>
+                  ) : item.name === "Copy" ? (
+                    <AnimatePresence initial={false} mode="wait">
+                      <motion.span
+                        key={copied ? "copied" : "copy"}
+                        initial={{ opacity: 0, scale: 0.6 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.6 }}
+                        transition={
+                          prefersReducedMotion
+                            ? { duration: 0 }
+                            : { type: "spring", damping: 25, stiffness: 700 }
+                        }
+                        className="flex size-full items-center justify-center"
+                      >
+                        {copied ? (
+                          <Check
+                            aria-hidden="true"
+                            className="text-success size-5"
+                          />
+                        ) : (
+                          <item.icon aria-hidden="true" className="size-5" />
+                        )}
+                      </motion.span>
+                    </AnimatePresence>
+                  ) : (
+                    <item.icon aria-hidden="true" className="size-5" />
+                  )}
+                  {item.name === "Copy" && (
+                    <sub
+                      className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
                       aria-hidden="true"
-                      className="text-destructive size-5"
-                    />
-                  </motion.div>
-                ) : (
-                  <item.icon aria-hidden="true" className="size-5" />
-                )}
-                {item.name === "Copy" && (
-                  <sub
-                    className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
-                    aria-hidden="true"
-                  >
-                    {shortcut}
-                  </sub>
-                )}
-              </Button>
-            ))}
+                    >
+                      {shortcut}
+                    </sub>
+                  )}
+                </Button>
+              );
+            })}
           </div>
+          <span role="status" aria-live="polite" className="sr-only">
+            {copied ? "Copied canvas to clipboard" : ""}
+          </span>
         </motion.div>
       </div>
     </>

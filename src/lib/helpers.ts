@@ -81,19 +81,22 @@ async function captureActiveTab(
   }
 }
 
+/** Returns whether the canvas actually made it onto the clipboard. */
 export async function handleCopyToClipboard(
   fcRef: RefObject<FabricCanvas | null>,
   toolbarRef: RefObject<HTMLDivElement | null>
 ) {
   try {
     const dataUrl = await captureActiveTab(fcRef, toolbarRef);
-    if (!dataUrl) return;
+    if (!dataUrl) return false;
     const blob = await (await fetch(dataUrl)).blob();
     const item = new ClipboardItem({ "image/png": blob });
     await navigator.clipboard.write([item]);
+    return true;
   } catch (error) {
     const errorMessage = getErrorMessage(error);
     console.error("Error copying to clipboard:", errorMessage);
+    return false;
   }
 }
 

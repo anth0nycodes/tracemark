@@ -134,6 +134,40 @@
   text-size-adjust: 100%;
   zoom: 1;
 
+  /* Tailwind v4 registers these via @property, but @property is ignored inside
+     shadow DOM — the initial-value defaults never apply, so utilities relying on
+     them silently break (borders, shadows, rings, outlines, enter/exit anims).
+     Re-declaring the neutral defaults here restores them for the whole tree.
+     (Only vars that ship an initial-value are listed; the rest are set by the
+     utilities themselves.) */
+  --tw-border-style: solid;
+  --tw-outline-style: solid;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-alpha: 100%;
+  --tw-inset-shadow: 0 0 #0000;
+  --tw-inset-shadow-alpha: 100%;
+  --tw-inset-ring-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-offset-width: 0;
+  --tw-ring-offset-color: #fff;
+  --tw-animation-delay: 0s;
+  --tw-animation-direction: normal;
+  --tw-animation-fill-mode: none;
+  --tw-animation-iteration-count: 1;
+  --tw-enter-opacity: 1;
+  --tw-enter-scale: 1;
+  --tw-enter-rotate: 0;
+  --tw-enter-blur: 0;
+  --tw-enter-translate-x: 0;
+  --tw-enter-translate-y: 0;
+  --tw-exit-opacity: 1;
+  --tw-exit-scale: 1;
+  --tw-exit-rotate: 0;
+  --tw-exit-blur: 0;
+  --tw-exit-translate-x: 0;
+  --tw-exit-translate-y: 0;
+
   --tm-radius: 10px;
   --tm-background: oklch(1 0 0);
   --tm-foreground: oklch(0.1913 0 0);

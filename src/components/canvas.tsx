@@ -130,6 +130,7 @@ export function Canvas({
   isUsingToolRef,
 }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const { fcRef, setFc } = useFabricCanvas();
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
@@ -262,6 +263,10 @@ export function Canvas({
     fc.selection = currentTool === "Select";
 
     const passThrough = currentTool === "Interact" ? "none" : "";
+    if (containerRef.current) {
+      containerRef.current.style.pointerEvents =
+        currentTool === "Interact" ? "none" : "auto";
+    }
     const layers = [
       shadowContainer,
       fc.wrapperEl,
@@ -574,9 +579,11 @@ export function Canvas({
   ]);
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div
+      ref={containerRef}
       className="pointer-events-auto absolute top-0 left-0 z-2147483646"
-    />
+    >
+      <canvas ref={canvasRef} />
+    </div>
   );
 }

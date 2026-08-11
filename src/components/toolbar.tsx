@@ -424,7 +424,6 @@ export function Toolbar({
                   }}
                   className={cn(
                     "relative size-11",
-                  
                     isCopyConfirming && "disabled:opacity-100"
                   )}
                   aria-label={label}
@@ -455,7 +454,10 @@ export function Toolbar({
                         transition={
                           prefersReducedMotion
                             ? { duration: 0 }
-                            : { type: "spring", damping: 25, stiffness: 700 }
+                            : {
+                                duration: 0.125,
+                                ease: "easeInOut",
+                              }
                         }
                         className="flex size-full items-center justify-center"
                       >

@@ -1,73 +1,85 @@
-# React + TypeScript + Vite
+# Tracemark
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<img src="public/opengraph.png" />
 
-Currently, two official plugins are available:
+<br />
+<br />
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A Chrome extension that lets you draw over any webpage and export or copy the result as an image.
 
-## React Compiler
+Tracemark injects a full-page drawing overlay into the active tab. Annotate anything — articles, dashboards, designs — with a pencil, text, and framing tools, then export the annotated view as a PNG or copy it straight to your clipboard.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- **Draw over any page** — pencil, line, frame, text, eraser, and a color picker.
+- **Edit as you go** — undo, redo, group, and delete your objects.
+- **Capture in one click** — copy to clipboard or export as PNG.
+- **Stays out of your way** — draggable toolbar, `1`–`7` tool shortcuts, and Interact / Select modes.
+- **Private by design** — runs only on the tab you activate, entirely in your browser.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- [WXT](https://wxt.dev) — extension framework and build tooling
+- [React 19](https://react.dev) + TypeScript
+- [Fabric.js 7](http://fabricjs.com) — canvas engine
+- [Tailwind CSS 4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com)
+- [Motion](https://motion.dev) — animations
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Requires [pnpm](https://pnpm.io) (see `packageManager` in `package.json`).
+
+```bash
+# install dependencies
+pnpm install
+
+# run in dev mode
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+`pnpm dev` launches a browser with the extension loaded and hot reload enabled.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# production build
+pnpm build
+
+# package as a distributable zip
+pnpm zip
 ```
+
+Build output lands in `.output/`.
+
+## Scripts
+
+| Script       | Description                                   |
+| ------------ | --------------------------------------------- |
+| `pnpm dev`   | Dev mode with hot reload                      |
+| `pnpm build` | Production build                              |
+| `pnpm zip`   | Package the extension as a zip                |
+| `pnpm check` | Type-check the project (`wxt prepare && tsc`) |
+| `pnpm lint`  | Run ESLint                                    |
+
+## Project Structure
+
+```
+src/
+├── entrypoints/        # background + overlay entrypoints
+├── components/         # toolbar, canvas, color picker, popovers, ui
+├── context/            # fabric canvas, shadow DOM, toolbar state
+│   ├── fabric-canvas/
+│   ├── shadow-dom/
+│   └── toolbar/        # color, frame, pencil, eraser, text
+├── lib/                # helpers + utils
+├── App.tsx
+└── AppProviders.tsx
+```
+
+## How It Works
+
+Clicking the toolbar icon injects an overlay entrypoint into the active tab. The overlay mounts a React app inside a Shadow DOM container, isolating the extension's styles from the host page. A Fabric.js canvas sits on top of the page, and toolbar tools drive canvas state through React context providers. On export, the canvas is serialized to an image for download or clipboard copy.
+
+## License
+
+See [LICENSE](./LICENSE).

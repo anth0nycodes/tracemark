@@ -51,7 +51,7 @@ export function Waitlist() {
 
       toast.success(
         payload?.message ??
-          "Successfully joined waitlist! You will receive a confirmation email in 1 minute."
+          "Successfully subscribed! You’ll receive a confirmation email shortly."
       );
 
       form.reset();

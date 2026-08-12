@@ -9,14 +9,14 @@ export async function POST(req: Request) {
     if (!email) {
       return NextResponse.json(
         { error: "An email is required." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     if (!LOOPS_API_KEY) {
       return NextResponse.json(
         { error: "No LOOPS_API_KEY found." },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           Authorization: `Bearer ${LOOPS_API_KEY}`,
         },
         body: JSON.stringify({ email }),
-      },
+      }
     );
 
     const data = await response.json().catch(() => null);
@@ -45,29 +45,29 @@ export async function POST(req: Request) {
       if (message.toLowerCase().includes("already exists")) {
         return NextResponse.json(
           { error: "This email already exists in our waitlist." },
-          { status: 400 },
+          { status: 400 }
         );
       }
 
       return NextResponse.json(
         { error: message },
-        { status: response.status || 500 },
+        { status: response.status || 500 }
       );
     }
 
     return NextResponse.json(
       {
         message:
-          "Successfully subscribed to waitlist! You will receive a confirmation email soon.",
+          "Successfully subscribed! You’ll receive a confirmation email shortly.",
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error) {
     console.error("Waitlist signup error:", error);
 
     return NextResponse.json(
       { error: "Failed to signup to waitlist." },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

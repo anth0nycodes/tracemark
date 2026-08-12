@@ -3,9 +3,10 @@
 <img src="public/opengraph.png" />
 
 <br />
-<br />
 
 A Chrome extension that lets you draw over any webpage and export or copy the result as an image.
+
+**[Install from the Chrome Web Store →](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)**
 
 Tracemark injects a full-page drawing overlay into the active tab. Annotate anything — articles, dashboards, designs — with a pencil, text, and framing tools, then export the annotated view as a PNG or copy it straight to your clipboard.
 

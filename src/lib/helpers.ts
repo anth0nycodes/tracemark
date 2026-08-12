@@ -106,21 +106,24 @@ export async function handleExportAsPNG(
 ) {
   try {
     const dataUrl = await captureActiveTab(fcRef, toolbarRef);
-    if (!dataUrl) return;
+    if (!dataUrl) return false;
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = "tracemark-canvas.png";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    return true;
   } catch (error) {
     const errorMessage = getErrorMessage(error);
     console.error("Error exporting as PNG:", errorMessage);
+    return false;
   }
 }
 
 export function handleClearCanvas(fcRef: RefObject<FabricCanvas | null>) {
   const fc = fcRef.current;
-  if (!fc) return;
+  if (!fc) return false;
   fc.clearCanvas();
+  return true;
 }

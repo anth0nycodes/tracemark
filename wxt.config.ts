@@ -15,7 +15,7 @@ export default defineConfig({
     name: mode === "development" ? "Tracemark (Dev)" : "Tracemark",
     description:
       "A Chrome extension that lets you draw over any webpage and export/copy the result as an image.",
-    version: "1.0",
+    version: "1.0.1",
     action: {
       default_title: "Open Tracemark",
     },

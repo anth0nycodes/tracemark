@@ -9,6 +9,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { TracemarkIcon } from "./svgs/icon";
 import { Field, FieldError } from "./ui/field";
 
 const waitlistSchema = z.object({
@@ -65,47 +66,59 @@ export function Waitlist() {
   }
 
   return (
-    <form
-      id="waitlist-form"
-      className="flex h-full w-full flex-col gap-2 sm:flex-row"
-      onSubmit={form.handleSubmit(onSubmit)}
-    >
-      <Controller
-        name="email"
-        control={form.control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <Input
-              {...field}
-              id={field.name}
-              aria-invalid={fieldState.invalid}
-              className="bg-accent focus:ring-input! hover:border-input border-transparent text-lg! transition-colors hover:cursor-pointer focus:ring-1!"
-              placeholder="Enter email"
-              autoComplete="off"
-            />
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
-      />
-      <Button
-        type="submit"
-        form="waitlist-form"
-        variant={null}
-        size={null}
-        disabled={isLoading}
-        className={cn(
-          "text-background bg-[#E691D2] px-4 py-2 text-lg transition-colors hover:bg-[#E691C1]",
-          !isLoading ? "h-full" : ""
-        )}
+    <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-4">
+        <TracemarkIcon className="size-24" />
+        <h2 className="text-center text-3xl font-bold">Join the waitlist</h2>
+        <p className="text-muted-foreground text-center text-lg">
+          Receive all the latest news and updates for Tracemark.
+        </p>
+      </div>
+      <form
+        id="waitlist-form"
+        className="flex h-full w-full flex-col gap-2 sm:flex-row"
+        onSubmit={form.handleSubmit(onSubmit)}
       >
-        {isLoading ? (
-          <div className="flex size-full items-center justify-center">
-            <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
-          </div>
-        ) : (
-          "Join Waitlist"
-        )}
-      </Button>
-    </form>
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <Input
+                {...field}
+                id={field.name}
+                aria-invalid={fieldState.invalid}
+                className="bg-accent focus:ring-input! hover:border-input border-transparent text-lg! transition-colors hover:cursor-pointer focus:ring-1!"
+                placeholder="Enter email"
+                autoComplete="off"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Button
+          type="submit"
+          form="waitlist-form"
+          variant={null}
+          size={null}
+          disabled={isLoading}
+          className={cn(
+            "text-background bg-[#E691D2] px-4 py-2 text-lg transition-colors hover:bg-[#E691C1]",
+            !isLoading ? "h-full" : ""
+          )}
+        >
+          {isLoading ? (
+            <div className="flex size-full items-center justify-center">
+              <LoaderCircle
+                className="size-5 animate-spin"
+                aria-hidden="true"
+              />
+            </div>
+          ) : (
+            "Join Waitlist"
+          )}
+        </Button>
+      </form>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import {
+  Check,
   Copy,
   Download,
   Eraser,
@@ -21,7 +22,12 @@ import {
   Type,
   type LucideIcon,
 } from "lucide-react";
-import { motion, useDragControls, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useDragControls,
+  useReducedMotion,
+} from "motion/react";
 import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
@@ -40,6 +46,8 @@ import {
 import { cn } from "@/lib/utils";
 import { FramePopover } from "./popovers/frame-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+
+const SECONDARY_TOOLBAR_ITEM_COOLDOWN = 1250;
 
 interface ToolbarItemProps {
   name: ToolbarStates;
@@ -80,7 +88,7 @@ interface SecondaryToolbarItem {
   onClick: (
     fcRef: RefObject<FabricCanvas | null>,
     toolbarRef: RefObject<HTMLDivElement | null>
-  ) => void;
+  ) => Promise<boolean> | boolean;
 }
 
 const secondaryToolbarItems: SecondaryToolbarItem[] = [
@@ -185,7 +193,7 @@ export function Toolbar({
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
     null
   );
-  const [cooldowns, setCooldowns] = useState<ReadonlySet<string>>(new Set());
+  const [cooldowns, setCooldowns] = useState<Map<string, boolean>>(new Map());
   const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
@@ -196,21 +204,72 @@ export function Toolbar({
     new Map()
   );
 
-  const startCooldown = (name: string) => {
+  const startCooldown = (name: string, result: boolean) => {
     clearTimeout(timersRef.current.get(name));
-    setCooldowns((prev) => new Set(prev).add(name));
+    setCooldowns((prev) => new Map(prev).set(name, result));
 
     const timeoutId = setTimeout(() => {
       setCooldowns((prev) => {
-        const next = new Set(prev);
+        const next = new Map(prev);
         next.delete(name);
         return next;
       });
       timersRef.current.delete(name);
-    }, 1500);
+    }, SECONDARY_TOOLBAR_ITEM_COOLDOWN);
 
     timersRef.current.set(name, timeoutId);
   };
+
+  function renderSecondaryIcons(
+    item: SecondaryToolbarItem,
+    isCopyConfirming: boolean
+  ) {
+    if (item.name === "Clear") {
+      return (
+        <motion.div
+          animate={
+            cooldowns.has("Clear")
+              ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
+              : {}
+          }
+          className="flex size-full items-center justify-center"
+          transition={{ duration: 0.6 }}
+        >
+          <item.icon aria-hidden="true" className="text-destructive size-5" />
+        </motion.div>
+      );
+    }
+
+    if (item.name === "Copy") {
+      return (
+        <AnimatePresence initial={false} mode="wait">
+          <motion.span
+            key={cooldowns.get("Copy") === true ? "copied" : "copy"}
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.6 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : {
+                    duration: 0.1,
+                    ease: "easeInOut",
+                  }
+            }
+            className="flex size-full items-center justify-center"
+          >
+            {isCopyConfirming ? (
+              <Check aria-hidden="true" className="text-success size-5" />
+            ) : (
+              <item.icon aria-hidden="true" className="size-5" />
+            )}
+          </motion.span>
+        </AnimatePresence>
+      );
+    }
+
+    return <item.icon aria-hidden="true" className="size-5" />;
+  }
 
   useEffect(() => {
     const resolveShortcut = async () => {
@@ -224,7 +283,7 @@ export function Toolbar({
   }, []);
 
   useEffect(() => {
-    const handleKeyShortcuts = (e: KeyboardEvent) => {
+    const handleKeyShortcuts = async (e: KeyboardEvent) => {
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
@@ -236,11 +295,14 @@ export function Toolbar({
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "c") {
         e.preventDefault();
         if (!timersRef.current.has("Copy")) {
-          startCooldown("Copy");
-          handleCopyToClipboard(fcRef, toolbarRef).catch((error: unknown) => {
+          try {
+            const didCopy = await handleCopyToClipboard(fcRef, toolbarRef);
+            startCooldown("Copy", didCopy);
+          } catch (error) {
             const errorMessage = getErrorMessage(error);
             console.error("Error copying to clipboard:", errorMessage);
-          });
+            startCooldown("Copy", false);
+          }
         }
         return;
       }
@@ -377,49 +439,51 @@ export function Toolbar({
 
           <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
           <div className="flex gap-2">
-            {secondaryToolbarItems.map((item) => (
-              <Button
-                key={item.name}
-                variant="ghost"
-                disabled={cooldowns.has(item.name)}
-                onClick={() => {
-                  startCooldown(item.name);
-                  setOpenPopoverId(null);
-                  item.onClick(fcRef, toolbarRef);
-                }}
-                className="relative size-11"
-                aria-label={item.description}
-                title={item.description}
-              >
-                {item.name === "Clear" ? (
-                  <motion.div
-                    animate={
-                      cooldowns.has("Clear")
-                        ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
-                        : {}
-                    }
-                    className="flex size-full items-center justify-center"
-                    transition={{ duration: 0.6 }}
-                  >
-                    <item.icon
+            {secondaryToolbarItems.map((item) => {
+              const isCopyConfirming =
+                item.name === "Copy" && cooldowns.get("Copy") === true;
+              const label = isCopyConfirming
+                ? "Copied canvas to clipboard"
+                : item.description;
+
+              return (
+                <Button
+                  key={item.name}
+                  variant="ghost"
+                  disabled={cooldowns.has(item.name)}
+                  onClick={async () => {
+                    startCooldown(item.name, false);
+                    const result = await item.onClick(fcRef, toolbarRef);
+                    startCooldown(item.name, result);
+                    setOpenPopoverId(null);
+                  }}
+                  className={cn(
+                    "relative size-11",
+                    isCopyConfirming && "disabled:opacity-100"
+                  )}
+                  aria-label={label}
+                  title={label}
+                >
+                  {renderSecondaryIcons(item, isCopyConfirming)}
+                  {item.name === "Copy" && (
+                    <sub
+                      className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
                       aria-hidden="true"
-                      className="text-destructive size-5"
-                    />
-                  </motion.div>
-                ) : (
-                  <item.icon aria-hidden="true" className="size-5" />
-                )}
-                {item.name === "Copy" && (
-                  <sub
-                    className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
-                    aria-hidden="true"
-                  >
-                    {shortcut}
-                  </sub>
-                )}
-              </Button>
-            ))}
+                    >
+                      {shortcut}
+                    </sub>
+                  )}
+                </Button>
+              );
+            })}
           </div>
+          <span role="status" aria-live="polite" className="sr-only">
+            {cooldowns.has("Copy")
+              ? cooldowns.get("Copy")
+                ? "Copied canvas to clipboard"
+                : "Failed to copy canvas to clipboard"
+              : ""}
+          </span>
         </motion.div>
       </div>
     </>

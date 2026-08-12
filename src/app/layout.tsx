@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "sonner";
+import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 
 const regestoGrotesk = localFont({
@@ -46,7 +47,6 @@ export const metadata: Metadata = {
     "webpage markup",
     "annotate websites",
     "screenshot annotation",
-    "full page screenshot",
     "viewport screenshot",
     "browser annotation tool",
     "chrome extension annotation",
@@ -102,11 +102,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${regestoGrotesk.variable} antialiased`}>
+      <body
+        className={`${regestoGrotesk.variable} mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 antialiased`}
+      >
         <Navbar />
         {children}
         <Toaster />
         <Analytics />
+        <Footer />
       </body>
     </html>
   );

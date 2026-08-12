@@ -11,8 +11,8 @@ export default defineConfig({
   alias: {
     "@": path.resolve(__dirname, "src"),
   },
-  manifest: {
-    name: "Tracemark",
+  manifest: ({ mode }) => ({
+    name: mode === "development" ? "Tracemark (Dev)" : "Tracemark",
     description:
       "A Chrome extension that lets you draw over any webpage and export/copy the result as an image.",
     version: "1.0",
@@ -26,7 +26,7 @@ export default defineConfig({
       128: "icon128.png",
     },
     permissions: ["activeTab", "scripting"],
-  },
+  }),
   vite: () => ({
     plugins: [tailwindcss()],
   }),

@@ -279,9 +279,7 @@ export function Toolbar({
     resolveShortcut();
 
     const timers = timersRef.current;
-    return () => {
-      timers.forEach((timer) => clearTimeout(timer));
-    };
+    return () => timers.forEach((timer) => clearTimeout(timer));
   }, []);
 
   useEffect(() => {

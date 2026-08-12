@@ -69,7 +69,7 @@ export function Waitlist() {
     <div className="flex flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-4">
         <TracemarkIcon className="size-24" />
-        <h2 className="text-center text-3xl font-bold">Join the waitlist</h2>
+        <h2 className="text-center text-3xl font-bold">Stay in the loop</h2>
         <p className="text-muted-foreground text-center text-lg">
           Receive all the latest news and updates for Tracemark.
         </p>

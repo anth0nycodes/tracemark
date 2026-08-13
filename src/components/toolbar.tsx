@@ -24,10 +24,12 @@ import {
 } from "lucide-react";
 import {
   AnimatePresence,
-  motion,
+  domMax,
+  LazyMotion,
   useDragControls,
   useReducedMotion,
 } from "motion/react";
+import * as m from "motion/react-m";
 import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, type CustomIcon } from "@/components/custom-icons/icons";
@@ -164,7 +166,7 @@ function ToolbarButton({
       </span>
 
       {isActive && (
-        <motion.div
+        <m.div
           layoutId={prefersReducedMotion ? undefined : "active-toolbar-item"}
           className="bg-foreground absolute inset-0 rounded-[10px]"
           transition={
@@ -226,7 +228,7 @@ export function Toolbar({
   ) {
     if (item.name === "Clear") {
       return (
-        <motion.div
+        <m.div
           animate={
             cooldowns.has("Clear")
               ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
@@ -236,14 +238,14 @@ export function Toolbar({
           transition={{ duration: 0.6 }}
         >
           <item.icon aria-hidden="true" className="text-destructive size-5" />
-        </motion.div>
+        </m.div>
       );
     }
 
     if (item.name === "Copy") {
       return (
         <AnimatePresence initial={false} mode="wait">
-          <motion.span
+          <m.span
             key={cooldowns.get("Copy") === true ? "copied" : "copy"}
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -263,7 +265,7 @@ export function Toolbar({
             ) : (
               <item.icon aria-hidden="true" className="size-5" />
             )}
-          </motion.span>
+          </m.span>
         </AnimatePresence>
       );
     }
@@ -351,7 +353,7 @@ export function Toolbar({
   }
 
   return (
-    <>
+    <LazyMotion features={domMax}>
       {/* Invisible full-viewport box the toolbar is kept inside while dragging */}
       <div
         ref={dragConstraintsRef}
@@ -365,7 +367,7 @@ export function Toolbar({
         }}
         className="pointer-events-auto fixed bottom-5 left-1/2 z-2147483647"
       >
-        <motion.div
+        <m.div
           drag
           dragListener={false}
           dragControls={dragControls}
@@ -374,16 +376,15 @@ export function Toolbar({
           className="bg-background text-foreground border-border relative flex h-max w-max items-center gap-2 rounded-[10px] border-2 p-1.5 shadow-md"
         >
           {/* Drag handle — only this grabs the bar, so buttons still click normally */}
-          <div
+          <button
+            type="button"
             onPointerDown={(e) => dragControls.start(e)}
-            role="button"
-            tabIndex={0}
             aria-label="Drag to move toolbar"
             title="Drag to move toolbar"
-            className="text-muted-foreground flex h-11 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
+            className="text-muted-foreground flex h-11 cursor-grab touch-none appearance-none items-center justify-center border-0 bg-transparent p-0 active:cursor-grabbing"
           >
             <GripVertical aria-hidden="true" className="size-5" />
-          </div>
+          </button>
           <ColorPicker />
           <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
           {toolbarItems.map((item) => {
@@ -419,7 +420,7 @@ export function Toolbar({
                   />
                 )}
                 {isActive && (
-                  <motion.div
+                  <m.div
                     layoutId={
                       prefersReducedMotion
                         ? undefined
@@ -484,8 +485,8 @@ export function Toolbar({
                 : "Failed to copy canvas to clipboard"
               : ""}
           </span>
-        </motion.div>
+        </m.div>
       </div>
-    </>
+    </LazyMotion>
   );
 }

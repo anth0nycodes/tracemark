@@ -1,5 +1,6 @@
 import { LineSquiggle, type LucideIcon } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
+import * as m from "motion/react-m";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -46,7 +47,7 @@ export function PencilPopover() {
             aria-label={`Pencil width ${item.value}px`}
           >
             {isActive && (
-              <motion.div
+              <m.div
                 layoutId={
                   prefersReducedMotion
                     ? undefined

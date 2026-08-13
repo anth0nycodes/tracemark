@@ -1,5 +1,6 @@
 import { Circle, Square, Triangle, type LucideIcon } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
+import * as m from "motion/react-m";
 import type { Frame } from "@/context/toolbar/frame/constants";
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
 import { cn } from "@/lib/utils";
@@ -44,7 +45,7 @@ export function FramePopover() {
             aria-label={`Frame ${item.value}`}
           >
             {isActive && (
-              <motion.div
+              <m.div
                 layoutId={
                   prefersReducedMotion ? undefined : "active-frame-popover-item"
                 }

@@ -146,7 +146,9 @@ export async function handleCopyToClipboard(
   try {
     const dataUrl = await captureActiveTab(fcRef, toolbarRef);
     if (!dataUrl) return false;
-    const blob = await (await fetch(dataUrl)).blob();
+    const response = await fetch(dataUrl);
+    if (!response.ok) return false;
+    const blob = await response.blob();
     const item = new ClipboardItem({ "image/png": blob });
     await navigator.clipboard.write([item]);
     return true;

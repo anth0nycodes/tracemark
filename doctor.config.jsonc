@@ -1,0 +1,8 @@
+{
+  // Generated build artifacts are not source we author — WXT bundles React and
+  // third-party code into .output, so scanning it just re-flags library
+  // internals (e.g. React's own Math.random fiber-key generation). Exclude it.
+  "ignore": {
+    "files": [".output/**", "**/.output/**"]
+  }
+}

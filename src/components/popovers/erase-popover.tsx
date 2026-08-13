@@ -1,5 +1,6 @@
 import { Dot, type LucideIcon } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
+import * as m from "motion/react-m";
 import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -46,7 +47,7 @@ export function EraserPopover() {
             aria-label={`Eraser width ${item.value}px`}
           >
             {isActive && (
-              <motion.div
+              <m.div
                 layoutId={
                   prefersReducedMotion
                     ? undefined

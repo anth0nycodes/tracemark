@@ -5,7 +5,8 @@ import {
   TextAlignStart,
   type LucideIcon,
 } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
+import * as m from "motion/react-m";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import type { TextAlign } from "@/context/toolbar/text-popover/constants";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
@@ -65,7 +66,7 @@ export function TextPopover() {
             aria-label={`Text alignment: ${item.value}`}
           >
             {isActive && (
-              <motion.div
+              <m.div
                 layoutId={
                   prefersReducedMotion ? undefined : "active-text-popover-item"
                 }

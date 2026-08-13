@@ -24,5 +24,6 @@ export function Line(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-const icons = [Line] as const;
-export type CustomIcon = (typeof icons)[number];
+// Add new custom-icon components to this tuple to grow the union.
+type CustomIcons = [typeof Line];
+export type CustomIcon = CustomIcons[number];

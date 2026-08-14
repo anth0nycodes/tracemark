@@ -22,32 +22,42 @@ import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-po
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { getCanvasCoordinates } from "@/lib/helpers";
 
-const CANVAS_HEIGHT_LIMIT = 16000;
+const CANVAS_LAG_WARNING_HEIGHT = 16250;
 const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
-const ADJUSTMENT_BUFFER = 25;
-let stopIncrementingCanvasHeight = false;
+let hasAlertedLagWarning = false;
+
+function alertLagWarning() {
+  alert(
+    "You’ve reached a very long part of this page. You can keep drawing, but it may start to feel laggy."
+  );
+  hasAlertedLagWarning = true;
+}
 
 function initializeCanvasDimensions(fc: FabricCanvas) {
-  stopIncrementingCanvasHeight = false;
+  const currentCanvasHeight = fc.getHeight();
   const contentWidth = Math.max(
     document.documentElement.clientWidth,
     document.body.clientWidth
   );
   const contentHeight = Math.max(
-    document.documentElement.clientHeight,
-    document.body.clientHeight
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight
   );
   const { scrollY, innerHeight: viewportHeight } = window;
   const heightUpUntilViewportBottom = viewportHeight + scrollY;
 
-  if (contentHeight > CANVAS_HEIGHT_LIMIT) {
+  if (contentHeight > CANVAS_LAG_WARNING_HEIGHT) {
     fc.setDimensions({
       width: contentWidth,
-      height:
-        heightUpUntilViewportBottom < CANVAS_HEIGHT_LIMIT
-          ? heightUpUntilViewportBottom
-          : viewportHeight,
+      height: Math.min(heightUpUntilViewportBottom, contentHeight),
     });
+
+    if (
+      currentCanvasHeight >= CANVAS_LAG_WARNING_HEIGHT &&
+      !hasAlertedLagWarning
+    ) {
+      alertLagWarning();
+    }
     return;
   }
 
@@ -65,27 +75,22 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
   const heightUpUntilViewportBottom = viewportHeight + scrollY;
 
   const contentHeight = Math.max(
-    document.documentElement.clientHeight,
-    document.body.clientHeight
+    document.documentElement.scrollHeight,
+    document.body.scrollHeight
   );
 
-  if (contentHeight < CANVAS_HEIGHT_LIMIT || stopIncrementingCanvasHeight)
-    return;
+  if (contentHeight < CANVAS_LAG_WARNING_HEIGHT) return;
 
-  if (currentCanvasHeight >= CANVAS_HEIGHT_LIMIT) {
-    alert(
-      `Tracemark supports pages up to ${CANVAS_HEIGHT_LIMIT}px. The canvas will be capped at ${CANVAS_HEIGHT_LIMIT - ADJUSTMENT_BUFFER}px.`
-    );
-    fc.setDimensions({ height: CANVAS_HEIGHT_LIMIT - ADJUSTMENT_BUFFER });
-    stopIncrementingCanvasHeight = true;
-    return;
+  if (
+    currentCanvasHeight >= CANVAS_LAG_WARNING_HEIGHT &&
+    !hasAlertedLagWarning
+  ) {
+    alertLagWarning();
   }
 
   while (
-    updatedCanvasHeight < CANVAS_HEIGHT_LIMIT &&
     updatedCanvasHeight < heightUpUntilViewportBottom &&
-    heightUpUntilViewportBottom <= contentHeight &&
-    !stopIncrementingCanvasHeight
+    heightUpUntilViewportBottom <= contentHeight
   ) {
     updatedCanvasHeight += CANVAS_HEIGHT_INCREMENT_AMOUNT;
   }
@@ -94,7 +99,7 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
     fc.setDimensions({
       height: Math.min(
         Math.max(updatedCanvasHeight, heightUpUntilViewportBottom),
-        CANVAS_HEIGHT_LIMIT
+        contentHeight
       ),
     });
   }

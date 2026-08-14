@@ -24,13 +24,13 @@ import { getCanvasCoordinates } from "@/lib/helpers";
 
 const CANVAS_LAG_WARNING_HEIGHT = 16250;
 const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
-let hasAlertedLagWarningHeight = false;
+let hasAlertedLagWarning = false;
 
-function alertLagWarningHeight() {
+function alertLagWarning() {
   alert(
     "You’ve reached a very long part of this page. You can keep drawing, but it may start to feel laggy."
   );
-  hasAlertedLagWarningHeight = true;
+  hasAlertedLagWarning = true;
 }
 
 function initializeCanvasDimensions(fc: FabricCanvas) {
@@ -54,9 +54,9 @@ function initializeCanvasDimensions(fc: FabricCanvas) {
 
     if (
       currentCanvasHeight >= CANVAS_LAG_WARNING_HEIGHT &&
-      !hasAlertedLagWarningHeight
+      !hasAlertedLagWarning
     ) {
-      alertLagWarningHeight();
+      alertLagWarning();
     }
     return;
   }
@@ -83,9 +83,9 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
 
   if (
     currentCanvasHeight >= CANVAS_LAG_WARNING_HEIGHT &&
-    !hasAlertedLagWarningHeight
+    !hasAlertedLagWarning
   ) {
-    alertLagWarningHeight();
+    alertLagWarning();
   }
 
   while (

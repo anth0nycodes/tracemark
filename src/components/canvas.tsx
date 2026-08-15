@@ -63,7 +63,7 @@ function initializeCanvasDimensions(fc: FabricCanvas) {
 
   fc.setDimensions({
     width: contentWidth,
-    height: contentHeight,
+    height: Math.min(heightUpUntilViewportBottom, contentHeight),
   });
 }
 
@@ -78,8 +78,6 @@ function updateDynamicCanvasHeight(fc: FabricCanvas) {
     document.documentElement.scrollHeight,
     document.body.scrollHeight
   );
-
-  if (contentHeight < CANVAS_LAG_WARNING_HEIGHT) return;
 
   if (
     currentCanvasHeight >= CANVAS_LAG_WARNING_HEIGHT &&

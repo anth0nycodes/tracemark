@@ -111,7 +111,8 @@
   --color-sidebar-ring: var(--tm-sidebar-ring);
 }
 
-:host {
+:host,
+:root {
   /* Reset inherited styles from host page */
   font-family:
     ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
@@ -204,7 +205,8 @@
   --tm-sidebar-ring: oklch(0.708 0 0);
 }
 
-:host(.dark) {
+:host(.dark),
+:root.dark {
   color: oklch(0.985 0 0);
   --tm-background: oklch(0.145 0 0);
   --tm-foreground: oklch(0.985 0 0);

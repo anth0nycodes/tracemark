@@ -13,6 +13,11 @@ export default defineBackground(() => {
 
   browser.action.onClicked.addListener(handleActionClick);
 
+  browser.runtime.onInstalled.addListener(({ reason }) => {
+    if (reason !== "install") return;
+    browser.tabs.create({ url: browser.runtime.getURL("/welcome.html") });
+  });
+
   browser.runtime.onMessage.addListener((message) => {
     if (message?.type === "CAPTURE_VISIBLE_TAB") {
       return browser.tabs.captureVisibleTab({ format: "png" });

@@ -17,6 +17,33 @@ Tracemark injects a full-page drawing overlay into the active tab. Annotate anyt
 - **Capture in one click** — copy to clipboard or export as PNG.
 - **Stays out of your way** — draggable toolbar, `1`–`7` tool shortcuts, and Interact / Select modes.
 - **Private by design** — runs only on the tab you activate, entirely in your browser.
+- **Onboards on install** — a welcome page walks through the tools and shortcuts.
+
+## Controls
+
+Click the toolbar icon to open the overlay on the current tab; click it again to close.
+
+| Tool     | Key | What it does                           |
+| -------- | --- | -------------------------------------- |
+| Interact | `1` | Scroll and click the page underneath   |
+| Select   | `2` | Move, resize, and group what you drew  |
+| Pencil   | `3` | Freehand strokes, with size and color  |
+| Erase    | `4` | Rub out parts of a stroke              |
+| Text     | `5` | Drop a label anywhere on the page      |
+| Frame    | `6` | Box off the part that matters          |
+| Line     | `7` | Straight lines for pointing things out |
+
+Pencil, Erase, Text, and Frame each open a popover for color, size, and style.
+
+| Shortcut         | Action                   |
+| ---------------- | ------------------------ |
+| `⌘C` / `Ctrl+C`  | Copy canvas to clipboard |
+| `⌘Z` / `Ctrl+Z`  | Undo                     |
+| `⌘⇧Z` / `Ctrl+Y` | Redo                     |
+| `⌘G` / `Ctrl+G`  | Group selection          |
+| `Backspace`      | Delete selection         |
+
+Copy, Export (PNG), and Clear live on the secondary toolbar. Drawings aren't saved — copy or export before closing the overlay or reloading the page.
 
 ## Tech Stack
 
@@ -66,7 +93,7 @@ Build output lands in `.output/`.
 
 ```
 src/
-├── entrypoints/        # background + overlay entrypoints
+├── entrypoints/        # background, overlay, and welcome entrypoints
 ├── components/         # toolbar, canvas, color picker, popovers, ui
 ├── context/            # fabric canvas, shadow DOM, toolbar state
 │   ├── fabric-canvas/
@@ -80,6 +107,8 @@ src/
 ## How It Works
 
 Clicking the toolbar icon injects an overlay entrypoint into the active tab. The overlay mounts a React app inside a Shadow DOM container, isolating the extension's styles from the host page. A Fabric.js canvas sits on top of the page, and toolbar tools drive canvas state through React context providers. On export, the canvas is serialized to an image for download or clipboard copy.
+
+On first install, the background script opens `welcome.html` — a standalone React page that introduces the tools and shortcuts.
 
 ## License
 

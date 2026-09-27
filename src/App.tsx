@@ -11,7 +11,11 @@ export type ToolbarStates =
   | "Frame"
   | "Line";
 
-export function App() {
+interface AppProps {
+  onClose: () => void;
+}
+
+export function App({ onClose }: AppProps) {
   const [currentTool, setCurrentTool] = useState<ToolbarStates>("Select");
   // True while the user is mid-interaction with a tool (e.g. drawing a stroke),
   // so shortcuts can't swap tools out from under an in-progress action.
@@ -23,6 +27,7 @@ export function App() {
         currentTool={currentTool}
         setCurrentTool={setCurrentTool}
         isUsingToolRef={isUsingToolRef}
+        onClose={onClose}
       />
       <Canvas
         currentTool={currentTool}

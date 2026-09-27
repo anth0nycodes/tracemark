@@ -34,7 +34,7 @@ function injectTracemarkContent(root: ShadowRoot) {
     <StrictMode>
       <ShadowContainerProvider container={tracemarkContentContainer}>
         <AppProviders>
-          <App />
+          <App onClose={closeTracemark} />
         </AppProviders>
       </ShadowContainerProvider>
     </StrictMode>

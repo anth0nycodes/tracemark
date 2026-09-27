@@ -20,6 +20,7 @@ import {
   Square,
   Trash2,
   Type,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -184,12 +185,14 @@ interface ToolbarProps {
   currentTool: ToolbarStates;
   setCurrentTool: (currentTool: ToolbarStates) => void;
   isUsingToolRef: RefObject<boolean>;
+  onClose: () => void;
 }
 
 export function Toolbar({
   currentTool,
   setCurrentTool,
   isUsingToolRef,
+  onClose,
 }: ToolbarProps) {
   const [prevTool, setPrevTool] = useState(currentTool);
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
@@ -478,6 +481,16 @@ export function Toolbar({
               );
             })}
           </div>
+          <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            className="size-11"
+            aria-label="Close Tracemark"
+            title="Close Tracemark"
+          >
+            <X aria-hidden="true" className="size-5" />
+          </Button>
           <span role="status" aria-live="polite" className="sr-only">
             {cooldowns.has("Copy")
               ? cooldowns.get("Copy")

@@ -76,7 +76,7 @@ const steps: Step[] = [
   },
   {
     title: "Open any page and click the Tracemark icon",
-    body: "A drawing overlay and a draggable toolbar appear on top of the page. Click the icon again to close it.",
+    body: "A drawing overlay and a draggable toolbar appear on top of the page. Click the icon again, or the X at the end of the toolbar, to close it.",
   },
   {
     title: "Pick a tool and draw",

@@ -27,6 +27,7 @@ import {
   AnimatePresence,
   domMax,
   LazyMotion,
+  MotionConfig,
   useDragControls,
   useReducedMotion,
 } from "motion/react";
@@ -90,7 +91,7 @@ interface SecondaryToolbarItem {
   icon: LucideIcon;
   onClick: (
     fcRef: RefObject<FabricCanvas | null>,
-    toolbarRef: RefObject<HTMLDivElement | null>
+    toolbarRef: RefObject<HTMLDivElement | null>,
   ) => Promise<boolean> | boolean;
 }
 
@@ -150,16 +151,13 @@ function ToolbarButton({
     >
       <item.icon
         aria-hidden="true"
-        className={cn(
-          "z-10 size-5 transition-colors",
-          isActive && "text-background"
-        )}
+        className={cn("z-10 size-5 transition-colors", isActive && "text-background")}
       />
 
       <span
         className={cn(
           "text-muted-foreground/60 dark:text-foreground absolute right-1.5 bottom-1 z-10 text-[9px] font-semibold transition-colors",
-          isActive && "text-background"
+          isActive && "text-background",
         )}
         aria-hidden="true"
       >
@@ -170,11 +168,6 @@ function ToolbarButton({
         <m.div
           layoutId={prefersReducedMotion ? undefined : "active-toolbar-item"}
           className="bg-foreground absolute inset-0 rounded-[10px]"
-          transition={
-            prefersReducedMotion
-              ? { duration: 0 }
-              : { type: "spring", damping: 50, stiffness: 600 }
-          }
         />
       )}
     </Button>
@@ -188,16 +181,9 @@ interface ToolbarProps {
   onClose: () => void;
 }
 
-export function Toolbar({
-  currentTool,
-  setCurrentTool,
-  isUsingToolRef,
-  onClose,
-}: ToolbarProps) {
+export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }: ToolbarProps) {
   const [prevTool, setPrevTool] = useState(currentTool);
-  const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(
-    null
-  );
+  const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(null);
   const [cooldowns, setCooldowns] = useState<Map<string, boolean>>(new Map());
   const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -205,9 +191,7 @@ export function Toolbar({
   const toolbarRef = useRef<HTMLDivElement | null>(null);
   const dragConstraintsRef = useRef<HTMLDivElement | null>(null);
   const dragControls = useDragControls();
-  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map()
-  );
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const startCooldown = (name: string, result: boolean) => {
     clearTimeout(timersRef.current.get(name));
@@ -225,18 +209,11 @@ export function Toolbar({
     timersRef.current.set(name, timeoutId);
   };
 
-  function renderSecondaryIcons(
-    item: SecondaryToolbarItem,
-    isCopyConfirming: boolean
-  ) {
+  function renderSecondaryIcons(item: SecondaryToolbarItem, isCopyConfirming: boolean) {
     if (item.name === "Clear") {
       return (
         <m.div
-          animate={
-            cooldowns.has("Clear")
-              ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] }
-              : {}
-          }
+          animate={cooldowns.has("Clear") ? { rotate: [0, 15, -15, 12, -12, 8, -8, 0] } : {}}
           className="flex size-full items-center justify-center"
           transition={{ duration: 0.6 }}
         >
@@ -394,61 +371,57 @@ export function Toolbar({
             const isActive = currentTool === item.name;
 
             return (
-              <div key={item.name} className="size-11">
-                {item.popover ? (
-                  <Popover
-                    open={openPopoverId === item.name}
-                    onOpenChange={() => handlePopoverOpen(isActive, item.name)}
-                  >
-                    <PopoverTrigger
-                      render={
-                        <ToolbarButton
-                          isActive={isActive}
-                          item={item}
-                          prefersReducedMotion={prefersReducedMotion}
-                          setCurrentTool={setCurrentTool}
-                        />
-                      }
+              <MotionConfig
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { type: "spring", damping: 50, stiffness: 600 }
+                }
+              >
+                <div key={item.name} className="size-11">
+                  {item.popover ? (
+                    <Popover
+                      open={openPopoverId === item.name}
+                      onOpenChange={() => handlePopoverOpen(isActive, item.name)}
+                    >
+                      <PopoverTrigger
+                        render={
+                          <ToolbarButton
+                            isActive={isActive}
+                            item={item}
+                            prefersReducedMotion={prefersReducedMotion}
+                            setCurrentTool={setCurrentTool}
+                          />
+                        }
+                      />
+                      <PopoverContent className="w-max p-1" sideOffset={16}>
+                        {item.popover}
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <ToolbarButton
+                      isActive={isActive}
+                      item={item}
+                      prefersReducedMotion={prefersReducedMotion}
+                      setCurrentTool={setCurrentTool}
                     />
-                    <PopoverContent className="w-max p-1" sideOffset={16}>
-                      {item.popover}
-                    </PopoverContent>
-                  </Popover>
-                ) : (
-                  <ToolbarButton
-                    isActive={isActive}
-                    item={item}
-                    prefersReducedMotion={prefersReducedMotion}
-                    setCurrentTool={setCurrentTool}
-                  />
-                )}
-                {isActive && (
-                  <m.div
-                    layoutId={
-                      prefersReducedMotion
-                        ? undefined
-                        : "active-toolbar-item-bar"
-                    }
-                    className="absolute -top-0.5 h-0.5 w-11 bg-[#2b7fff]"
-                    transition={
-                      prefersReducedMotion
-                        ? { duration: 0 }
-                        : { type: "spring", damping: 50, stiffness: 600 }
-                    }
-                  />
-                )}
-              </div>
+                  )}
+                  {isActive && (
+                    <m.div
+                      layoutId={prefersReducedMotion ? undefined : "active-toolbar-item-bar"}
+                      className="absolute -top-0.5 h-0.5 w-11 bg-[#2b7fff]"
+                    />
+                  )}
+                </div>
+              </MotionConfig>
             );
           })}
 
           <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
           <div className="flex gap-2">
             {secondaryToolbarItems.map((item) => {
-              const isCopyConfirming =
-                item.name === "Copy" && cooldowns.get("Copy") === true;
-              const label = isCopyConfirming
-                ? "Copied canvas to clipboard"
-                : item.description;
+              const isCopyConfirming = item.name === "Copy" && cooldowns.get("Copy") === true;
+              const label = isCopyConfirming ? "Copied canvas to clipboard" : item.description;
 
               return (
                 <Button
@@ -461,10 +434,7 @@ export function Toolbar({
                     startCooldown(item.name, result);
                     setOpenPopoverId(null);
                   }}
-                  className={cn(
-                    "relative size-11",
-                    isCopyConfirming && "disabled:opacity-100"
-                  )}
+                  className={cn("relative size-11", isCopyConfirming && "disabled:opacity-100")}
                   aria-label={label}
                   title={label}
                 >

@@ -12,9 +12,9 @@ export default defineConfig({
     "@": path.resolve(__dirname, "src"),
   },
   manifest: ({ mode }) => ({
-    name: mode === "development" ? "Tracemark (Dev)" : "Tracemark",
+    name: mode === "development" ? "Tracemark (Dev)" : "Tracemark – Live Web Markup",
     description:
-      "A Chrome extension that lets you draw over any webpage and export/copy the result as an image.",
+      "Annotate any website. Mark up your screen, then copy or export the result as an image.",
     version: "1.0.4",
     action: {
       default_title: "Open Tracemark",

@@ -1,9 +1,6 @@
 import { createContext, type Dispatch, type SetStateAction } from "react";
-import { IText } from "fabric";
 
-export type TextAlign = NonNullable<
-  ConstructorParameters<typeof IText>[1]
->["textAlign"];
+export type TextAlign = "left" | "center" | "right";
 
 interface TextPopoverContextProps {
   textAlignment: TextAlign;

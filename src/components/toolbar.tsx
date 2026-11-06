@@ -372,7 +372,11 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
                         />
                       }
                     />
-                    <PopoverContent className="w-max p-1" sideOffset={16}>
+                    {/* Zero the enter slide from ui/popover so it only scales in place */}
+                    <PopoverContent
+                      className="w-max origin-bottom p-1 duration-75 [--tw-enter-translate-y:0]!"
+                      sideOffset={16}
+                    >
                       {item.popover}
                     </PopoverContent>
                   </Popover>

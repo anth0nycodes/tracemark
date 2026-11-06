@@ -1,14 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
-import {
-  Eraser,
-  Hand,
-  MousePointer2,
-  PencilLine,
-  Square,
-  Type,
-  type LucideIcon,
-} from "lucide-react";
-import { Line } from "@/components/custom-icons/icons";
+import { Eraser, Hand, MousePointer2, PencilLine, Square, type LucideIcon } from "lucide-react";
+import { Line, Text } from "@/components/custom-icons/icons";
 import type { CustomIcon } from "@/components/custom-icons/icons";
 import { getOS } from "@/lib/helpers";
 
@@ -23,43 +15,43 @@ const tools: Tool[] = [
   {
     name: "Interact",
     icon: Hand,
-    shortcut: "1",
+    shortcut: "i",
     description: "Scroll and click the page underneath",
   },
   {
     name: "Select",
     icon: MousePointer2,
-    shortcut: "2",
+    shortcut: "v",
     description: "Move, resize, and group what you drew",
   },
   {
     name: "Pencil",
     icon: PencilLine,
-    shortcut: "3",
+    shortcut: "p",
     description: "Freehand strokes, with size and color",
   },
   {
     name: "Erase",
     icon: Eraser,
-    shortcut: "4",
+    shortcut: "e",
     description: "Rub out parts of a stroke",
   },
   {
     name: "Text",
-    icon: Type,
-    shortcut: "5",
+    icon: Text,
+    shortcut: "t",
     description: "Drop a label anywhere on the page",
   },
   {
     name: "Frame",
     icon: Square,
-    shortcut: "6",
+    shortcut: "f",
     description: "Box off the part that matters",
   },
   {
     name: "Line",
     icon: Line,
-    shortcut: "7",
+    shortcut: "l",
     description: "Straight lines for pointing things out",
   },
 ];
@@ -90,7 +82,7 @@ const steps: Step[] = [
 
 function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="bg-muted border-border text-foreground inline-flex min-w-6 items-center justify-center rounded-md border border-b-2 px-1.5 py-0.5 font-mono text-xs">
+    <kbd className="bg-muted border-border text-foreground inline-flex min-w-6 items-center justify-center rounded-md border border-b-2 px-1.5 py-0.5 font-mono text-xs capitalize">
       {children}
     </kbd>
   );
@@ -123,19 +115,15 @@ export function Welcome() {
     <main className="bg-background text-foreground mx-auto max-w-3xl px-6 pt-16 pb-24">
       <header className="flex flex-col items-center gap-4 text-center">
         <img src="/icon128.png" alt="" className="size-16" />
-        <h1 className="text-4xl font-semibold tracking-tight">
-          Welcome to Tracemark
-        </h1>
+        <h1 className="text-4xl font-semibold tracking-tight">Welcome to Tracemark</h1>
         <p className="text-muted-foreground max-w-lg">
-          Draw over any webpage, then copy or export the result as an image.
-          Annotate articles, dashboards, and designs without leaving the tab.
+          Draw over any webpage, then copy or export the result as an image. Annotate articles,
+          dashboards, and designs without leaving the tab.
         </p>
       </header>
 
       <section className="mt-12">
-        <h2 className="mb-4 text-lg font-semibold tracking-tight">
-          Getting started
-        </h2>
+        <h2 className="mb-4 text-lg font-semibold tracking-tight">Getting started</h2>
         <ol className="grid gap-3">
           {steps.map((step, index) => (
             <li
@@ -147,9 +135,7 @@ export function Welcome() {
               </span>
               <div>
                 <p className="font-medium">{step.title}</p>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  {step.body}
-                </p>
+                <p className="text-muted-foreground mt-1 text-sm">{step.body}</p>
               </div>
             </li>
           ))}
@@ -167,9 +153,7 @@ export function Welcome() {
               <tool.icon aria-hidden="true" className="size-5 shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{tool.name}</p>
-                <p className="text-muted-foreground text-xs">
-                  {tool.description}
-                </p>
+                <p className="text-muted-foreground text-xs">{tool.description}</p>
               </div>
               <Kbd>{tool.shortcut}</Kbd>
             </div>
@@ -190,15 +174,13 @@ export function Welcome() {
 
       <div className="bg-muted border-border text-muted-foreground mt-12 space-y-2 rounded-lg border p-4 text-sm">
         <p>
-          <strong className="text-foreground font-medium">Good to know.</strong>{" "}
-          Tracemark only runs on the tab you activate it on, and everything stays
-          in your browser — nothing is uploaded. Drawings aren't saved, so copy
-          or export before you close the overlay or reload the page.
+          <strong className="text-foreground font-medium">Good to know.</strong> Tracemark only runs
+          on the tab you activate it on, and everything stays in your browser — nothing is uploaded.
+          Drawings aren't saved, so copy or export before you close the overlay or reload the page.
         </p>
         <p>
-          Chrome blocks extensions on its own pages (<code>chrome://</code> URLs,
-          the Chrome Web Store, and other extensions' pages), so the overlay
-          won't open there.
+          Chrome blocks extensions on its own pages (<code>chrome://</code> URLs, the Chrome Web
+          Store, and other extensions' pages), so the overlay won't open there.
         </p>
       </div>
 

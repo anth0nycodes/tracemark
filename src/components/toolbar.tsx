@@ -19,7 +19,6 @@ import {
   PencilLine,
   Square,
   Trash2,
-  Type,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -27,14 +26,13 @@ import {
   AnimatePresence,
   domMax,
   LazyMotion,
-  MotionConfig,
   useDragControls,
   useReducedMotion,
 } from "motion/react";
 import * as m from "motion/react-m";
 import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
-import { Line, type CustomIcon } from "@/components/custom-icons/icons";
+import { Line, Text, type CustomIcon } from "@/components/custom-icons/icons";
 import { EraserPopover } from "@/components/popovers/erase-popover";
 import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { TextPopover } from "@/components/popovers/text-popover";
@@ -61,28 +59,28 @@ interface ToolbarItemProps {
 }
 
 const toolbarItems: ToolbarItemProps[] = [
-  { name: "Interact", icon: Hand, shortcut: "1" },
-  { name: "Select", icon: MousePointer2, shortcut: "2" },
+  { name: "Interact", icon: Hand, shortcut: "i" },
+  { name: "Select", icon: MousePointer2, shortcut: "v" },
   {
     name: "Pencil",
     icon: PencilLine,
-    shortcut: "3",
+    shortcut: "p",
     popover: <PencilPopover />,
   },
   {
     name: "Erase",
     icon: Eraser,
-    shortcut: "4",
+    shortcut: "e",
     popover: <EraserPopover />,
   },
   {
     name: "Text",
-    icon: Type,
-    shortcut: "5",
+    icon: Text,
+    shortcut: "t",
     popover: <TextPopover />,
   },
-  { name: "Frame", icon: Square, shortcut: "6", popover: <FramePopover /> },
-  { name: "Line", icon: Line, shortcut: "7" },
+  { name: "Frame", icon: Square, shortcut: "f", popover: <FramePopover /> },
+  { name: "Line", icon: Line, shortcut: "l" },
 ];
 
 interface SecondaryToolbarItem {
@@ -120,7 +118,6 @@ const secondaryToolbarItems: SecondaryToolbarItem[] = [
 interface ToolbarButtonProps {
   isActive: boolean;
   item: ToolbarItemProps;
-  prefersReducedMotion: boolean | null;
   setCurrentTool: (currentTool: ToolbarStates) => void;
   ref?: Ref<HTMLButtonElement>;
   onClick?: MouseEventHandler<HTMLButtonElement>;
@@ -129,7 +126,6 @@ interface ToolbarButtonProps {
 function ToolbarButton({
   isActive,
   item,
-  prefersReducedMotion,
   setCurrentTool,
   ref,
   onClick,
@@ -139,37 +135,27 @@ function ToolbarButton({
     <Button
       {...props}
       ref={ref}
-      variant={isActive ? null : "ghost"}
-      className="relative flex size-full shrink-0 items-center justify-center rounded-[10px]"
+      variant="ghost"
+      className={cn(
+        "hover:bg-accent/50 relative flex size-full shrink-0 items-center justify-center rounded-[10px] duration-0!",
+        isActive && "bg-accent hover:bg-accent",
+      )}
       onClick={(e) => {
         setCurrentTool(item.name);
         onClick?.(e);
       }}
-      aria-label={`${item.name} (${item.shortcut})`}
-      title={`${item.name} (${item.shortcut})`}
+      aria-label={`${item.name} (${item.shortcut.toUpperCase()})`}
+      title={`${item.name} (${item.shortcut.toUpperCase()})`}
       aria-pressed={isActive}
     >
-      <item.icon
-        aria-hidden="true"
-        className={cn("z-10 size-5 transition-colors", isActive && "text-background")}
-      />
+      <item.icon aria-hidden="true" className="size-5" />
 
       <span
-        className={cn(
-          "text-muted-foreground/60 dark:text-foreground absolute right-1.5 bottom-1 z-10 text-[9px] font-semibold transition-colors",
-          isActive && "text-background",
-        )}
+        className="text-muted-foreground/60 dark:text-foreground absolute right-1.5 bottom-1 text-[9px] font-semibold capitalize"
         aria-hidden="true"
       >
         {item.shortcut}
       </span>
-
-      {isActive && (
-        <m.div
-          layoutId={prefersReducedMotion ? undefined : "active-toolbar-item"}
-          className="bg-foreground absolute inset-0 rounded-[10px]"
-        />
-      )}
     </Button>
   );
 }
@@ -295,13 +281,13 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
       }
 
       const keyMap: Record<string, ToolbarStates> = {
-        "1": "Interact",
-        "2": "Select",
-        "3": "Pencil",
-        "4": "Erase",
-        "5": "Text",
-        "6": "Frame",
-        "7": "Line",
+        i: "Interact",
+        v: "Select",
+        p: "Pencil",
+        e: "Erase",
+        t: "Text",
+        f: "Frame",
+        l: "Line",
       };
 
       const tool = keyMap[e.key];
@@ -353,7 +339,7 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
           dragControls={dragControls}
           dragConstraints={dragConstraintsRef}
           dragMomentum={false}
-          className="bg-background text-foreground border-border relative flex h-max w-max items-center gap-2 rounded-[10px] border-2 p-1.5 shadow-md"
+          className="bg-background text-foreground border-border relative flex h-max w-max items-center gap-2 rounded-full border-2 px-3 py-2 shadow-md"
         >
           {/* Drag handle — only this grabs the bar, so buttons still click normally */}
           <button
@@ -366,58 +352,38 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
             <GripVertical aria-hidden="true" className="size-5" />
           </button>
           <ColorPicker />
-          <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
+          <div className="bg-muted h-8 w-0.5 rounded-full" />
           {toolbarItems.map((item) => {
             const isActive = currentTool === item.name;
 
             return (
-              <MotionConfig
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0 }
-                    : { type: "spring", damping: 50, stiffness: 600 }
-                }
-              >
-                <div key={item.name} className="size-11">
-                  {item.popover ? (
-                    <Popover
-                      open={openPopoverId === item.name}
-                      onOpenChange={() => handlePopoverOpen(isActive, item.name)}
-                    >
-                      <PopoverTrigger
-                        render={
-                          <ToolbarButton
-                            isActive={isActive}
-                            item={item}
-                            prefersReducedMotion={prefersReducedMotion}
-                            setCurrentTool={setCurrentTool}
-                          />
-                        }
-                      />
-                      <PopoverContent className="w-max p-1" sideOffset={16}>
-                        {item.popover}
-                      </PopoverContent>
-                    </Popover>
-                  ) : (
-                    <ToolbarButton
-                      isActive={isActive}
-                      item={item}
-                      prefersReducedMotion={prefersReducedMotion}
-                      setCurrentTool={setCurrentTool}
+              <div key={item.name} className="size-11">
+                {item.popover ? (
+                  <Popover
+                    open={openPopoverId === item.name}
+                    onOpenChange={() => handlePopoverOpen(isActive, item.name)}
+                  >
+                    <PopoverTrigger
+                      render={
+                        <ToolbarButton
+                          isActive={isActive}
+                          item={item}
+                          setCurrentTool={setCurrentTool}
+                        />
+                      }
                     />
-                  )}
-                  {isActive && (
-                    <m.div
-                      layoutId={prefersReducedMotion ? undefined : "active-toolbar-item-bar"}
-                      className="absolute -top-0.5 h-0.5 w-11 bg-[#2b7fff]"
-                    />
-                  )}
-                </div>
-              </MotionConfig>
+                    <PopoverContent className="w-max p-1" sideOffset={16}>
+                      {item.popover}
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <ToolbarButton isActive={isActive} item={item} setCurrentTool={setCurrentTool} />
+                )}
+              </div>
             );
           })}
 
-          <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
+          <div className="bg-muted h-8 w-0.5 rounded-full" />
           <div className="flex gap-2">
             {secondaryToolbarItems.map((item) => {
               const isCopyConfirming = item.name === "Copy" && cooldowns.get("Copy") === true;
@@ -434,7 +400,10 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
                     startCooldown(item.name, result);
                     setOpenPopoverId(null);
                   }}
-                  className={cn("relative size-11", isCopyConfirming && "disabled:opacity-100")}
+                  className={cn(
+                    "hover:bg-accent/50 relative size-11 rounded-[10px] duration-0!",
+                    isCopyConfirming && "disabled:opacity-100",
+                  )}
                   aria-label={label}
                   title={label}
                 >
@@ -451,11 +420,11 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
               );
             })}
           </div>
-          <div className="h-8 w-0.5 rounded-[10px] bg-[#C2C7CB]" />
+          <div className="bg-muted h-8 w-0.5 rounded-full" />
           <Button
             variant="ghost"
             onClick={onClose}
-            className="size-11"
+            className="hover:bg-accent/50 size-11 rounded-[10px] duration-0!"
             aria-label="Close Tracemark"
             title="Close Tracemark"
           >

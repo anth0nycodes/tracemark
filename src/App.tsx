@@ -6,6 +6,7 @@ export type ToolbarStates =
   | "Interact"
   | "Select"
   | "Pencil"
+  | "Highlighter"
   | "Erase"
   | "Text"
   | "Frame"

@@ -1,5 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Eraser, Hand, MousePointer2, PencilLine, Square, type LucideIcon } from "lucide-react";
+import {
+  Eraser,
+  Hand,
+  Highlighter,
+  MousePointer2,
+  PencilLine,
+  Square,
+  type LucideIcon,
+} from "lucide-react";
 import { Line, Text } from "@/components/custom-icons/icons";
 import type { CustomIcon } from "@/components/custom-icons/icons";
 import { getOS } from "@/lib/helpers";
@@ -29,6 +37,12 @@ const tools: Tool[] = [
     icon: PencilLine,
     shortcut: "p",
     description: "Freehand strokes, with size and color",
+  },
+  {
+    name: "Highlighter",
+    icon: Highlighter,
+    shortcut: "h",
+    description: "Translucent strokes to mark up text",
   },
   {
     name: "Erase",
@@ -72,7 +86,7 @@ const steps: Step[] = [
   },
   {
     title: "Pick a tool and draw",
-    body: "Pencil, erase, text, and frame each open a popover for color, size, and style. Interact lets the page through; Select grabs what you drew.",
+    body: "Pencil, highlighter, erase, text, and frame each open a popover for color, size, and style. Interact lets the page through; Select grabs what you drew.",
   },
   {
     title: "Copy or export",

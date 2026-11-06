@@ -3,6 +3,7 @@ import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history"
 import { EraserBrush } from "@erase2d/fabric";
 import {
   Circle,
+  Color,
   Group,
   IText,
   PencilBrush,
@@ -18,10 +19,12 @@ import { useShadowContainer } from "@/context/shadow-dom/use-shadow-container";
 import { useColor } from "@/context/toolbar/color/use-color";
 import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
+import { useHighlighterPopover } from "@/context/toolbar/highlighter-popover/use-highlighter-popover";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { getCanvasCoordinates } from "@/lib/helpers";
 
+const HIGHLIGHTER_ALPHA = 0.4;
 const CANVAS_LAG_WARNING_HEIGHT = 16250;
 const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
 let hasAlertedLagWarning = false;
@@ -137,6 +140,7 @@ export function Canvas({
   const { fcRef, setFc } = useFabricCanvas();
   const { color } = useColor();
   const { pencilWidth } = usePencilPopover();
+  const { highlighterWidth } = useHighlighterPopover();
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
   const { frame } = useFramePopover();
@@ -294,6 +298,20 @@ export function Canvas({
         fc.isDrawingMode = true;
         pencil.width = pencilWidth;
         pencil.color = color;
+
+        return trackCanvasInteraction(fc, isUsingToolRef);
+      }
+      case "Highlighter": {
+        fc.discardActiveObject();
+        fc.requestRenderAll();
+        const highlighter = new PencilBrush(fc);
+        fc.freeDrawingBrush = highlighter;
+        fc.isDrawingMode = true;
+        highlighter.width = highlighterWidth;
+        // Same brush as the pencil, just translucent so the page shows through
+        highlighter.color = new Color(color)
+          .setAlpha(HIGHLIGHTER_ALPHA)
+          .toRgba();
 
         return trackCanvasInteraction(fc, isUsingToolRef);
       }
@@ -573,6 +591,7 @@ export function Canvas({
     currentTool,
     color,
     pencilWidth,
+    highlighterWidth,
     eraserWidth,
     textAlignment,
     frame,

@@ -15,6 +15,7 @@ import {
   Eraser,
   GripVertical,
   Hand,
+  Highlighter,
   MousePointer2,
   PencilLine,
   Square,
@@ -34,6 +35,7 @@ import type { ToolbarStates } from "@/App";
 import { ColorPicker } from "@/components/color-picker";
 import { Line, Text, type CustomIcon } from "@/components/custom-icons/icons";
 import { EraserPopover } from "@/components/popovers/erase-popover";
+import { HighlighterPopover } from "@/components/popovers/highlighter-popover";
 import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
@@ -66,6 +68,12 @@ const toolbarItems: ToolbarItemProps[] = [
     icon: PencilLine,
     shortcut: "p",
     popover: <PencilPopover />,
+  },
+  {
+    name: "Highlighter",
+    icon: Highlighter,
+    shortcut: "h",
+    popover: <HighlighterPopover />,
   },
   {
     name: "Erase",
@@ -284,6 +292,7 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
         i: "Interact",
         v: "Select",
         p: "Pencil",
+        h: "Highlighter",
         e: "Erase",
         t: "Text",
         f: "Frame",

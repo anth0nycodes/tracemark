@@ -172,10 +172,17 @@ interface ToolbarProps {
   currentTool: ToolbarStates;
   setCurrentTool: (currentTool: ToolbarStates) => void;
   isUsingToolRef: RefObject<boolean>;
+  isHidden: boolean;
   onClose: () => void;
 }
 
-export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }: ToolbarProps) {
+export function Toolbar({
+  currentTool,
+  setCurrentTool,
+  isUsingToolRef,
+  isHidden,
+  onClose,
+}: ToolbarProps) {
   const [prevTool, setPrevTool] = useState(currentTool);
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(null);
   const [cooldowns, setCooldowns] = useState<Map<string, boolean>>(new Map());
@@ -259,6 +266,9 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
   }, []);
 
   useEffect(() => {
+    // No tool/copy shortcuts while hidden, so keys go to the page untouched
+    if (isHidden) return;
+
     const handleKeyShortcuts = async (e: KeyboardEvent) => {
       if (
         e.target instanceof HTMLInputElement ||
@@ -313,7 +323,7 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
     return () => {
       window.removeEventListener("keydown", handleKeyShortcuts);
     };
-  }, [setCurrentTool, fcRef, isUsingToolRef]);
+  }, [setCurrentTool, fcRef, isUsingToolRef, isHidden]);
 
   if (prevTool !== currentTool) {
     setPrevTool(currentTool);
@@ -369,7 +379,8 @@ export function Toolbar({ currentTool, setCurrentTool, isUsingToolRef, onClose }
               <div key={item.name} className="size-11">
                 {item.popover ? (
                   <Popover
-                    open={openPopoverId === item.name}
+                    // Forced closed while hidden so page clicks/Escape can't toggle it in the background
+                    open={!isHidden && openPopoverId === item.name}
                     onOpenChange={() => handlePopoverOpen(isActive, item.name)}
                   >
                     <PopoverTrigger

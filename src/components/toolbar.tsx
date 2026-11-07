@@ -16,9 +16,11 @@ import {
   GripVertical,
   Hand,
   Highlighter,
+  Moon,
   MousePointer2,
   PencilLine,
   Square,
+  Sun,
   Trash2,
   X,
   type LucideIcon,
@@ -40,6 +42,7 @@ import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
+import { useTheme } from "@/context/theme/use-theme";
 import {
   getErrorMessage,
   getOS,
@@ -146,7 +149,7 @@ function ToolbarButton({
       variant="ghost"
       className={cn(
         "hover:bg-accent/50 relative flex size-full shrink-0 items-center justify-center rounded-[10px] duration-0!",
-        isActive && "bg-accent hover:bg-accent",
+        isActive && "bg-accent hover:bg-accent dark:hover:bg-accent",
       )}
       onClick={(e) => {
         setCurrentTool(item.name);
@@ -189,6 +192,8 @@ export function Toolbar({
   const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
+  const { theme, toggleTheme } = useTheme();
+  const themeToggleLabel = theme === "light" ? "Switch to dark theme" : "Switch to light theme";
   const toolbarRef = useRef<HTMLDivElement | null>(null);
   const dragConstraintsRef = useRef<HTMLDivElement | null>(null);
   const dragControls = useDragControls();
@@ -439,7 +444,7 @@ export function Toolbar({
                   {renderSecondaryIcons(item, isCopyConfirming)}
                   {item.name === "Copy" && (
                     <sub
-                      className="text-muted-foreground/60 absolute right-1 bottom-1.5 text-[9px] font-semibold"
+                      className="text-muted-foreground/60 dark:text-foreground absolute right-1 bottom-1.5 text-[9px] font-semibold"
                       aria-hidden="true"
                     >
                       {shortcut}
@@ -448,6 +453,19 @@ export function Toolbar({
                 </Button>
               );
             })}
+            <Button
+              variant="ghost"
+              onClick={toggleTheme}
+              className="hover:bg-accent/50 size-11 rounded-[10px] duration-0!"
+              aria-label={themeToggleLabel}
+              title={themeToggleLabel}
+            >
+              {theme === "light" ? (
+                <Sun aria-hidden="true" className="size-5" />
+              ) : (
+                <Moon aria-hidden="true" className="size-5" />
+              )}
+            </Button>
           </div>
           <div className="bg-muted h-8 w-0.5 rounded-full" />
           <Button

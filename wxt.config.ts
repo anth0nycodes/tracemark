@@ -25,7 +25,7 @@ export default defineConfig({
       48: "icon48.png",
       128: "icon128.png",
     },
-    permissions: ["activeTab", "scripting"],
+    permissions: ["activeTab", "scripting", "storage"],
   }),
   vite: () => ({
     plugins: [tailwindcss()],

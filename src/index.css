@@ -175,7 +175,7 @@
   --tm-ring: oklch(0.708 0 0);
 }
 
-:host(.dark),
+#tracemark-content-container.dark,
 :root.dark {
   color: oklch(0.9699 0.0013 106.42);
   --tm-background: oklch(0.2178 0 0); /* #1A1A1A */

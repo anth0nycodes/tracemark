@@ -33,7 +33,7 @@ export function PopoverOptions<T extends string | number>({
             variant="ghost"
             className={cn(
               "hover:bg-accent/50 size-9 rounded-lg duration-0!",
-              isActive && "bg-accent hover:bg-accent",
+              isActive && "bg-accent hover:bg-accent dark:hover:bg-accent",
             )}
             aria-label={option.label}
             aria-pressed={isActive}

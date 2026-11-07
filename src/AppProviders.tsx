@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { FabricCanvasProvider } from "@/context/fabric-canvas/FabricCanvasProvider";
+import { ThemeProvider } from "@/context/theme/ThemeProvider";
 import { ColorProvider } from "@/context/toolbar/color/ColorProvider";
 import { EraserPopoverProvider } from "@/context/toolbar/eraser-popover/EraserPopoverProvider";
 import { FramePopoverProvider } from "@/context/toolbar/frame/FramePopoverProvider";
@@ -15,6 +16,7 @@ type ProviderComponent = ComponentType<{ children: ReactNode }>;
 
 const providers: ProviderComponent[] = [
   FabricCanvasProvider,
+  ThemeProvider,
   ColorProvider,
   PencilPopoverProvider,
   HighlighterPopoverProvider,

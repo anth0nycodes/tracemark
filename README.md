@@ -37,7 +37,9 @@ Pencil, Erase, Text, and Frame each open a popover for color, size, and style.
 
 | Shortcut         | Action                   |
 | ---------------- | ------------------------ |
-| `⌘C` / `Ctrl+C`  | Copy canvas to clipboard |
+| `⇧C`             | Copy canvas to clipboard |
+| `⌘C` / `Ctrl+C`  | Copy selection           |
+| `⌘V` / `Ctrl+V`  | Paste at cursor          |
 | `⌘Z` / `Ctrl+Z`  | Undo                     |
 | `⌘⇧Z` / `Ctrl+Y` | Redo                     |
 | `⌘G` / `Ctrl+G`  | Group selection          |

@@ -45,7 +45,6 @@ import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
 import { useTheme } from "@/context/theme/use-theme";
 import {
   getErrorMessage,
-  getOS,
   handleClearCanvas,
   handleCopyToClipboard,
   handleExportAsPNG,
@@ -189,7 +188,6 @@ export function Toolbar({
   const [prevTool, setPrevTool] = useState(currentTool);
   const [openPopoverId, setOpenPopoverId] = useState<ToolbarStates | null>(null);
   const [cooldowns, setCooldowns] = useState<Map<string, boolean>>(new Map());
-  const [shortcut, setShortcut] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { fcRef } = useFabricCanvas();
   const { theme, toggleTheme } = useTheme();
@@ -260,12 +258,6 @@ export function Toolbar({
   }
 
   useEffect(() => {
-    const resolveShortcut = async () => {
-      const os = await getOS();
-      setShortcut(os === "macOS" ? "⌘C" : "Ctrl+C");
-    };
-    resolveShortcut();
-
     const timers = timersRef.current;
     return () => timers.forEach((timer) => clearTimeout(timer));
   }, []);
@@ -283,7 +275,9 @@ export function Toolbar({
         return;
       }
 
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "c") {
+      const isCopyCanvasShortcut =
+        e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === "c";
+      if (isCopyCanvasShortcut) {
         e.preventDefault();
         if (!timersRef.current.has("Copy")) {
           try {
@@ -447,7 +441,7 @@ export function Toolbar({
                       className="text-muted-foreground/60 dark:text-foreground absolute right-1 bottom-1.5 text-[9px] font-semibold"
                       aria-hidden="true"
                     >
-                      {shortcut}
+                      ⇧C
                     </sub>
                   )}
                 </Button>

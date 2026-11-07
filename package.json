@@ -9,6 +9,7 @@
     "zip": "wxt zip",
     "check": "wxt prepare && tsc --noEmit",
     "lint": "eslint .",
+    "checkall": "pnpm check && pnpm lint && pnpm build",
     "postinstall": "wxt prepare"
   },
   "dependencies": {

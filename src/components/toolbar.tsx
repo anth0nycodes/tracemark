@@ -394,7 +394,12 @@ export function Toolbar({
                     />
                     {/* Zero the enter slide from ui/popover so it only scales in place */}
                     <PopoverContent
-                      className="w-max origin-bottom p-1 duration-75 [--tw-enter-translate-y:0]!"
+                      // Portaled outside the hidden wrapper, so hide it directly too;
+                      // display: none also skips the exit animation that would linger
+                      className={cn(
+                        "w-max origin-bottom p-1 duration-75 [--tw-enter-translate-y:0]!",
+                        isHidden && "hidden",
+                      )}
                       sideOffset={16}
                     >
                       {item.popover}

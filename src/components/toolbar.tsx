@@ -573,6 +573,9 @@ export function Toolbar({
       <m.div
         ref={toolbarRef}
         layout="position"
+        // Only re-measure when the position state changes, so hiding and
+        // showing the overlay doesn't animate the bar in from (0, 0)
+        layoutDependency={dragOrigin ?? placement}
         transition={prefersReducedMotion ? { duration: 0 } : POSITION_TRANSITION}
         style={
           dragOrigin

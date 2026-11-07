@@ -128,12 +128,14 @@ interface CanvasProps {
   currentTool: ToolbarStates;
   setCurrentTool: (currentTool: ToolbarStates) => void;
   isUsingToolRef: RefObject<boolean>;
+  isHidden: boolean;
 }
 
 export function Canvas({
   currentTool,
   setCurrentTool,
   isUsingToolRef,
+  isHidden,
 }: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -163,6 +165,38 @@ export function Canvas({
         e.target.set({ erasable: true });
       }
     });
+
+    // Set initial dimensions
+    initializeCanvasDimensions(fc);
+
+    // Re-initialize dimensions on resize
+    const handleResizeDimensions = () => initializeCanvasDimensions(fc);
+
+    // Update height of canvas on scroll
+    const handleScroll = () => updateDynamicCanvasHeight(fc);
+
+    let resizeTimeoutId: ReturnType<typeof setTimeout>;
+    const resizeObserver = new ResizeObserver(() => {
+      clearTimeout(resizeTimeoutId);
+      resizeTimeoutId = setTimeout(handleResizeDimensions, 50);
+    });
+
+    resizeObserver.observe(document.body);
+    resizeObserver.observe(document.documentElement);
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      fc.dispose();
+      clearTimeout(resizeTimeoutId);
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [setFc]);
+
+  // Canvas keyboard shortcuts.
+  useEffect(() => {
+    const fc = fcRef.current;
+    if (!fc || isHidden) return;
 
     const handleDeleteObject = (e: KeyboardEvent) => {
       const activeObjects = fc.getActiveObjects();
@@ -229,38 +263,16 @@ export function Canvas({
       }
     };
 
-    // Set initial dimensions
-    initializeCanvasDimensions(fc);
-
-    // Re-initialize dimensions on resize
-    const handleResizeDimensions = () => initializeCanvasDimensions(fc);
-
-    // Update height of canvas on scroll
-    const handleScroll = () => updateDynamicCanvasHeight(fc);
-
-    let resizeTimeoutId: ReturnType<typeof setTimeout>;
-    const resizeObserver = new ResizeObserver(() => {
-      clearTimeout(resizeTimeoutId);
-      resizeTimeoutId = setTimeout(handleResizeDimensions, 50);
-    });
-
-    resizeObserver.observe(document.body);
-    resizeObserver.observe(document.documentElement);
-    window.addEventListener("scroll", handleScroll);
     window.addEventListener("keydown", handleDeleteObject);
     window.addEventListener("keydown", handleUndoAndRedo);
     window.addEventListener("keydown", handleGroupObjects);
 
     return () => {
-      fc.dispose();
-      clearTimeout(resizeTimeoutId);
-      resizeObserver.disconnect();
-      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("keydown", handleDeleteObject);
       window.removeEventListener("keydown", handleUndoAndRedo);
       window.removeEventListener("keydown", handleGroupObjects);
     };
-  }, [setFc, isUsingToolRef]);
+  }, [fcRef, isUsingToolRef, isHidden]);
 
   // Handle active tool logic
   useEffect(() => {
@@ -269,10 +281,14 @@ export function Canvas({
     fc.skipTargetFind = currentTool !== "Select";
     fc.selection = currentTool === "Select";
 
-    const passThrough = currentTool === "Interact" ? "none" : "";
+    // Hidden counts as pass-through too: the shadow container spans the whole
+    // page, so it would still swallow clicks even with its contents hidden
+    const shouldPassThrough = currentTool === "Interact" || isHidden;
+    const passThrough = shouldPassThrough ? "none" : "";
     if (containerRef.current) {
-      containerRef.current.style.pointerEvents =
-        currentTool === "Interact" ? "none" : "auto";
+      containerRef.current.style.pointerEvents = shouldPassThrough
+        ? "none"
+        : "auto";
     }
     const layers = [
       shadowContainer,
@@ -283,6 +299,9 @@ export function Canvas({
     for (const el of layers) {
       if (el) el.style.pointerEvents = passThrough;
     }
+
+    // Skip tool setup while hidden; it re-runs on show with the same tool
+    if (isHidden) return;
 
     switch (currentTool) {
       case "Interact": {
@@ -598,6 +617,7 @@ export function Canvas({
     setCurrentTool,
     shadowContainer,
     isUsingToolRef,
+    isHidden,
   ]);
 
   return (

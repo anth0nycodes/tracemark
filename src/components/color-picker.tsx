@@ -4,7 +4,7 @@ export function ColorPicker() {
   const { color, setColor } = useColor();
 
   return (
-    <div className="size-11 p-1.5">
+    <div className="size-9 p-1">
       <div
         className="flex size-full items-center justify-center rounded-full p-[3px]"
         style={{

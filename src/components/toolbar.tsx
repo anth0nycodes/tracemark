@@ -83,7 +83,7 @@ const POSITION_TRANSITION: Transition = {
 // No bounce on size: overshooting the circle's diameter would squash it into an oval
 const SIZE_TRANSITION: Transition = {
   type: "spring",
-  visualDuration: 0.3,
+  visualDuration: 0.15,
   bounce: 0,
 };
 

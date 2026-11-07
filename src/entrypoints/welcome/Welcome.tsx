@@ -183,6 +183,7 @@ export function Welcome() {
           <Shortcut label="Redo" keys={redoKeys} />
           <Shortcut label="Group selection" keys={[mod, "G"]} />
           <Shortcut label="Delete selection" keys={["Backspace"]} />
+          <Shortcut label="Hide / show overlay" keys={[mod, "."]} />
         </div>
       </section>
 

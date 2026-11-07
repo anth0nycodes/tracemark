@@ -22,7 +22,7 @@ export function PopoverOptions<T extends string | number>({
   onChange,
 }: PopoverOptionsProps<T>) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 in-data-[side=left]:flex-col in-data-[side=right]:flex-col">
       {options.map((option) => {
         const isActive = value === option.value;
 

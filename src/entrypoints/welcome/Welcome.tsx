@@ -178,7 +178,9 @@ export function Welcome() {
       <section className="mt-12">
         <h2 className="mb-4 text-lg font-semibold tracking-tight">Shortcuts</h2>
         <div className="grid gap-2 sm:grid-cols-2">
-          <Shortcut label="Copy to clipboard" keys={[mod, "C"]} />
+          <Shortcut label="Copy canvas to clipboard" keys={["⇧", "C"]} />
+          <Shortcut label="Copy selection" keys={[mod, "C"]} />
+          <Shortcut label="Paste at cursor" keys={[mod, "V"]} />
           <Shortcut label="Undo" keys={[mod, "Z"]} />
           <Shortcut label="Redo" keys={redoKeys} />
           <Shortcut label="Group selection" keys={[mod, "G"]} />

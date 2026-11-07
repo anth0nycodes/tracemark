@@ -2,14 +2,17 @@ import { useEffect, useRef, type RefObject } from "react";
 import { CanvasWithHistory as FabricCanvas } from "@anth0nycodes/fabric-history";
 import { EraserBrush } from "@erase2d/fabric";
 import {
+  ActiveSelection,
   Circle,
   Color,
   Group,
   IText,
   PencilBrush,
+  Point,
   Polyline,
   Rect,
   Triangle,
+  type FabricObject,
   type TPointerEvent,
   type TPointerEventInfo,
 } from "fabric";
@@ -147,6 +150,10 @@ export function Canvas({
   const { textAlignment } = useTextPopover();
   const { frame } = useFramePopover();
   const shadowContainer = useShadowContainer();
+  // Cloned selection from the last Cmd/Ctrl+C, kept in memory (same tab only)
+  const clipboardRef = useRef<FabricObject | null>(null);
+  // Last pointer position in client (viewport) coords, null when off-canvas
+  const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
 
   // Sets up fabric canvas
   useEffect(() => {
@@ -185,7 +192,23 @@ export function Canvas({
     resizeObserver.observe(document.documentElement);
     window.addEventListener("scroll", handleScroll);
 
+    // Track the pointer for paste-at-cursor. Store client coords rather than
+    // canvas coords so scrolling after the last move is accounted for at
+    // paste time. Plain DOM events instead of fabric's mouse:out, which also
+    // fires whenever the hover moves off an object.
+    const pointerTarget = fc.upperCanvasEl;
+    const handlePointerMove = (e: PointerEvent) => {
+      lastPointerRef.current = { x: e.clientX, y: e.clientY };
+    };
+    const handlePointerLeave = () => {
+      lastPointerRef.current = null;
+    };
+    pointerTarget.addEventListener("pointermove", handlePointerMove);
+    pointerTarget.addEventListener("pointerleave", handlePointerLeave);
+
     return () => {
+      pointerTarget.removeEventListener("pointermove", handlePointerMove);
+      pointerTarget.removeEventListener("pointerleave", handlePointerLeave);
       fc.dispose();
       clearTimeout(resizeTimeoutId);
       resizeObserver.disconnect();
@@ -263,16 +286,94 @@ export function Canvas({
       }
     };
 
+    const handleCopyAndPaste = async (e: KeyboardEvent) => {
+      // Keys aimed at a page input belong to the page, not the canvas
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        (e.target as HTMLElement).isContentEditable
+      ) {
+        return;
+      }
+
+      const isMod = (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey;
+      const key = e.key.toLowerCase();
+      if (!isMod || (key !== "c" && key !== "v")) return;
+      if (currentTool === "Interact" || isUsingToolRef.current) return;
+
+      // Leave native copy/paste alone while typing in a textbox
+      const activeObjects = fc.getActiveObjects();
+      for (const object of activeObjects) {
+        if (object instanceof IText && object.isEditing) return;
+      }
+
+      if (key === "c") {
+        const activeObject = fc.getActiveObject();
+        // Nothing selected -> let the browser copy page text as usual
+        if (!activeObject) return;
+        e.preventDefault();
+        clipboardRef.current = await activeObject.clone();
+        return;
+      }
+
+      const clipboard = clipboardRef.current;
+      if (!clipboard) return;
+      e.preventDefault();
+
+      // Clone again so every paste is independent of the stored copy
+      const pasted = await clipboard.clone();
+
+      // Paste under the cursor, or the middle of the viewport if the cursor
+      // hasn't moved over the canvas yet / has left it
+      const canvasRect = fc.upperCanvasEl.getBoundingClientRect();
+      const client = lastPointerRef.current ?? {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      };
+      const target = new Point(
+        client.x - canvasRect.left,
+        client.y - canvasRect.top
+      );
+      // Centering the whole unit keeps the objects' layout relative to each
+      // other; only the anchor moves
+      pasted.setPositionByOrigin(target, "center", "center");
+
+      // A multi-selection's children are positioned relative to it;
+      // removeAll() bakes them back to absolute canvas coords
+      const objects =
+        pasted instanceof ActiveSelection ? pasted.removeAll() : [pasted];
+
+      // Same trick as the Frame/Line tools: add while excluded from export so
+      // each object:added skips history, then record one entry for the batch
+      for (const object of objects) object.set({ excludeFromExport: true });
+      fc.discardActiveObject();
+      fc.add(...objects);
+      for (const object of objects) object.set({ excludeFromExport: false });
+
+      const selection =
+        pasted instanceof ActiveSelection
+          ? new ActiveSelection(objects, { canvas: fc })
+          : pasted;
+      fc.setActiveObject(selection);
+      fc.fire("object:modified", { target: selection });
+      fc.requestRenderAll();
+      // Pasted objects come in selected, so hand off to the Select tool
+      // instead of leaving handles showing under a drawing tool
+      setCurrentTool("Select");
+    };
+
     window.addEventListener("keydown", handleDeleteObject);
     window.addEventListener("keydown", handleUndoAndRedo);
     window.addEventListener("keydown", handleGroupObjects);
+    window.addEventListener("keydown", handleCopyAndPaste);
 
     return () => {
       window.removeEventListener("keydown", handleDeleteObject);
       window.removeEventListener("keydown", handleUndoAndRedo);
       window.removeEventListener("keydown", handleGroupObjects);
+      window.removeEventListener("keydown", handleCopyAndPaste);
     };
-  }, [fcRef, isUsingToolRef, isHidden]);
+  }, [fcRef, isUsingToolRef, isHidden, currentTool, setCurrentTool]);
 
   // Handle active tool logic
   useEffect(() => {

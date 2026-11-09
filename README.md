@@ -1,6 +1,6 @@
 # Tracemark
 
-<img src="public/opengraph.png" />
+<img src="apps/extension/public/opengraph.png" />
 
 <br />
 

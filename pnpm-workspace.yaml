@@ -1,3 +1,6 @@
+packages:
+  - apps/*
+
 minimumReleaseAge: 10080 # minutes = 7 days
 trustPolicy: no-downgrade
 blockExoticSubdeps: true

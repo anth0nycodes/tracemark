@@ -25,9 +25,9 @@ Thanks for your interest in contributing! This guide covers how to set up the pr
 3. **Install dependencies and start dev mode:**
    ```bash
    pnpm install
-   pnpm dev
+   pnpm dev:extension   # or `pnpm dev:web` for the landing page
    ```
-   `pnpm dev` launches a browser with the extension loaded and hot reload enabled.
+   `pnpm dev:extension` launches a browser with the extension loaded and hot reload enabled. Run all commands from the repo root.
 
 ### Keeping your fork in sync
 
@@ -49,9 +49,9 @@ git push origin main
 2. **Make your change.** Keep it focused — one concern per pull request.
 3. **Verify locally** before opening a PR:
    ```bash
-   pnpm check   # type-check (wxt prepare && tsc --noEmit)
-   pnpm lint    # eslint
-   pnpm build   # confirm a production build succeeds
+   pnpm check   # type-check the extension (wxt prepare && tsc --noEmit)
+   pnpm lint    # eslint, both apps
+   pnpm build   # confirm both apps build
    ```
 4. **Test the extension manually** in the browser — draw, erase, add text, frame, export, and copy to confirm nothing regressed.
 5. **Push your branch** to your fork:
@@ -83,19 +83,23 @@ Keep the subject line concise (≤ 50 chars)
 ## Project Structure
 
 ```
-src/
-├── entrypoints/        # background + overlay entrypoints
-├── components/         # toolbar, canvas, color picker, popovers, ui
-├── context/            # fabric canvas, shadow DOM, toolbar state
-│   ├── fabric-canvas/
-│   ├── shadow-dom/
-│   └── toolbar/        # color, frame, pencil, eraser, text
-├── lib/                # helpers + utils
-├── App.tsx
-└── AppProviders.tsx
+apps/
+├── extension/              # the Chrome extension (WXT + React)
+│   └── src/
+│       ├── entrypoints/    # background, overlay, and welcome entrypoints
+│       ├── components/     # toolbar, canvas, color picker, popovers, ui
+│       ├── context/        # fabric canvas, shadow DOM, theme, toolbar state
+│       │   ├── fabric-canvas/
+│       │   ├── shadow-dom/
+│       │   ├── theme/
+│       │   └── toolbar/    # color, frame, pencil, highlighter, eraser, text
+│       ├── lib/            # helpers + utils
+│       ├── App.tsx
+│       └── AppProviders.tsx
+└── web/                    # the landing page (Next.js)
 ```
 
-Toolbar tools follow a consistent pattern: a context provider under `src/context/toolbar/<tool>/` (state + hook + constants) paired with a popover UI in `src/components/popovers/`. Match this shape when adding a new tool.
+Toolbar tools follow a consistent pattern: a context provider under `apps/extension/src/context/toolbar/<tool>/` (state + hook + constants) paired with a popover UI in `apps/extension/src/components/popovers/`. Match this shape when adding a new tool.
 
 ## Reporting Issues
 

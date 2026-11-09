@@ -1,6 +1,6 @@
 # Tracemark
 
-<img src="public/opengraph.png" />
+<img src="apps/extension/public/opengraph.png" />
 
 <br />
 
@@ -64,55 +64,66 @@ Hiding the overlay with `⌘.` / `Ctrl+.` keeps your drawings, undo history, and
 
 ## Getting Started
 
-Requires [pnpm](https://pnpm.io) (see `packageManager` in `package.json`).
+Requires [pnpm](https://pnpm.io) (see `packageManager` in `package.json`). This is a pnpm workspace — run everything from the repo root.
 
 ```bash
-# install dependencies
+# install dependencies for all apps
 pnpm install
 
-# run in dev mode
-pnpm dev
+# run the extension in dev mode
+pnpm dev:extension
+
+# run the landing page in dev mode
+pnpm dev:web
 ```
 
-`pnpm dev` launches a browser with the extension loaded and hot reload enabled.
+`pnpm dev:extension` launches a browser with the extension loaded and hot reload enabled.
 
 ## Build
 
 ```bash
-# production build
+# production build of both apps
 pnpm build
 
-# package as a distributable zip
+# package the extension as a distributable zip
 pnpm zip
 ```
 
-Build output lands in `.output/`.
+Extension build output lands in `apps/extension/.output/`.
 
 ## Scripts
 
-| Script          | Description                                   |
-| --------------- | --------------------------------------------- |
-| `pnpm dev`      | Dev mode with hot reload                      |
-| `pnpm build`    | Production build                              |
-| `pnpm zip`      | Package the extension as a zip                |
-| `pnpm check`    | Type-check the project (`wxt prepare && tsc`) |
-| `pnpm lint`     | Run ESLint                                    |
-| `pnpm checkall` | Run `check`, `lint`, and `build` in sequence  |
+Run from the repo root:
+
+| Script               | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| `pnpm dev:extension` | Extension dev mode with hot reload                      |
+| `pnpm dev:web`       | Landing page dev server                                 |
+| `pnpm build`         | Production build of both apps                           |
+| `pnpm zip`           | Package the extension as a zip                          |
+| `pnpm check`         | Type-check the extension (`wxt prepare && tsc`)         |
+| `pnpm lint`          | Run ESLint in both apps                                 |
+| `pnpm checkall`      | Run `check`, `lint`, and `build` in sequence            |
+
+To run any other script in a single app, use `pnpm --filter ./apps/<app> <script>`.
 
 ## Project Structure
 
 ```
-src/
-├── entrypoints/        # background, overlay, and welcome entrypoints
-├── components/         # toolbar, canvas, color picker, popovers, ui
-├── context/            # fabric canvas, shadow DOM, theme, toolbar state
-│   ├── fabric-canvas/
-│   ├── shadow-dom/
-│   ├── theme/          # light/dark theme, persisted to extension storage
-│   └── toolbar/        # color, frame, pencil, highlighter, eraser, text
-├── lib/                # helpers + utils
-├── App.tsx
-└── AppProviders.tsx
+apps/
+├── extension/              # the Chrome extension (WXT + React)
+│   └── src/
+│       ├── entrypoints/    # background, overlay, and welcome entrypoints
+│       ├── components/     # toolbar, canvas, color picker, popovers, ui
+│       ├── context/        # fabric canvas, shadow DOM, theme, toolbar state
+│       │   ├── fabric-canvas/
+│       │   ├── shadow-dom/
+│       │   ├── theme/      # light/dark theme, persisted to extension storage
+│       │   └── toolbar/    # color, frame, pencil, highlighter, eraser, text
+│       ├── lib/            # helpers + utils
+│       ├── App.tsx
+│       └── AppProviders.tsx
+└── web/                    # the landing page (Next.js)
 ```
 
 ## How It Works

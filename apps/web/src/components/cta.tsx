@@ -23,6 +23,11 @@ const NOTE_AT_MS = 1000;
 const ARROW_SHAFT_AT_MS = 1500;
 const ARROW_SHAFT_DURATION_MS = 300;
 
+// How far below their resting spot the characters start. Must exceed the
+// tallest visible part at any breakpoint (about 94px for the square at md)
+// so nothing peeks over the panel's edge before they pop up.
+const HIDDEN_BELOW_PANEL_OFFSET = 120;
+
 const CHARACTER_CLASS_NAME = "pointer-events-none absolute";
 
 export function Cta() {
@@ -119,7 +124,7 @@ export function Cta() {
           "-bottom-10 left-[6%] w-20 sm:-bottom-14 sm:left-[8%] sm:w-28 md:-bottom-16 md:w-36"
         )}
         style={{
-          ...travelOffset(0, 90),
+          ...travelOffset(0, HIDDEN_BELOW_PANEL_OFFSET),
           ...animationStyle(travelFrom(300, 550, POP_EASE)),
         }}
       />
@@ -132,7 +137,7 @@ export function Cta() {
           "right-[6%] -bottom-12 w-20 sm:right-[8%] sm:-bottom-16 sm:w-28 md:-bottom-20 md:w-36"
         )}
         style={{
-          ...travelOffset(0, 90),
+          ...travelOffset(0, HIDDEN_BELOW_PANEL_OFFSET),
           ...animationStyle(travelFrom(450, 550, POP_EASE)),
         }}
       />

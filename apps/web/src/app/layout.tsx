@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Manrope } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import { StickerFilterDefs } from "@/components/decor/hand-drawn-star";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 
@@ -84,6 +85,7 @@ export default function RootLayout({
       className={`${manrope.variable} ${bricolageGrotesque.variable}`}
     >
       <body className="flex min-h-screen flex-col antialiased">
+        <StickerFilterDefs />
         <Navbar />
         {children}
         <Analytics />

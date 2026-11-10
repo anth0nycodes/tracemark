@@ -271,26 +271,3 @@
     scale: 1;
   }
 }
-
-/*
- * FAQ answers open and close by animating the details content's height.
- * `interpolate-size` lets height transition to `auto`. Browsers without
- * ::details-content support just open instantly.
- */
-@media (prefers-reduced-motion: no-preference) {
-  .faq-item {
-    interpolate-size: allow-keywords;
-  }
-
-  .faq-item::details-content {
-    block-size: 0;
-    overflow: hidden;
-    transition:
-      block-size 200ms cubic-bezier(0.33, 1, 0.68, 1),
-      content-visibility 200ms allow-discrete;
-  }
-
-  .faq-item[open]::details-content {
-    block-size: auto;
-  }
-}

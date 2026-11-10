@@ -65,7 +65,7 @@ export default function PrivacyPolicy() {
         <TrapezoidGuy
           aria-hidden
           lookX={-4}
-          className="pointer-events-none absolute right-0 bottom-0 hidden w-28 sm:block"
+          className="pointer-events-none absolute right-0 bottom-0 w-14 sm:w-28"
         />
       </header>
 

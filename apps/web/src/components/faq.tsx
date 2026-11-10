@@ -1,11 +1,6 @@
 import type { ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
-import {
-  animationStyle,
-  riseIn,
-  SECTION_CONTENT_DELAY_MS,
-  SECTION_TRIGGER,
-} from "@/lib/motion-sequence";
+import { SECTION_TRIGGER } from "@/lib/motion-sequence";
+import { FaqAccordion } from "./faq-accordion";
 import { PlayOnView } from "./play-on-view";
 import { SectionHeader } from "./section-header";
 
@@ -68,33 +63,7 @@ export function Faq() {
     >
       <SectionHeader id="faq-title" title="Frequently Asked Questions" />
 
-      <div className="mx-auto w-full max-w-2xl">
-        {QUESTIONS.map(({ question, answer }, questionIndex) => (
-          // `name` makes these an exclusive accordion: opening one closes the rest
-          <details
-            key={question}
-            name="faq"
-            className="faq-item group border-border border-b"
-            // A tighter stagger than cards: rows are short and close together
-            style={animationStyle(
-              riseIn(SECTION_CONTENT_DELAY_MS + questionIndex * 50)
-            )}
-          >
-            <summary className="hover:text-foreground-hover flex cursor-pointer list-none items-center justify-between gap-4 py-4 transition-colors [&::-webkit-details-marker]:hidden">
-              <span className="font-secondary text-base md:text-lg">
-                {question}
-              </span>
-              <ChevronDown
-                aria-hidden
-                className="size-5 shrink-0 transition-transform duration-200 ease-out group-open:rotate-180 motion-reduce:transition-none"
-              />
-            </summary>
-            <p className="text-muted-foreground pb-4 leading-relaxed">
-              {answer}
-            </p>
-          </details>
-        ))}
-      </div>
+      <FaqAccordion items={QUESTIONS} />
     </PlayOnView>
   );
 }

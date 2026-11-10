@@ -1,6 +1,6 @@
 # Tracemark
 
-<img src="apps/extension/public/opengraph.png" />
+<img src=".github/assets/poster.png" alt="The web is your canvas: a browser window covered in Tracemark annotations, including a red frame, a purple triangle, a handwritten 'I like this!' and a worked math problem." />
 
 <br />
 

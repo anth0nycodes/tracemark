@@ -1,128 +1,296 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * Tracemark landing design system.
+ *
+ * Tailwind's default color and font-size scales are cleared so that only
+ * tokens from the design system exist. An off-system class like `bg-red-500`
+ * or `text-7xl` generates nothing.
+ */
 
+@theme {
+  /* Colors: Landing / Neutral / Light */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-foreground: #1a1a1a;
+  --color-foreground-hover: #373737;
+  --color-muted-foreground: #71717a;
+  --color-background: #ffffff;
+  --color-secondary-background: #f4f4f5;
+  --color-border: #e4e4e4;
+
+  /* Colors: Landing / Brand. Use for illustration and decoration, not text or fills behind text. */
+  --color-brand-red: #e04040;
+  --color-brand-green: #4bbe3a;
+  --color-brand-blue: #4291db;
+  --color-brand-yellow: #ffd700;
+
+  /*
+   * Colors: actions. White on brand blue is 3.33:1 and fails AA for 16px
+   * text. These are brand blue with OKLCH lightness lowered (same hue and
+   * chroma): 0.55 gives 4.83:1, and hover at 0.50 gives 5.97:1.
+   */
+  --color-primary: #2375bd;
+  --color-primary-hover: #0b66ad;
+  --color-primary-foreground: #ffffff;
+
+  /*
+   * Font size scale. Line height is not set per size. It comes from the
+   * font family (see `--family-leading` below), so the same size gets 150% in
+   * Manrope and 120% in Bricolage.
+   */
+  --text-*: initial;
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-2xl-plus: 1.75rem; /* 28px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-3xl-plus: 2rem; /* 32px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-4xl-plus: 2.5rem; /* 40px */
+  --text-5xl: 3rem; /* 48px */
+  --text-6xl: 3.5rem; /* 56px */
+
+  /* Per-family metrics from the type spec. */
+  --leading-primary: 1.5;
+  --leading-secondary: 1.2;
+  --tracking-primary: -0.025em;
+  --tracking-secondary: -0.04em;
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * `inline` matters here. Without it, Tailwind emits these on :root, where
+ * `var(--family-leading)` resolves once and every element inherits the
+ * root's value. Inlined, each `text-*` utility reads `--family-leading` from
+ * the element it is applied to.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-regesto-grotesk: var(--font-regesto-grotesk);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --text-xs--line-height: var(--family-leading);
+  --text-sm--line-height: var(--family-leading);
+  --text-base--line-height: var(--family-leading);
+  --text-lg--line-height: var(--family-leading);
+  --text-xl--line-height: var(--family-leading);
+  --text-2xl--line-height: var(--family-leading);
+  --text-2xl-plus--line-height: var(--family-leading);
+  --text-3xl--line-height: var(--family-leading);
+  --text-3xl-plus--line-height: var(--family-leading);
+  --text-4xl--line-height: var(--family-leading);
+  --text-4xl-plus--line-height: var(--family-leading);
+  --text-5xl--line-height: var(--family-leading);
+  --text-6xl--line-height: var(--family-leading);
 }
 
-body {
-  font-family: var(--font-regesto-grotesk), Arial, Helvetica, sans-serif;
+/*
+ * Font family utilities. Each one sets the family together with its line
+ * height and tracking. `--family-leading` is inherited, so a `text-*`
+ * utility on a descendant still picks up the right leading. An explicit
+ * `leading-*` or `tracking-*` class still wins through `--tw-leading` and
+ * `--tw-tracking`.
+ */
+@utility font-primary {
+  --family-leading: var(--leading-primary);
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  line-height: var(--tw-leading, var(--family-leading));
+  letter-spacing: var(--tw-tracking, var(--tracking-primary));
 }
 
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.4205 0.0035 84.57);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+@utility font-secondary {
+  --family-leading: var(--leading-secondary);
+  font-family:
+    var(--font-bricolage-grotesque), ui-sans-serif, system-ui, sans-serif;
+  line-height: var(--tw-leading, var(--family-leading));
+  letter-spacing: var(--tw-tracking, var(--tracking-secondary));
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* Faint dots, like a canvas or graph paper */
+@utility dot-grid {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--color-muted-foreground) 30%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 18px 18px;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply font-primary bg-background text-foreground text-base;
+  }
+}
+
+/*
+ * Motion sequences: the hero mockup and the feature demos.
+ *
+ * Each animated element composes these keyframes in an inline `animation`
+ * built by src/lib/motion-sequence.ts. An element's static styles are its
+ * final state, so with reduced motion everything shows already finished.
+ *
+ * These rules sit outside any layer so they beat Tailwind's utilities, and
+ * use !important to beat the inline `animation` shorthand, which would
+ * otherwise reset play-state.
+ */
+[data-motion-sequence][data-waiting] * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-motion-sequence] * {
+    animation: none !important;
+  }
+}
+
+/*
+ * Draws a stroke in. Expects pathLength="1" and stroke-dasharray="1".
+ * Opacity is held at 0 for the first frame so round line caps don't show
+ * as a dot before the stroke starts.
+ */
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+}
+
+/*
+ * Wipes text in left to right. Both ends must be inset(): animating to the
+ * default `clip-path: none` can't be interpolated, so the text would pop in
+ * halfway through. Negative insets keep glyph flourishes unclipped.
+ */
+@keyframes write {
+  from {
+    clip-path: inset(-25% 100% -25% -10%);
+  }
+  to {
+    clip-path: inset(-25% -10% -25% -10%);
+  }
+}
+
+/*
+ * Grows a <rect> from its top-left corner like the Frame tool being
+ * dragged. Animates width/height rather than scale() so the stroke keeps
+ * its thickness. The rect's attributes are the end size.
+ */
+@keyframes frame {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+}
+
+/* Visibility windows. Run with no fill so they only apply while active. */
+@keyframes appear {
+  from,
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vanish {
+  from,
+  to {
+    opacity: 0;
+  }
+}
+
+/* Moves from an offset (--travel-x, --travel-y) to the element's place. */
+@keyframes travel {
+  from {
+    translate: var(--travel-x, 0) var(--travel-y, 0);
+  }
+}
+
+/* The toolbar expanding from a circle into a vertical bar. */
+@keyframes expand-y {
+  from {
+    scale: 1 0.1;
+  }
+}
+
+/* A page copy shrinking away as it turns into a file. Hidden at rest. */
+@keyframes shrink-away {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.2;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+/* A landing bump, e.g. the downloads tray catching a file. */
+@keyframes bump {
+  50% {
+    scale: 1.15;
+  }
+}
+
+/* Content entering as its section scrolls into view. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+/* Keyboard shortcut hint: pops in, holds, fades out. */
+@keyframes key-hint {
+  0% {
+    opacity: 0;
+    scale: 0.9;
+  }
+  15%,
+  80% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+/*
+ * FAQ answers open and close by animating the details content's height.
+ * `interpolate-size` lets height transition to `auto`. Browsers without
+ * ::details-content support just open instantly.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .faq-item {
+    interpolate-size: allow-keywords;
+  }
+
+  .faq-item::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 200ms cubic-bezier(0.33, 1, 0.68, 1),
+      content-visibility 200ms allow-discrete;
+  }
+
+  .faq-item[open]::details-content {
+    block-size: auto;
   }
 }

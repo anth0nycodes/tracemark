@@ -1,40 +1,19 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Bricolage_Grotesque, Manrope } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import { Toaster } from "sonner";
+import { StickerFilterDefs } from "@/components/decor/hand-drawn-star";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 
-const regestoGrotesk = localFont({
-  src: [
-    {
-      path: "../../public/fonts/RegestoGrotesk-Light-BF670354791e938.woff",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/RegestoGrotesk-Regular-BF67035479252e2.woff",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/RegestoGrotesk-Medium-BF67035478ba605.woff",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/RegestoGrotesk-Bold-BF67035478bbf99.woff",
-      weight: "700",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/RegestoGrotesk-Black-BF67035478db36b.woff",
-      weight: "900",
-      style: "normal",
-    },
-  ],
-  variable: "--font-regesto-grotesk",
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+});
+
+const bricolageGrotesque = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage-grotesque",
 });
 
 export const metadata: Metadata = {
@@ -101,13 +80,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${regestoGrotesk.variable} mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 antialiased`}
-      >
+    <html
+      lang="en"
+      className={`${manrope.variable} ${bricolageGrotesque.variable}`}
+    >
+      <body className="flex min-h-screen flex-col antialiased">
+        <StickerFilterDefs />
         <Navbar />
         {children}
-        <Toaster />
         <Analytics />
         <Footer />
       </body>

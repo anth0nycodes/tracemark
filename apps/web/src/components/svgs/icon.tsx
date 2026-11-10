@@ -17,6 +17,7 @@ export function TracemarkIcon(props: SVGProps<SVGSVGElement>) {
           width="114.888"
           height="114.888"
           rx="28.472"
+          fill="white"
           stroke="black"
         />
       </g>

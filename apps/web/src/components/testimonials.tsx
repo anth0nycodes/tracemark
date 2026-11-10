@@ -15,21 +15,39 @@ import { SectionHeader } from "./section-header";
 // Reviews and profile pictures from the Chrome Web Store listing. The
 // pictures are saved locally rather than linked from Google, whose URLs
 // change when someone updates their photo.
-const TESTIMONIALS = [
+type Testimonial = {
+  name: string;
+  role: string;
+  company: { name: string; url: string; note?: string };
+  avatarSrc: string;
+  quote: string;
+};
+
+const TESTIMONIALS: Testimonial[] = [
   {
     name: "Runbo Li",
+    role: "Co-founder & CEO",
+    company: {
+      name: "Magic Hour",
+      url: "https://magichour.ai/",
+      note: "(YC W24)",
+    },
     avatarSrc: "/testimonials/runbo-li.png",
     quote:
       "Tracemark is really helpful for quickly communicating changes related to product design. It saves me time from using GPT image to create mock-ups and skips all of the iteration. So I can just indicate exactly what I want the way I want it. It's a useful collaboration tool I recommend for any team that does a lot of design iteration.",
   },
   {
     name: "Simon Xu",
+    role: "Co-founder & CEO",
+    company: { name: "Ness", url: "https://ness-health.com/" },
     avatarSrc: "/testimonials/simon-xu.png",
     quote:
       "I use this at my company every day, really helpful for providing context to engineers / agents.",
   },
   {
     name: "Andrew Miller",
+    role: "Co-founder & CTO",
+    company: { name: "Ness", url: "https://ness-health.com/" },
     avatarSrc: "/testimonials/andrew-miller.png",
     quote:
       "Really helpful extension. I've been using it to give coding agents better context and for quick sketches. It's well made, and the shortcuts are intuitive. 10/10.",
@@ -68,9 +86,25 @@ export function Testimonials() {
               )
             )}
           >
-            <blockquote className="text-sm md:text-base">
-              <p>&ldquo;{testimonial.quote}&rdquo;</p>
-            </blockquote>
+            <div className="flex flex-col gap-3">
+              <span
+                role="img"
+                aria-label={`Rated ${STAR_TILTS.length} out of ${STAR_TILTS.length}`}
+                className="flex gap-0.5"
+              >
+                {STAR_TILTS.map((tiltDegrees, starIndex) => (
+                  <HandDrawnStar
+                    key={starIndex}
+                    aria-hidden
+                    className="size-4"
+                    style={{ rotate: `${tiltDegrees}deg` }}
+                  />
+                ))}
+              </span>
+              <blockquote className="text-sm md:text-base">
+                <p>&ldquo;{testimonial.quote}&rdquo;</p>
+              </blockquote>
+            </div>
             <figcaption className="flex items-center gap-3">
               {/* Decorative: the name is right next to it */}
               <Image
@@ -84,19 +118,17 @@ export function Testimonials() {
                 <span className="font-secondary text-base font-medium">
                   {testimonial.name}
                 </span>
-                <span
-                  role="img"
-                  aria-label={`Rated ${STAR_TILTS.length} out of ${STAR_TILTS.length}`}
-                  className="flex gap-0.5"
-                >
-                  {STAR_TILTS.map((tiltDegrees, starIndex) => (
-                    <HandDrawnStar
-                      key={starIndex}
-                      aria-hidden
-                      className="size-4"
-                      style={{ rotate: `${tiltDegrees}deg` }}
-                    />
-                  ))}
+                <span className="text-muted-foreground text-sm">
+                  {testimonial.role} @{" "}
+                  <a
+                    href={testimonial.company.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground hover:text-foreground-hover decoration-border underline underline-offset-2 transition-colors hover:decoration-current"
+                  >
+                    {testimonial.company.name}
+                  </a>
+                  {testimonial.company.note && ` ${testimonial.company.note}`}
                 </span>
               </span>
             </figcaption>

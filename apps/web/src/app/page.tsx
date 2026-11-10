@@ -1,10 +1,9 @@
 import { AddToChromeButton } from "@/components/add-to-chrome-button";
 import { Hero } from "@/components/hero";
-import { Waitlist } from "@/components/waitlist";
 
 export default function Landing() {
   return (
-    <div className="font-regesto-grotesk flex flex-col items-center justify-center gap-16 py-16">
+    <main className="flex flex-col items-center justify-center gap-16 py-16">
       <div className="flex flex-col items-center justify-center gap-12">
         <div>
           <img
@@ -21,7 +20,6 @@ export default function Landing() {
           />
         </div>
       </div>
-      <Waitlist />
-    </div>
+    </main>
   );
 }

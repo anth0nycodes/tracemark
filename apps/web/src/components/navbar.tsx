@@ -4,11 +4,11 @@ import { TracemarkLogo } from "./svgs/logo";
 
 export function Navbar() {
   return (
-    <div className="flex w-full items-center justify-between py-5 sm:py-6 md:px-12">
-      <Link href="/">
-        <TracemarkLogo width={175} height={39} />
+    <header className="border-border flex w-full items-center justify-between border-b px-4 py-3 sm:px-5">
+      <Link href="/" aria-label="Tracemark home">
+        <TracemarkLogo className="h-7 w-auto sm:h-8" />
       </Link>
-      <AddToChromeButton className="rounded-full font-bold" />
-    </div>
+      <AddToChromeButton />
+    </header>
   );
 }

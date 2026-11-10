@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <div className="mt-auto flex flex-col items-center justify-between gap-4 py-5 font-medium sm:flex-row sm:py-6 md:px-12">
+    <div className="mt-auto flex flex-col items-center justify-between gap-4 px-4 py-5 font-medium sm:flex-row sm:py-6 md:px-12">
       <span className="text-muted-foreground text-sm sm:text-base">
         Made with ❤️ by{" "}
         <a

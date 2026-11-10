@@ -1,8 +1,4 @@
-import {
-  FRAME_CORNER_RADIUS,
-  FRAME_STROKE_WIDTH,
-  TOOLBAR_EDGE_GAP,
-} from "@/lib/extension-metrics";
+import { FRAME_CORNER_RADIUS, TOOLBAR_EDGE_GAP } from "@/lib/extension-metrics";
 import { handwritingFont } from "@/lib/fonts";
 import {
   animationStyle,
@@ -11,6 +7,7 @@ import {
   growFrame,
   writeIn,
 } from "@/lib/motion-sequence";
+import { PageImage, PageParagraph } from "./features/demo-canvas";
 import {
   TOOLBAR_LENGTH,
   TOOLBAR_THICKNESS,
@@ -28,6 +25,11 @@ const TOOLBAR_X =
   MOCKUP_WIDTH - (TOOLBAR_THICKNESS + TOOLBAR_EDGE_GAP) * EXTENSION_SCALE;
 const TOOLBAR_Y =
   PAGE_TOP + (PAGE_HEIGHT - TOOLBAR_LENGTH * EXTENSION_SCALE) / 2;
+
+// Annotations are drawn bolder than the extension's real strokes scaled
+// down: they're the product, so they should read at a glance.
+const ANNOTATION_STROKE_WIDTH = 4.5;
+const FRAME_ANNOTATION_STROKE_WIDTH = 4.5;
 
 // The arrow's head starts the moment its shaft finishes.
 const ARROW_SHAFT_DELAY_MS = 1600;
@@ -77,22 +79,26 @@ export function HeroMockup() {
         >
           Mia Chen
         </text>
-        {[440, 482, 524].map((linkX) => (
-          <rect
-            key={linkX}
-            x={linkX}
-            y="59"
-            width="32"
-            height="6"
-            rx="3"
-            className="fill-border"
-          />
+        {[
+          { label: "Work", x: 452 },
+          { label: "About", x: 490 },
+          { label: "Contact", x: 534 },
+        ].map((navLink) => (
+          <text
+            key={navLink.label}
+            x={navLink.x}
+            y="66"
+            fontSize="10"
+            className="fill-muted-foreground"
+          >
+            {navLink.label}
+          </text>
         ))}
 
         <path
-          d="M146 152 L323 150"
+          d="M146 152.6 C 190 150.4, 238 153.4, 279 150.8 C 300 149.6, 314 151.2, 323 149.6"
           strokeWidth="18"
-          opacity="0.6"
+          opacity="0.7"
           className="stroke-brand-yellow mix-blend-multiply"
           {...drawnStrokeProps}
           style={animationStyle(drawIn(300, 500))}
@@ -110,17 +116,17 @@ export function HeroMockup() {
           </tspan>
         </text>
 
-        {[300, 280, 200].map((lineWidth, lineIndex) => (
-          <rect
-            key={lineIndex}
-            x="36"
-            y={184 + lineIndex * 12}
-            width={lineWidth}
-            height="6"
-            rx="3"
-            className="fill-border"
-          />
-        ))}
+        <PageParagraph
+          x={36}
+          baselineY={182}
+          lineHeight={13}
+          fontSize={10.5}
+          lines={[
+            "I'm a product designer in Toronto, making tools that feel",
+            "quiet, fast and kind to the people who use them. Right now",
+            "I'm designing at a small studio.",
+          ]}
+        />
 
         <rect
           x="36"
@@ -140,22 +146,24 @@ export function HeroMockup() {
           View work
         </text>
 
-        {[36, 300].map((cardX) => (
-          <g key={cardX}>
-            <rect
-              x={cardX}
-              y="288"
-              width="250"
-              height="104"
-              rx="10"
-              className="fill-secondary-background"
-            />
-            <circle cx={cardX + 150} cy="320" r="7" className="fill-border" />
-            <path
-              d={`M${cardX + 92} 364 l22 -26 l14 16 l10 -10 l20 20 Z`}
-              className="fill-border"
-            />
-          </g>
+        {/*
+          Portfolio work: stocksnap.io/photo/design-mockups-P6HXICOTZ5 and
+          stocksnap.io/photo/office-work-42H3JH8QI5
+        */}
+        {[
+          { x: 36, src: "/stock/portfolio-wireframes.jpg" },
+          { x: 300, src: "/stock/portfolio-laptop.jpg" },
+        ].map((portfolioCard) => (
+          <PageImage
+            key={portfolioCard.x}
+            id={`hero-portfolio-${portfolioCard.x}`}
+            src={portfolioCard.src}
+            x={portfolioCard.x}
+            y={288}
+            width={250}
+            height={104}
+            cornerRadius={10}
+          />
         ))}
       </g>
 
@@ -164,7 +172,7 @@ export function HeroMockup() {
         <text
           x="404"
           y="104"
-          fontSize="26"
+          fontSize="32"
           transform="rotate(-6 404 104)"
           className="fill-brand-blue"
           style={animationStyle(writeIn(900, 600))}
@@ -172,8 +180,8 @@ export function HeroMockup() {
           I like this!
         </text>
         <path
-          d="M452 114 C 466 136, 430 154, 352 155"
-          strokeWidth="2.5"
+          d="M467 116.5 C 474.5 127.5, 470.5 141.5, 452 148.5 C 433 155.5, 393 158.5, 352.5 156.2"
+          strokeWidth={ANNOTATION_STROKE_WIDTH}
           className="stroke-brand-blue"
           {...drawnStrokeProps}
           style={animationStyle(
@@ -181,8 +189,8 @@ export function HeroMockup() {
           )}
         />
         <path
-          d="M362 147 L352 155 L363 161"
-          strokeWidth="2.5"
+          d="M367.5 143.5 C 361.5 148.5, 356.5 152.8, 352.5 156.4 C 357.5 159.6, 362.2 162.8, 368.6 167.2"
+          strokeWidth={ANNOTATION_STROKE_WIDTH}
           className="stroke-brand-blue"
           {...drawnStrokeProps}
           style={animationStyle(
@@ -198,14 +206,14 @@ export function HeroMockup() {
           height="46"
           rx={FRAME_CORNER_RADIUS * EXTENSION_SCALE}
           fill="none"
-          strokeWidth={FRAME_STROKE_WIDTH * EXTENSION_SCALE}
+          strokeWidth={FRAME_ANNOTATION_STROKE_WIDTH}
           className="stroke-brand-red"
           style={animationStyle(growFrame(2400, 500))}
         />
         <text
           x="152"
           y="254"
-          fontSize="22"
+          fontSize="27"
           transform="rotate(-3 152 254)"
           className="fill-brand-red"
           style={animationStyle(writeIn(3150, 750))}
@@ -214,8 +222,8 @@ export function HeroMockup() {
         </text>
 
         <path
-          d="M522 298 L534 312 L560 282"
-          strokeWidth="3.5"
+          d="M513 301.5 C 518.5 307, 524 313.5, 530.5 320 C 541 305.5, 552.5 290, 568 276"
+          strokeWidth="6"
           className="stroke-brand-green"
           {...drawnStrokeProps}
           style={animationStyle(drawIn(4000, 350))}

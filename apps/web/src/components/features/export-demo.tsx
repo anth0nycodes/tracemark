@@ -1,9 +1,5 @@
 import { Inbox } from "lucide-react";
-import {
-  FRAME_CORNER_RADIUS,
-  FRAME_STROKE_WIDTH,
-  TOOLBAR_EDGE_GAP,
-} from "@/lib/extension-metrics";
+import { FRAME_CORNER_RADIUS, TOOLBAR_EDGE_GAP } from "@/lib/extension-metrics";
 import {
   animationStyle,
   bump,
@@ -25,9 +21,12 @@ import {
   DEMO_HEIGHT,
   DEMO_PAGE_INSET,
   DemoCanvas,
-  ImagePlaceholder,
+  FRAME_MARK_STROKE_WIDTH,
+  MARK_STROKE_WIDTH,
   NARROW_DEMO_WIDTH,
   PageHeading,
+  PageImage,
+  PageParagraph,
   SCALE_FROM_CENTER,
 } from "./demo-canvas";
 
@@ -65,18 +64,25 @@ export function ExportDemo() {
         fontSize={20}
         lines={["Weekend ramen"]}
       />
-      {[240, 190].map((lineWidth, lineIndex) => (
-        <rect
-          key={lineIndex}
-          x="48"
-          y={104 + lineIndex * 14}
-          width={lineWidth}
-          height="7"
-          rx="3.5"
-          className="fill-border"
-        />
-      ))}
-      <ImagePlaceholder x={48} y={140} width={304} height={100} />
+      <PageParagraph
+        x={48}
+        baselineY={111}
+        lineHeight={14}
+        fontSize={11.5}
+        lines={[
+          "Rich miso broth, jammy eggs and a spoon of chili oil.",
+          "Ready in about 40 minutes.",
+        ]}
+      />
+      {/* stocksnap.io/photo/ramen-noodles-KKMQPWQK6H */}
+      <PageImage
+        id="export-photo"
+        src="/stock/ramen.jpg"
+        x={48}
+        y={140}
+        width={304}
+        height={100}
+      />
       <rect
         x="40"
         y="72"
@@ -84,13 +90,13 @@ export function ExportDemo() {
         height="28"
         rx={FRAME_CORNER_RADIUS * EXTENSION_SCALE}
         fill="none"
-        strokeWidth={FRAME_STROKE_WIDTH * EXTENSION_SCALE}
+        strokeWidth={FRAME_MARK_STROKE_WIDTH}
         className="stroke-brand-red"
       />
       <path
-        d="M296 162 L306 174 L330 148"
+        d="M295.5 162.5 C 299 166.5, 302.5 170.5, 306.5 174.8 C 313 165.5, 320.5 156.5, 331 146.5"
         fill="none"
-        strokeWidth="3.5"
+        strokeWidth={MARK_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
         className="stroke-brand-green"
@@ -119,7 +125,14 @@ export function ExportDemo() {
           fontSize={20}
           lines={["Weekend ramen"]}
         />
-        <ImagePlaceholder x={48} y={140} width={304} height={100} />
+        <PageImage
+          id="export-copy-photo"
+          src="/stock/ramen.jpg"
+          x={48}
+          y={140}
+          width={304}
+          height={100}
+        />
       </g>
 
       <ToolbarMockup

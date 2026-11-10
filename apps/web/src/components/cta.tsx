@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { AddToChromeButton } from "./add-to-chrome-button";
 import { SquareGuy, TriangleGuy } from "./decor/characters";
 import { PlayOnView } from "./play-on-view";
-import { TracemarkIcon } from "./svgs/icon";
+import { TracemarkTile } from "./svgs/logo-mark";
 
 // The panel gets marked up after its content lands, like the product would
 const HIGHLIGHT_AT_MS = 500;
@@ -38,7 +38,7 @@ export function Cta() {
       aria-labelledby="cta-title"
       className="bg-secondary-background dot-grid relative mb-16 flex flex-col items-center gap-6 overflow-hidden rounded-3xl px-6 py-14 text-center md:mb-24 md:py-20"
     >
-      <TracemarkIcon
+      <TracemarkTile
         aria-hidden
         className="size-16 md:size-20"
         style={animationStyle(riseIn(0))}
@@ -93,7 +93,7 @@ export function Cta() {
             it&apos;s free!
           </text>
           <path
-            d="M86 32 C 102 22, 122 20, 144 26"
+            d="M86 33.2 C 95 27, 104.5 23.4, 116.5 22.6 C 128.5 21.8, 136.5 23.6, 144.2 26.6"
             strokeWidth="2.5"
             className="stroke-brand-red"
             {...drawnStrokeProps}
@@ -102,7 +102,7 @@ export function Cta() {
             )}
           />
           <path
-            d="M134 18 L145 26 L134 33"
+            d="M134.6 17.4 C 138.2 20.4, 141.6 23.4, 145 26.6 C 141.2 29, 137.6 31.2, 133.4 33.8"
             strokeWidth="2.5"
             className="stroke-brand-red"
             {...drawnStrokeProps}

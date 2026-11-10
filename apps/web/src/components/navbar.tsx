@@ -1,16 +1,15 @@
 import Link from "next/link";
-import { AddToChromeButton } from "./add-to-chrome-button";
-import { TracemarkLogo } from "./svgs/logo";
+import { TracemarkLogo } from "./svgs/logo-mark";
 
 export function Navbar() {
   return (
-    // The border spans the full width; the contents line up with the page
+    // The border spans the full width; the contents line up with the page.
+    // No button here: the hero's Add to Chrome is the page's one main action.
     <header className="border-border w-full border-b">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+      <div className="mx-auto flex w-full max-w-7xl items-center px-4 py-3 sm:px-6">
         <Link href="/" aria-label="Tracemark home">
-          <TracemarkLogo className="h-7 w-auto sm:h-8" />
+          <TracemarkLogo aria-hidden className="h-8 w-auto sm:h-9" />
         </Link>
-        <AddToChromeButton />
       </div>
     </header>
   );

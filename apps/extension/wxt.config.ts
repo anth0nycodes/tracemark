@@ -15,7 +15,7 @@ export default defineConfig({
     name: mode === "development" ? "Tracemark (Dev)" : "Tracemark – Live Web Markup",
     description:
       "Annotate any website. Mark up your screen, then copy or export the result as an image.",
-    version: "2.0",
+    version: "2.0.1",
     action: {
       default_title: "Open Tracemark",
     },

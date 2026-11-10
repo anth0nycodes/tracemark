@@ -17,24 +17,41 @@ export function Hero() {
       data-motion-sequence
       className="grid items-center gap-8 py-10 md:grid-cols-2 md:gap-12 md:pt-24 md:pb-16"
     >
-      <div className="flex flex-col items-start gap-4">
-        <div className="flex flex-col items-start gap-2">
-          <h1
-            className="font-secondary text-3xl font-medium md:text-6xl"
+      <div className="flex flex-col items-start gap-6">
+        <div className="flex flex-col items-start gap-3">
+          {/* Who it's for, before anything else */}
+          <p
+            className="border-border text-muted-foreground rounded-full border bg-white px-3 py-1 text-sm"
             style={animationStyle(riseIn(0))}
           >
-            The web is your canvas.
-          </h1>
-          <p
-            className="max-w-md"
+            For designers, developers and students
+          </p>
+          <h1
+            className="font-secondary text-3xl font-medium md:text-6xl"
             style={animationStyle(riseIn(REVEAL_STAGGER_MS))}
           >
-            Annotate any website. Mark up your screen, then copy or export the
-            result as an image.
+            The only markup tool you need.
+          </h1>
+          {/* What it's good for */}
+          <p
+            className="max-w-md"
+            style={animationStyle(riseIn(REVEAL_STAGGER_MS * 2))}
+          >
+            Draw right on top of any website to critique a design, flag a bug
+            for your team, or take notes while you study. Then copy or export it
+            as an image in one click.
           </p>
         </div>
-        <div style={animationStyle(riseIn(REVEAL_STAGGER_MS * 2))}>
-          <AddToChromeButton label="Add to Chrome — It's Free" />
+        <div
+          className="flex flex-col items-start gap-2"
+          style={animationStyle(riseIn(REVEAL_STAGGER_MS * 3))}
+        >
+          {/* The page's one call to action, so it's larger than default */}
+          <AddToChromeButton className="px-6 py-3 text-lg" />
+          {/* Answers "what does it cost?" right where people decide */}
+          <p className="text-muted-foreground text-sm">
+            Free to use · No account needed
+          </p>
         </div>
       </div>
       <div

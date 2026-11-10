@@ -1,5 +1,5 @@
 import type { SVGProps } from "react";
-import { TracemarkWordmark } from "./wordmark";
+import { TracemarkWordmark, WORDMARK_ASPECT_RATIO } from "./wordmark";
 
 /*
  * The Tracemark mark: a pointer that has just drawn a red marker stroke.
@@ -52,16 +52,26 @@ export function TracemarkMark(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+// The wordmark's letters (ascenders to baseline) are this tall next to the
+// 40-unit mark, centered vertically, after a small gap
+const WORDMARK_HEIGHT = 24.4;
+const WORDMARK_X = 44;
+const WORDMARK_WIDTH = WORDMARK_HEIGHT * WORDMARK_ASPECT_RATIO;
+
 // Mark and wordmark as one SVG, so they always scale together
 export function TracemarkLogo(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 184 40" fill="none" {...props}>
+    <svg
+      viewBox={`0 0 ${WORDMARK_X + WORDMARK_WIDTH} 40`}
+      fill="none"
+      {...props}
+    >
       <MarkShapes />
       <TracemarkWordmark
-        x={44}
-        y={7.8}
-        width={139.2}
-        height={24.4}
+        x={WORDMARK_X}
+        y={(40 - WORDMARK_HEIGHT) / 2}
+        width={WORDMARK_WIDTH}
+        height={WORDMARK_HEIGHT}
         className="text-foreground"
       />
     </svg>

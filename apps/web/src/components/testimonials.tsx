@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
+import { CHROME_STORE_REVIEWS_URL } from "@/lib/constants";
 import {
   animationStyle,
   REVEAL_STAGGER_MS,
@@ -15,6 +17,12 @@ import { SectionHeader } from "./section-header";
 // change when someone updates their photo.
 const TESTIMONIALS = [
   {
+    name: "Runbo Li",
+    avatarSrc: "/testimonials/runbo-li.png",
+    quote:
+      "Tracemark is really helpful for quickly communicating changes related to product design. It saves me time from using GPT image to create mock-ups and skips all of the iteration. So I can just indicate exactly what I want the way I want it. It's a useful collaboration tool I recommend for any team that does a lot of design iteration.",
+  },
+  {
     name: "Simon Xu",
     avatarSrc: "/testimonials/simon-xu.png",
     quote:
@@ -25,11 +33,6 @@ const TESTIMONIALS = [
     avatarSrc: "/testimonials/andrew-miller.png",
     quote:
       "Really helpful extension. I've been using it to give coding agents better context and for quick sketches. It's well made, and the shortcuts are intuitive. 10/10.",
-  },
-  {
-    name: "retr0",
-    avatarSrc: "/testimonials/retr0.png",
-    quote: "easy to use and neat design!",
   },
 ];
 
@@ -50,12 +53,15 @@ export function Testimonials() {
         description="Here's what people have to say after annotating their first page."
       />
 
-      {/* Two per row, with an odd card centered below */}
-      <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-4">
+      {/*
+        Three across on large screens; on tablets two per row with the third
+        centered below
+      */}
+      <div className="mx-auto flex max-w-6xl flex-wrap justify-center gap-4">
         {TESTIMONIALS.map((testimonial, testimonialIndex) => (
           <figure
             key={testimonial.name}
-            className="border-border flex w-full flex-col justify-between gap-4 rounded-2xl border bg-white p-5 md:w-[calc(50%-0.5rem)]"
+            className="border-border flex w-full flex-col justify-between gap-4 rounded-2xl border bg-white p-5 md:w-[calc(50%-0.5rem)] lg:w-[calc((100%-2rem)/3)]"
             style={animationStyle(
               riseIn(
                 SECTION_CONTENT_DELAY_MS + testimonialIndex * REVEAL_STAGGER_MS
@@ -97,6 +103,25 @@ export function Testimonials() {
           </figure>
         ))}
       </div>
+
+      {/* Secondary on purpose: the hero's Add to Chrome is the main action */}
+      <a
+        href={CHROME_STORE_REVIEWS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="border-border hover:bg-secondary-background focus-visible:outline-primary font-secondary mx-auto inline-flex items-center gap-1.5 rounded-full border bg-white px-5 py-2.5 text-base transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={animationStyle(
+          riseIn(
+            SECTION_CONTENT_DELAY_MS + TESTIMONIALS.length * REVEAL_STAGGER_MS
+          )
+        )}
+      >
+        View all reviews
+        <ArrowUpRight aria-hidden className="size-4" />
+        <span className="sr-only">
+          (opens the Chrome Web Store in a new tab)
+        </span>
+      </a>
     </PlayOnView>
   );
 }

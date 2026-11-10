@@ -61,61 +61,6 @@
   --tracking-secondary: -0.04em;
 
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-
-  /*
-   * Hero annotation reveals. Durations are set per element to match each
-   * stroke's length, so these are only defaults.
-   *
-   * `draw` expects a path with pathLength="1" and stroke-dasharray="1".
-   * Opacity is held at 0 for the first frame so round line caps don't show
-   * as a dot before the stroke starts. The curve is a gentle sine in-out: a
-   * pen eases in and out a little, but a steep curve makes short strokes
-   * flash in all at once.
-   *
-   * `write` wipes text left to right at a steady speed, like handwriting.
-   * Both ends must be `inset()`. Animating to the default `clip-path: none`
-   * can't be interpolated, so the text would pop in halfway through. The
-   * negative insets keep glyph flourishes outside the text box unclipped.
-   */
-  --animate-draw: draw 600ms cubic-bezier(0.37, 0, 0.63, 1) both;
-  --animate-write: write 600ms linear both;
-  /*
-   * `frame` grows a <rect> from its top-left corner like the Frame tool
-   * being dragged. It animates width/height, not scale(), so the stroke stays
-   * the same thickness. The rect's width and height attributes are the end
-   * size. Ease-out: a drag moves fast and settles into place.
-   */
-  --animate-frame: frame 500ms cubic-bezier(0.33, 1, 0.68, 1) both;
-
-  @keyframes draw {
-    0% {
-      stroke-dashoffset: 1;
-      opacity: 0;
-    }
-    1% {
-      opacity: 1;
-    }
-  }
-
-  @keyframes frame {
-    0% {
-      width: 0;
-      height: 0;
-      opacity: 0;
-    }
-    1% {
-      opacity: 1;
-    }
-  }
-
-  @keyframes write {
-    from {
-      clip-path: inset(-25% 100% -25% -10%);
-    }
-    to {
-      clip-path: inset(-25% -10% -25% -10%);
-    }
-  }
 }
 
 /*
@@ -169,5 +114,143 @@
 
   body {
     @apply font-primary bg-background text-foreground text-base;
+  }
+}
+
+/*
+ * Motion sequences: the hero mockup and the feature demos.
+ *
+ * Each animated element composes these keyframes in an inline `animation`
+ * built by src/lib/motion-sequence.ts. An element's static styles are its
+ * final state, so with reduced motion everything shows already finished.
+ *
+ * These rules sit outside any layer so they beat Tailwind's utilities, and
+ * use !important to beat the inline `animation` shorthand, which would
+ * otherwise reset play-state.
+ */
+[data-motion-sequence][data-waiting] * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-motion-sequence] * {
+    animation: none !important;
+  }
+}
+
+/*
+ * Draws a stroke in. Expects pathLength="1" and stroke-dasharray="1".
+ * Opacity is held at 0 for the first frame so round line caps don't show
+ * as a dot before the stroke starts.
+ */
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+}
+
+/*
+ * Wipes text in left to right. Both ends must be inset(): animating to the
+ * default `clip-path: none` can't be interpolated, so the text would pop in
+ * halfway through. Negative insets keep glyph flourishes unclipped.
+ */
+@keyframes write {
+  from {
+    clip-path: inset(-25% 100% -25% -10%);
+  }
+  to {
+    clip-path: inset(-25% -10% -25% -10%);
+  }
+}
+
+/*
+ * Grows a <rect> from its top-left corner like the Frame tool being
+ * dragged. Animates width/height rather than scale() so the stroke keeps
+ * its thickness. The rect's attributes are the end size.
+ */
+@keyframes frame {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+}
+
+/* Visibility windows. Run with no fill so they only apply while active. */
+@keyframes appear {
+  from,
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vanish {
+  from,
+  to {
+    opacity: 0;
+  }
+}
+
+/* Moves from an offset (--travel-x, --travel-y) to the element's place. */
+@keyframes travel {
+  from {
+    translate: var(--travel-x, 0) var(--travel-y, 0);
+  }
+}
+
+/* The toolbar expanding from a circle into a vertical bar. */
+@keyframes expand-y {
+  from {
+    scale: 1 0.1;
+  }
+}
+
+/* A page copy shrinking away as it turns into a file. Hidden at rest. */
+@keyframes shrink-away {
+  from {
+    opacity: 1;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0.2;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+/* A landing bump, e.g. the downloads tray catching a file. */
+@keyframes bump {
+  50% {
+    scale: 1.15;
+  }
+}
+
+/* Keyboard shortcut hint: pops in, holds, fades out. */
+@keyframes key-hint {
+  0% {
+    opacity: 0;
+    scale: 0.9;
+  }
+  15%,
+  80% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
   }
 }

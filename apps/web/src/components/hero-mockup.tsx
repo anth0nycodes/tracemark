@@ -1,5 +1,16 @@
 import { Caveat } from "next/font/google";
-import { cn } from "@/lib/utils";
+import {
+  FRAME_CORNER_RADIUS,
+  FRAME_STROKE_WIDTH,
+  TOOLBAR_EDGE_GAP,
+} from "@/lib/extension-metrics";
+import {
+  animationStyle,
+  drawIn,
+  drawnStrokeProps,
+  growFrame,
+  writeIn,
+} from "@/lib/motion-sequence";
 import {
   TOOLBAR_LENGTH,
   TOOLBAR_THICKNESS,
@@ -16,48 +27,10 @@ const EXTENSION_SCALE = 0.54;
 const MOCKUP_WIDTH = 640;
 const PAGE_TOP = 36;
 const PAGE_HEIGHT = 384;
-// The Frame tool's rectangle (apps/extension canvas.tsx: rx 12, strokeWidth 4)
-const FRAME_CORNER_RADIUS = 12 * EXTENSION_SCALE;
-const FRAME_STROKE_WIDTH = 4 * EXTENSION_SCALE;
-const TOOLBAR_EDGE_GAP = 20;
 const TOOLBAR_X =
   MOCKUP_WIDTH - (TOOLBAR_THICKNESS + TOOLBAR_EDGE_GAP) * EXTENSION_SCALE;
 const TOOLBAR_Y =
   PAGE_TOP + (PAGE_HEIGHT - TOOLBAR_LENGTH * EXTENSION_SCALE) / 2;
-
-type RevealTiming = {
-  delayMs: number;
-  durationMs: number;
-  className: string;
-};
-
-// Props for a stroke that draws itself in. Duration should scale with the
-// stroke's length so every mark is drawn at a similar pen speed.
-function drawnStroke({ delayMs, durationMs, className }: RevealTiming) {
-  return {
-    pathLength: 1,
-    strokeDasharray: 1,
-    fill: "none",
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    className: cn("animate-draw motion-reduce:animate-none", className),
-    style: {
-      animationDelay: `${delayMs}ms`,
-      animationDuration: `${durationMs}ms`,
-    },
-  };
-}
-
-// Props for handwritten text that is written in left to right.
-function writtenText({ delayMs, durationMs, className }: RevealTiming) {
-  return {
-    className: cn("animate-write motion-reduce:animate-none", className),
-    style: {
-      animationDelay: `${delayMs}ms`,
-      animationDuration: `${durationMs}ms`,
-    },
-  };
-}
 
 // The arrow's head starts the moment its shaft finishes.
 const ARROW_SHAFT_DELAY_MS = 1600;
@@ -69,6 +42,7 @@ export function HeroMockup() {
       viewBox="0 0 640 420"
       role="img"
       aria-labelledby="hero-mockup-title"
+      data-motion-sequence
       className="border-border h-auto w-full rounded-2xl border bg-white"
     >
       <title id="hero-mockup-title">
@@ -122,11 +96,9 @@ export function HeroMockup() {
           d="M146 152 L323 150"
           strokeWidth="18"
           opacity="0.6"
-          {...drawnStroke({
-            delayMs: 300,
-            durationMs: 500,
-            className: "stroke-brand-yellow mix-blend-multiply",
-          })}
+          className="stroke-brand-yellow mix-blend-multiply"
+          {...drawnStrokeProps}
+          style={animationStyle(drawIn(300, 500))}
         />
         <text
           fontSize="28"
@@ -197,31 +169,28 @@ export function HeroMockup() {
           y="104"
           fontSize="26"
           transform="rotate(-6 404 104)"
-          {...writtenText({
-            delayMs: 900,
-            durationMs: 600,
-            className: "fill-brand-blue",
-          })}
+          className="fill-brand-blue"
+          style={animationStyle(writeIn(900, 600))}
         >
           I like this!
         </text>
         <path
           d="M452 114 C 466 136, 430 154, 352 155"
           strokeWidth="2.5"
-          {...drawnStroke({
-            delayMs: ARROW_SHAFT_DELAY_MS,
-            durationMs: ARROW_SHAFT_DURATION_MS,
-            className: "stroke-brand-blue",
-          })}
+          className="stroke-brand-blue"
+          {...drawnStrokeProps}
+          style={animationStyle(
+            drawIn(ARROW_SHAFT_DELAY_MS, ARROW_SHAFT_DURATION_MS)
+          )}
         />
         <path
           d="M362 147 L352 155 L363 161"
           strokeWidth="2.5"
-          {...drawnStroke({
-            delayMs: ARROW_SHAFT_DELAY_MS + ARROW_SHAFT_DURATION_MS,
-            durationMs: 200,
-            className: "stroke-brand-blue",
-          })}
+          className="stroke-brand-blue"
+          {...drawnStrokeProps}
+          style={animationStyle(
+            drawIn(ARROW_SHAFT_DELAY_MS + ARROW_SHAFT_DURATION_MS, 200)
+          )}
         />
 
         {/* Dragged out from its top-left corner with the Frame tool */}
@@ -230,22 +199,19 @@ export function HeroMockup() {
           y="219"
           width="113"
           height="46"
-          rx={FRAME_CORNER_RADIUS}
+          rx={FRAME_CORNER_RADIUS * EXTENSION_SCALE}
           fill="none"
-          strokeWidth={FRAME_STROKE_WIDTH}
-          className="stroke-brand-red animate-frame motion-reduce:animate-none"
-          style={{ animationDelay: "2400ms" }}
+          strokeWidth={FRAME_STROKE_WIDTH * EXTENSION_SCALE}
+          className="stroke-brand-red"
+          style={animationStyle(growFrame(2400, 500))}
         />
         <text
           x="152"
           y="254"
           fontSize="22"
           transform="rotate(-3 152 254)"
-          {...writtenText({
-            delayMs: 3150,
-            durationMs: 750,
-            className: "fill-brand-red",
-          })}
+          className="fill-brand-red"
+          style={animationStyle(writeIn(3150, 750))}
         >
           make it bigger?
         </text>
@@ -253,18 +219,16 @@ export function HeroMockup() {
         <path
           d="M522 298 L534 312 L560 282"
           strokeWidth="3.5"
-          {...drawnStroke({
-            delayMs: 4000,
-            durationMs: 350,
-            className: "stroke-brand-green",
-          })}
+          className="stroke-brand-green"
+          {...drawnStrokeProps}
+          style={animationStyle(drawIn(4000, 350))}
         />
       </g>
 
-      {/* Toolbar, snapped to the right edge. Pencil and green drew the last mark. */}
+      {/* Toolbar, snapped to the right edge. Pencil drew the last mark. */}
       <ToolbarMockup
+        id="hero-toolbar"
         activeTool="Pencil"
-        colorClassName="fill-brand-green"
         transform={`translate(${TOOLBAR_X} ${TOOLBAR_Y}) scale(${EXTENSION_SCALE})`}
       />
     </svg>

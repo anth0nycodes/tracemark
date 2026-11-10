@@ -3,7 +3,9 @@ import {
   Copy,
   Download,
   Eraser,
+  Grip,
   GripHorizontal,
+  GripVertical,
   Hand,
   Highlighter,
   MousePointer2,
@@ -16,8 +18,8 @@ import {
 
 /*
  * An SVG drawing of the extension's toolbar (apps/extension/src/components/
- * toolbar.tsx), snapped to a vertical edge. All sizes are the real toolbar's
- * CSS pixels. Scale the group with a transform to fit it into a mockup.
+ * toolbar.tsx). All sizes are the real toolbar's CSS pixels. Scale the group
+ * with a transform to fit it into a mockup.
  */
 
 const BUTTON_SIZE = 36;
@@ -113,7 +115,7 @@ function getSlotLength(slot: ToolbarSlot) {
   return slot.kind === "divider" ? DIVIDER_THICKNESS : BUTTON_SIZE;
 }
 
-// Top edge of each slot, stacked with the toolbar's gap between them
+// Start of each slot along the bar, with the toolbar's gap between them
 const SLOT_OFFSETS = TOOLBAR_SLOTS.reduce<number[]>((offsets, slot, index) => {
   const previousEnd =
     index === 0
@@ -128,8 +130,49 @@ export const TOOLBAR_LENGTH =
   PADDING +
   BORDER_WIDTH;
 
-const CONTENT_X = BORDER_WIDTH + PADDING;
-const CENTER_X = TOOLBAR_THICKNESS / 2;
+// Distance from the bar's outer edge to its slots, across the bar
+const SLOT_INSET = BORDER_WIDTH + PADDING;
+const CROSS_CENTER = TOOLBAR_THICKNESS / 2;
+
+// Vertical sits on the left or right edge, horizontal on the top or bottom
+export type ToolbarOrientation = "vertical" | "horizontal";
+
+// Turns (along the bar, across the bar) into x/y for the orientation
+function toPoint(
+  orientation: ToolbarOrientation,
+  along: number,
+  across: number
+) {
+  return orientation === "vertical"
+    ? { x: across, y: along }
+    : { x: along, y: across };
+}
+
+export function getToolbarSize(orientation: ToolbarOrientation) {
+  const { x: width, y: height } = toPoint(
+    orientation,
+    TOOLBAR_LENGTH,
+    TOOLBAR_THICKNESS
+  );
+  return { width, height };
+}
+
+/*
+ * Top-left of a button's 36px slot, in toolbar pixels. For demos that draw
+ * their own animated active state as `children`.
+ */
+export function getToolbarButtonOrigin(
+  buttonName: string,
+  orientation: ToolbarOrientation
+) {
+  const slotIndex = TOOLBAR_SLOTS.findIndex(
+    (slot) => slot.kind === "button" && slot.name === buttonName
+  );
+  return toPoint(orientation, SLOT_OFFSETS[slotIndex], SLOT_INSET);
+}
+
+export const TOOLBAR_BUTTON_SIZE = BUTTON_SIZE;
+export const TOOLBAR_ACTIVE_RADIUS = 10;
 
 /*
  * SVG has no conic gradient, so the color ring is built from thin arcs. The
@@ -139,77 +182,119 @@ const CENTER_X = TOOLBAR_THICKNESS / 2;
 const RING_SEGMENT_COUNT = 60;
 const RING_RADIUS = 12.5; // 28px ring (36px slot minus 4px padding), 3px thick
 const RING_THICKNESS = 3;
+const SWATCH_RADIUS = RING_RADIUS - RING_THICKNESS / 2;
 
-function describeRingSegment(centerY: number, segmentIndex: number) {
+const COLOR_SLOT_INDEX = TOOLBAR_SLOTS.findIndex(
+  (slot) => slot.kind === "color"
+);
+
+// Center of the color swatch, in toolbar pixels
+function getToolbarSwatchCenter(orientation: ToolbarOrientation) {
+  return toPoint(
+    orientation,
+    SLOT_OFFSETS[COLOR_SLOT_INDEX] + BUTTON_SIZE / 2,
+    CROSS_CENTER
+  );
+}
+
+function describeRingSegment(
+  center: { x: number; y: number },
+  segmentIndex: number
+) {
   const degreesPerSegment = 360 / RING_SEGMENT_COUNT;
   // Overlap neighbors slightly so no hairline seams show between arcs
   const startAngle = ((segmentIndex * degreesPerSegment - 90) * Math.PI) / 180;
   const endAngle =
     (((segmentIndex + 1.15) * degreesPerSegment - 90) * Math.PI) / 180;
-  const startX = CENTER_X + RING_RADIUS * Math.cos(startAngle);
-  const startY = centerY + RING_RADIUS * Math.sin(startAngle);
-  const endX = CENTER_X + RING_RADIUS * Math.cos(endAngle);
-  const endY = centerY + RING_RADIUS * Math.sin(endAngle);
+  const startX = center.x + RING_RADIUS * Math.cos(startAngle);
+  const startY = center.y + RING_RADIUS * Math.sin(startAngle);
+  const endX = center.x + RING_RADIUS * Math.cos(endAngle);
+  const endY = center.y + RING_RADIUS * Math.sin(endAngle);
   return `M${startX.toFixed(2)} ${startY.toFixed(2)} A${RING_RADIUS} ${RING_RADIUS} 0 0 1 ${endX.toFixed(2)} ${endY.toFixed(2)}`;
 }
 
+// Tailwind's shadow-md, as the extension uses. Ids must be unique per page.
+function ShadowFilter({ id }: { id: string }) {
+  return (
+    <defs>
+      <filter id={id} x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow
+          dx="0"
+          dy="4"
+          stdDeviation="3"
+          floodColor="#000000"
+          floodOpacity="0.1"
+        />
+      </filter>
+    </defs>
+  );
+}
+
 type ToolbarMockupProps = {
-  activeTool: string;
-  // A design-system fill class for the color swatch, e.g. "fill-brand-green"
-  colorClassName: string;
+  // Unique per page, for the shadow filter
+  id: string;
+  orientation?: ToolbarOrientation;
+  // Omit to draw your own active state as children
+  activeTool?: string;
   transform?: string;
+  // Drawn above the bar's background and below its icons, in toolbar pixels
+  children?: React.ReactNode;
 };
 
 export function ToolbarMockup({
+  id,
+  orientation = "vertical",
   activeTool,
-  colorClassName,
   transform,
+  children,
 }: ToolbarMockupProps) {
+  const shadowId = `${id}-shadow`;
+  const { width, height } = getToolbarSize(orientation);
+  const GripIcon = orientation === "vertical" ? GripHorizontal : GripVertical;
+
   return (
     <g transform={transform} aria-hidden>
-      <defs>
-        <filter
-          id="toolbar-mockup-shadow"
-          x="-50%"
-          y="-10%"
-          width="200%"
-          height="120%"
-        >
-          {/* Tailwind's shadow-md, as the extension uses */}
-          <feDropShadow
-            dx="0"
-            dy="4"
-            stdDeviation="3"
-            floodColor="#000000"
-            floodOpacity="0.1"
-          />
-        </filter>
-      </defs>
-
+      <ShadowFilter id={shadowId} />
       <rect
         x={BORDER_WIDTH / 2}
         y={BORDER_WIDTH / 2}
-        width={TOOLBAR_THICKNESS - BORDER_WIDTH}
-        height={TOOLBAR_LENGTH - BORDER_WIDTH}
+        width={width - BORDER_WIDTH}
+        height={height - BORDER_WIDTH}
         rx={(TOOLBAR_THICKNESS - BORDER_WIDTH) / 2}
         strokeWidth={BORDER_WIDTH}
-        filter="url(#toolbar-mockup-shadow)"
+        filter={`url(#${shadowId})`}
         className="stroke-border fill-white"
       />
 
+      {children}
+
       {TOOLBAR_SLOTS.map((slot, slotIndex) => {
-        const slotY = SLOT_OFFSETS[slotIndex];
-        const iconX = CONTENT_X + (BUTTON_SIZE - ICON_SIZE) / 2;
-        const iconY = slotY + (BUTTON_SIZE - ICON_SIZE) / 2;
+        const slotOrigin = toPoint(
+          orientation,
+          SLOT_OFFSETS[slotIndex],
+          SLOT_INSET
+        );
+        const iconX = slotOrigin.x + (BUTTON_SIZE - ICON_SIZE) / 2;
+        const iconY = slotOrigin.y + (BUTTON_SIZE - ICON_SIZE) / 2;
 
         if (slot.kind === "divider") {
+          const dividerOrigin = toPoint(
+            orientation,
+            SLOT_OFFSETS[slotIndex],
+            CROSS_CENTER - DIVIDER_LENGTH / 2
+          );
+          const dividerSize = toPoint(
+            orientation,
+            DIVIDER_THICKNESS,
+            DIVIDER_LENGTH
+          );
           return (
             <rect
               key={slotIndex}
-              x={CENTER_X - DIVIDER_LENGTH / 2}
-              y={slotY}
-              width={DIVIDER_LENGTH}
-              height={DIVIDER_THICKNESS}
+              x={dividerOrigin.x}
+              y={dividerOrigin.y}
+              width={dividerSize.x}
+              height={dividerSize.y}
               rx={DIVIDER_THICKNESS / 2}
               // Matches the extension's muted divider (#C2C7CB)
               opacity="0.4"
@@ -220,7 +305,7 @@ export function ToolbarMockup({
 
         if (slot.kind === "handle") {
           return (
-            <GripHorizontal
+            <GripIcon
               key={slotIndex}
               x={iconX}
               y={iconY}
@@ -232,38 +317,38 @@ export function ToolbarMockup({
         }
 
         if (slot.kind === "color") {
-          const centerY = slotY + BUTTON_SIZE / 2;
+          const swatchCenter = getToolbarSwatchCenter(orientation);
           return (
             <g key={slotIndex}>
               {Array.from({ length: RING_SEGMENT_COUNT }, (_, segmentIndex) => (
                 <path
                   key={segmentIndex}
-                  d={describeRingSegment(centerY, segmentIndex)}
+                  d={describeRingSegment(swatchCenter, segmentIndex)}
                   fill="none"
                   strokeWidth={RING_THICKNESS}
                   stroke={`hsl(${(segmentIndex * 360) / RING_SEGMENT_COUNT} 100% 50%)`}
                 />
               ))}
+              {/* Every mockup shows red as the selected color */}
               <circle
-                cx={CENTER_X}
-                cy={centerY}
-                r={RING_RADIUS - RING_THICKNESS / 2}
-                className={colorClassName}
+                cx={swatchCenter.x}
+                cy={swatchCenter.y}
+                r={SWATCH_RADIUS}
+                className="fill-brand-red"
               />
             </g>
           );
         }
 
-        const isActive = slot.name === activeTool;
         return (
           <g key={slotIndex}>
-            {isActive && (
+            {slot.name === activeTool && (
               <rect
-                x={CONTENT_X}
-                y={slotY}
+                x={slotOrigin.x}
+                y={slotOrigin.y}
                 width={BUTTON_SIZE}
                 height={BUTTON_SIZE}
-                rx="10"
+                rx={TOOLBAR_ACTIVE_RADIUS}
                 className="fill-secondary-background"
               />
             )}
@@ -279,8 +364,10 @@ export function ToolbarMockup({
             {slot.shortcut && (
               <text
                 // The extension pins shortcuts to the button's bottom-right
-                x={CONTENT_X + BUTTON_SIZE - 4}
-                y={slotY + BUTTON_SIZE - (slot.shortcut === "⇧C" ? 1 : 4)}
+                x={slotOrigin.x + BUTTON_SIZE - 4}
+                y={
+                  slotOrigin.y + BUTTON_SIZE - (slot.shortcut === "⇧C" ? 1 : 4)
+                }
                 fontSize="9"
                 fontWeight="600"
                 textAnchor="end"
@@ -295,4 +382,35 @@ export function ToolbarMockup({
       })}
     </g>
   );
+}
+
+/*
+ * The toolbar while it's being dragged: the bar collapses into a circle
+ * around the drag handle. Drawn centered on (0, 0), in toolbar pixels.
+ */
+export function CollapsedToolbarMockup({ id }: { id: string }) {
+  const shadowId = `${id}-shadow`;
+  return (
+    <g aria-hidden>
+      <ShadowFilter id={shadowId} />
+      <circle
+        r={(TOOLBAR_THICKNESS - BORDER_WIDTH) / 2}
+        strokeWidth={BORDER_WIDTH}
+        filter={`url(#${shadowId})`}
+        className="stroke-border fill-white"
+      />
+      <Grip
+        x={-ICON_SIZE / 2}
+        y={-ICON_SIZE / 2}
+        width={ICON_SIZE}
+        height={ICON_SIZE}
+        className="text-muted-foreground"
+      />
+    </g>
+  );
+}
+
+// Center of the drag handle, in toolbar pixels. It is always the first slot.
+export function getToolbarHandleCenter(orientation: ToolbarOrientation) {
+  return toPoint(orientation, SLOT_OFFSETS[0] + BUTTON_SIZE / 2, CROSS_CENTER);
 }

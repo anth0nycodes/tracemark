@@ -1,9 +1,9 @@
-import { Caveat } from "next/font/google";
 import {
   FRAME_CORNER_RADIUS,
   FRAME_STROKE_WIDTH,
   TOOLBAR_EDGE_GAP,
 } from "@/lib/extension-metrics";
+import { handwritingFont } from "@/lib/fonts";
 import {
   animationStyle,
   drawIn,
@@ -16,9 +16,6 @@ import {
   TOOLBAR_THICKNESS,
   ToolbarMockup,
 } from "./toolbar-mockup";
-
-// Handwriting for the annotations only. Not part of the UI type system.
-const caveat = Caveat({ subsets: ["latin"], weight: "600" });
 
 // Converts the extension's real CSS pixels into mockup units. It is sized so
 // the full toolbar fits the page area below the browser chrome (y 36 to 420),
@@ -163,7 +160,7 @@ export function HeroMockup() {
       </g>
 
       {/* Annotations, in the order they draw in */}
-      <g className={caveat.className}>
+      <g className={handwritingFont.className}>
         <text
           x="404"
           y="104"

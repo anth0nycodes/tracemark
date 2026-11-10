@@ -1,26 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentPropsWithoutRef,
+  type Ref,
+} from "react";
 
-type PlayOnViewProps = {
-  children: ReactNode;
-  className?: string;
+type PlayOnViewProps = ComponentPropsWithoutRef<"div"> & {
+  as?: "div" | "section" | "footer";
+  // How much of the element must be visible before it plays
+  threshold?: number;
+  // Shrinks the viewport for the check, e.g. "0px 0px -15% 0px" plays once
+  // the element's top passes 85% of the screen. Use with threshold 0 for
+  // sections that can be taller than the screen.
+  rootMargin?: string;
 };
-
-// How much of the element must be visible before its sequence starts
-const VISIBLE_THRESHOLD = 0.5;
 
 /*
  * Holds every animation inside it paused (see `data-waiting` in
- * globals.css) until the element is mostly on screen, then plays them once.
+ * globals.css) until it scrolls into view, then plays them once.
  */
-export function PlayOnView({ children, className }: PlayOnViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export function PlayOnView({
+  as: Element = "div",
+  threshold = 0.5,
+  rootMargin,
+  children,
+  ...elementProps
+}: PlayOnViewProps) {
+  const elementRef = useRef<HTMLElement>(null);
   const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const element = elementRef.current;
+    if (!element) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -28,20 +42,20 @@ export function PlayOnView({ children, className }: PlayOnViewProps) {
         setIsInView(true);
         observer.disconnect();
       },
-      { threshold: VISIBLE_THRESHOLD }
+      { threshold, rootMargin }
     );
-    observer.observe(container);
+    observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [threshold, rootMargin]);
 
   return (
-    <div
-      ref={containerRef}
+    <Element
+      ref={elementRef as Ref<HTMLDivElement>}
       data-motion-sequence
       data-waiting={isInView ? undefined : ""}
-      className={className}
+      {...elementProps}
     >
       {children}
-    </div>
+    </Element>
   );
 }

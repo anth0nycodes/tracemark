@@ -14,6 +14,22 @@ const PEN_EASE = "cubic-bezier(0.37, 0, 0.63, 1)";
 const SETTLE_EASE = "cubic-bezier(0.33, 1, 0.68, 1)";
 // For objects travelling across the scene.
 const MOVE_EASE = "cubic-bezier(0.65, 0, 0.35, 1)";
+// Overshoots a little before settling, for characters popping into view.
+export const POP_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+// Content entering the page: quick start, long gentle settle.
+const ENTER_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+// Gap between staggered items in a section's entrance
+export const REVEAL_STAGGER_MS = 80;
+// Where a section's entrance starts after its header (title, then intro)
+export const SECTION_CONTENT_DELAY_MS = REVEAL_STAGGER_MS * 2;
+
+// PlayOnView trigger for whole page sections, which can be taller than the
+// screen: plays once the section's top passes 85% of the viewport.
+export const SECTION_TRIGGER = {
+  threshold: 0,
+  rootMargin: "0px 0px -15% 0px",
+};
 
 export const KEY_HINT_DURATION_MS = 800;
 
@@ -100,4 +116,11 @@ export function bump(delayMs: number, durationMs: number) {
 
 export function keyHint(delayMs: number) {
   return `key-hint ${KEY_HINT_DURATION_MS}ms ease-out ${delayMs}ms`;
+}
+
+// Fades content in while it rises a short way into place
+export const REVEAL_DURATION_MS = 600;
+
+export function riseIn(delayMs: number) {
+  return `rise-in ${REVEAL_DURATION_MS}ms ${ENTER_EASE} ${delayMs}ms both`;
 }

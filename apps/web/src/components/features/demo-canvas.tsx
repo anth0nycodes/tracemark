@@ -12,6 +12,12 @@ export const NARROW_DEMO_WIDTH = 400;
 export const DEMO_PAGE_INSET = 16;
 export const DEMO_PAGE_BOTTOM = DEMO_HEIGHT - DEMO_PAGE_INSET;
 
+// Annotation sizes for the demos. Deliberately bolder than the extension's
+// real strokes scaled down: the marks are the product, so they should read
+// at a glance even at the demos' small size.
+export const MARK_STROKE_WIDTH = 5.5;
+export const FRAME_MARK_STROKE_WIDTH = 4.5;
+
 // For groups animated with scale: scale around their own center
 export const SCALE_FROM_CENTER = "origin-center [transform-box:fill-box]";
 
@@ -41,39 +47,53 @@ export function DemoCanvas({ width, children }: DemoCanvasProps) {
   );
 }
 
-// A placeholder image: a sun and two mountains on a soft block
-export function ImagePlaceholder({
+/*
+ * A photo on a mock page, cropped to fill its box with rounded corners. The
+ * grey block behind it shows until the photo loads. `id` must be unique on
+ * the page: it names the clip shape for the corners.
+ *
+ * Photos are CC0 stock from StockSnap, saved in public/stock and cropped to
+ * each box's shape (sources listed where they're used).
+ */
+export function PageImage({
+  id,
+  src,
   x,
   y,
   width,
   height,
+  cornerRadius = 8,
 }: {
+  id: string;
+  src: string;
   x: number;
   y: number;
   width: number;
   height: number;
+  cornerRadius?: number;
 }) {
-  const centerX = x + width / 2;
-  const baseY = y + height * 0.72;
+  const clipId = `${id}-clip`;
   return (
     <g>
+      <clipPath id={clipId}>
+        <rect x={x} y={y} width={width} height={height} rx={cornerRadius} />
+      </clipPath>
       <rect
         x={x}
         y={y}
         width={width}
         height={height}
-        rx="8"
+        rx={cornerRadius}
         className="fill-secondary-background"
       />
-      <circle
-        cx={centerX + 12}
-        cy={y + height * 0.32}
-        r="6"
-        className="fill-border"
-      />
-      <path
-        d={`M${centerX - 30} ${baseY} l20 -22 l12 13 l9 -8 l18 17 Z`}
-        className="fill-border"
+      <image
+        href={src}
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        preserveAspectRatio="xMidYMid slice"
+        clipPath={`url(#${clipId})`}
       />
     </g>
   );
@@ -141,5 +161,31 @@ export function PageButton({
         {label}
       </text>
     </g>
+  );
+}
+
+// Body copy for a mock page: grey text, one tspan per line. Lines are
+// broken by hand so each one's length is predictable for annotations.
+export function PageParagraph({
+  x,
+  baselineY,
+  lineHeight,
+  fontSize,
+  lines,
+}: {
+  x: number;
+  baselineY: number;
+  lineHeight: number;
+  fontSize: number;
+  lines: string[];
+}) {
+  return (
+    <text fontSize={fontSize} className="fill-muted-foreground">
+      {lines.map((line, lineIndex) => (
+        <tspan key={line} x={x} y={baselineY + lineIndex * lineHeight}>
+          {line}
+        </tspan>
+      ))}
+    </text>
   );
 }

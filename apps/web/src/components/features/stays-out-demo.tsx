@@ -1,8 +1,4 @@
-import {
-  FRAME_CORNER_RADIUS,
-  FRAME_STROKE_WIDTH,
-  TOOLBAR_EDGE_GAP,
-} from "@/lib/extension-metrics";
+import { FRAME_CORNER_RADIUS, TOOLBAR_EDGE_GAP } from "@/lib/extension-metrics";
 import {
   animationStyle,
   expandY,
@@ -23,9 +19,12 @@ import {
   DEMO_PAGE_BOTTOM,
   DEMO_PAGE_INSET,
   DemoCanvas,
-  ImagePlaceholder,
+  FRAME_MARK_STROKE_WIDTH,
+  MARK_STROKE_WIDTH,
   PageButton,
   PageHeading,
+  PageImage,
+  PageParagraph,
   SCALE_FROM_CENTER,
   WIDE_DEMO_WIDTH,
 } from "./demo-canvas";
@@ -87,19 +86,28 @@ export function StaysOutDemo() {
           fontSize={24}
           lines={["Find your next", "quiet getaway."]}
         />
-        {[340, 310, 250, 300].map((lineWidth, lineIndex) => (
-          <rect
-            key={lineIndex}
-            x="56"
-            y={120 + lineIndex * 15}
-            width={lineWidth}
-            height="7"
-            rx="3.5"
-            className="fill-border"
-          />
-        ))}
+        <PageParagraph
+          x={56}
+          baselineY={128}
+          lineHeight={15}
+          fontSize={12}
+          lines={[
+            "Cabins, lake houses and small inns a few hours from the city,",
+            "hand-picked for slow mornings and long walks in the woods.",
+            "Book a weekend away in a few minutes,",
+            "then leave the laptop at home and switch off.",
+          ]}
+        />
         <PageButton x={56} y={196} width={96} height={28} label="Explore" />
-        <ImagePlaceholder x={430} y={44} width={220} height={170} />
+        {/* stocksnap.io/photo/wood-logs-HJAYJG4OLY */}
+        <PageImage
+          id="stays-out-photo"
+          src="/stock/cabin.jpg"
+          x={430}
+          y={44}
+          width={220}
+          height={170}
+        />
 
         {/* The bar on the bottom edge, until it's grabbed */}
         <g
@@ -147,14 +155,14 @@ export function StaysOutDemo() {
           )}
         >
           <path
-            d="M56 106 q 10 -6 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0"
+            d="M56 106 C 59.5 101.9, 64.1 101.3, 67.6 105.3 C 71.3 109.3, 76.3 109.3, 80.0 105.4 C 83.5 101.5, 88.3 101.6, 91.9 105.6 C 95.6 108.9, 100.6 109.2, 104.3 105.9 C 107.7 102.2, 112.3 102.6, 115.8 106.3 C 118.9 109.8, 123.0 109.0, 126.1 105.5 C 129.2 102.0, 133.3 101.9, 136.4 105.4 C 139.6 109.3, 143.8 109.5, 147.0 105.6 C 150.2 102.7, 154.5 103.5, 157.8 106.3 C 160.7 109.4, 164.6 109.4, 167.6 106.3 C 170.8 102.8, 175.1 102.6, 178.4 106.2 C 181.7 109.5, 186.1 108.9, 189.4 105.5 C 192.4 102.4, 196.3 102.6, 199.3 105.6 C 202.4 109.7, 206.6 109.6, 209.8 105.6 C 211.6 102.4, 214.1 102.3, 216.0 105.5"
             fill="none"
-            strokeWidth="3.5"
+            strokeWidth={MARK_STROKE_WIDTH}
             strokeLinecap="round"
             className="stroke-brand-red"
           />
           <path
-            d="M64 138.5 L358 138.5"
+            d="M62 139.4 C 125 137.6, 210 140.6, 276 138.6 C 312 137.6, 338 139.2, 355 138.2"
             strokeWidth="16"
             strokeLinecap="round"
             opacity="0.6"
@@ -167,7 +175,7 @@ export function StaysOutDemo() {
             height="186"
             rx={FRAME_CORNER_RADIUS * EXTENSION_SCALE}
             fill="none"
-            strokeWidth={FRAME_STROKE_WIDTH * EXTENSION_SCALE}
+            strokeWidth={FRAME_MARK_STROKE_WIDTH}
             className="stroke-brand-green"
           />
 

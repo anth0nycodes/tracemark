@@ -6,9 +6,11 @@ import {
 } from "@/lib/motion-sequence";
 import {
   DemoCanvas,
-  ImagePlaceholder,
+  MARK_STROKE_WIDTH,
   NARROW_DEMO_WIDTH,
   PageHeading,
+  PageImage,
+  PageParagraph,
 } from "./demo-canvas";
 import { ShortcutHint } from "./shortcut-hint";
 
@@ -28,31 +30,39 @@ export function UndoRedoDemo() {
           fontSize={20}
           lines={["Notes on spacing"]}
         />
-        {[280, 250, 180].map((lineWidth, lineIndex) => (
-          <rect
-            key={lineIndex}
-            x="48"
-            y={74 + lineIndex * 14}
-            width={lineWidth}
-            height="7"
-            rx="3.5"
-            className="fill-border"
-          />
-        ))}
-        <ImagePlaceholder x={48} y={124} width={304} height={116} />
+        <PageParagraph
+          x={48}
+          baselineY={81}
+          lineHeight={14}
+          fontSize={11.5}
+          lines={[
+            "Good spacing is mostly rhythm. Pick a base unit,",
+            "use it everywhere, and let whitespace group",
+            "related things for you.",
+          ]}
+        />
+        {/* stocksnap.io/photo/minimal-office-CZWGWFXJYB */}
+        <PageImage
+          id="undo-redo-photo"
+          src="/stock/minimal-desk.jpg"
+          x={48}
+          y={124}
+          width={304}
+          height={116}
+        />
 
         {/* First mark: stays */}
         <path
-          d="M40 54 C 42 34, 208 30, 214 50 C 220 70, 62 76, 42 62 C 36 58, 38 50, 50 45"
-          strokeWidth="3.5"
+          d="M37 57 C 35 41, 118 31, 194 35 C 213 36.5, 219 48, 211 58 C 201 68, 122 72, 61 68.5 C 43 67, 36 60, 40 51 C 43 45.5, 50 43, 59 42"
+          strokeWidth={MARK_STROKE_WIDTH}
           className="stroke-brand-blue"
           {...drawnStrokeProps}
           style={animationStyle(drawIn(300, 700))}
         />
-        {/* Second mark: undone, then redone */}
+        {/* Second mark, circling the plant: undone, then redone */}
         <path
-          d="M168 156 C 190 134, 250 140, 252 176 C 254 212, 186 220, 164 196 C 152 182, 156 162, 176 152"
-          strokeWidth="3.5"
+          d="M219 150 C 237 133, 285 131.5, 298 158 C 307 180, 291 206, 256 210 C 226 213, 204 197, 206.5 175 C 208 160, 216.5 151, 231 145.5"
+          strokeWidth={MARK_STROKE_WIDTH}
           className="stroke-brand-red"
           {...drawnStrokeProps}
           style={animationStyle(

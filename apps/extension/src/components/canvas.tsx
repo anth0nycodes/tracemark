@@ -15,6 +15,7 @@ import {
   type FabricObject,
   type TPointerEvent,
   type TPointerEventInfo,
+  type XY,
 } from "fabric";
 import type { ToolbarStates } from "@/App";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
@@ -23,6 +24,8 @@ import { useColor } from "@/context/toolbar/color/use-color";
 import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
 import { useHighlighterPopover } from "@/context/toolbar/highlighter-popover/use-highlighter-popover";
+import type { LineStyle } from "@/context/toolbar/line-popover/constants";
+import { useLinePopover } from "@/context/toolbar/line-popover/use-line-popover";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { getCanvasCoordinates } from "@/lib/helpers";
@@ -30,7 +33,39 @@ import { getCanvasCoordinates } from "@/lib/helpers";
 const HIGHLIGHTER_ALPHA = 0.4;
 const CANVAS_LAG_WARNING_HEIGHT = 16250;
 const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
+const LINE_STROKE_WIDTH = 4;
+const ARROW_HEAD_LENGTH = 16;
+// Angle between the shaft and each wing of the arrowhead (30deg)
+const ARROW_HEAD_ANGLE = Math.PI / 6;
 let hasAlertedLagWarning = false;
+
+// The two wing endpoints of an arrowhead whose tip sits at `tip`, pointing
+// away from `tail`
+function getArrowHeadWings(tip: XY, tail: XY): [XY, XY] {
+  const shaftAngle = Math.atan2(tip.y - tail.y, tip.x - tail.x);
+  // Cap the head at half the shaft so short arrows don't turn into a blob
+  const headLength = Math.min(
+    ARROW_HEAD_LENGTH,
+    Math.hypot(tip.x - tail.x, tip.y - tail.y) / 2
+  );
+  const wingAt = (angleOffset: number) => ({
+    x: tip.x - headLength * Math.cos(shaftAngle + angleOffset),
+    y: tip.y - headLength * Math.sin(shaftAngle + angleOffset),
+  });
+  return [wingAt(ARROW_HEAD_ANGLE), wingAt(-ARROW_HEAD_ANGLE)];
+}
+
+// Arrowheads are drawn by retracing the polyline out to each wing and back to
+// the tip, so every style stays a single Polyline object
+function getLinePoints(lineStyle: LineStyle, start: XY, end: XY): XY[] {
+  if (lineStyle === "Line") return [start, end];
+
+  const [endWingA, endWingB] = getArrowHeadWings(end, start);
+  if (lineStyle === "Arrow") return [start, end, endWingA, end, endWingB];
+
+  const [startWingA, startWingB] = getArrowHeadWings(start, end);
+  return [startWingA, start, startWingB, start, end, endWingA, end, endWingB];
+}
 
 function alertLagWarning() {
   alert(
@@ -149,6 +184,7 @@ export function Canvas({
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
   const { frame } = useFramePopover();
+  const { lineStyle } = useLinePopover();
   const shadowContainer = useShadowContainer();
   // Cloned selection from the last Cmd/Ctrl+C, kept in memory (same tab only)
   const clipboardRef = useRef<FabricObject | null>(null);
@@ -630,23 +666,21 @@ export function Canvas({
         fc.requestRenderAll();
         fc.isDrawingMode = false;
         let lineObject: Polyline | null = null;
-        let startX: number;
-        let startY: number;
+        let startPoint: XY;
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
           isUsingToolRef.current = true;
-          const { x, y } = getCanvasCoordinates(fc, e.e);
-          startX = x;
-          startY = y;
+          startPoint = getCanvasCoordinates(fc, e.e);
 
           lineObject = new Polyline(
-            [
-              { x: startX, y: startY },
-              { x: startX, y: startY },
-            ],
+            getLinePoints(lineStyle, startPoint, startPoint),
             {
               stroke: color,
-              strokeWidth: 4,
+              strokeWidth: LINE_STROKE_WIDTH,
+              // round joins keep the arrowhead tip clean where the polyline
+              // doubles back on itself
+              strokeLineJoin: "round",
+              strokeLineCap: "round",
               fill: "transparent",
               // let Fabric derive position/bbox from points instead of
               // overriding with a manual left/top
@@ -658,15 +692,12 @@ export function Canvas({
         };
 
         const handleMouseMove = (e: TPointerEventInfo<TPointerEvent>) => {
-          const { x: endX, y: endY } = getCanvasCoordinates(fc, e.e);
           if (!lineObject) return;
+          const endPoint = getCanvasCoordinates(fc, e.e);
 
-          const updatedCoordinates = [
-            { x: startX, y: startY },
-            { x: endX, y: endY },
-          ];
-
-          lineObject.set({ points: updatedCoordinates });
+          lineObject.set({
+            points: getLinePoints(lineStyle, startPoint, endPoint),
+          });
           // recompute bounding box/pathOffset after mutating points,
           // otherwise controls + hit area stay stale
           lineObject.setBoundingBox(true);
@@ -715,6 +746,7 @@ export function Canvas({
     eraserWidth,
     textAlignment,
     frame,
+    lineStyle,
     setCurrentTool,
     shadowContainer,
     isUsingToolRef,

@@ -30,6 +30,12 @@ import { useLinePopover } from "@/context/toolbar/line-popover/use-line-popover"
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
 import { getCanvasCoordinates } from "@/lib/helpers";
+import {
+  applySelectionStyles,
+  canvasSelectionOptions,
+} from "@/lib/selection-styles";
+
+applySelectionStyles();
 
 const HIGHLIGHTER_ALPHA = 0.4;
 const CANVAS_LAG_WARNING_HEIGHT = 16250;
@@ -201,6 +207,7 @@ export function Canvas({
     const canvas = canvasRef.current;
     const fc = new FabricCanvas(canvas, {
       enableRetinaScaling: true, // Let Fabric handle DPR automatically
+      ...canvasSelectionOptions,
     });
     setFc(fc);
 

@@ -11,6 +11,7 @@ import {
   Point,
   Polyline,
   Rect,
+  Textbox,
   Triangle,
   type FabricObject,
   type TPointerEvent,
@@ -34,6 +35,7 @@ const HIGHLIGHTER_ALPHA = 0.4;
 const CANVAS_LAG_WARNING_HEIGHT = 16250;
 const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
 const LINE_STROKE_WIDTH = 4;
+const TEXTBOX_DEFAULT_WIDTH = 500;
 const ARROW_HEAD_LENGTH = 16;
 // Angle between the shaft and each wing of the arrowhead (30deg)
 const ARROW_HEAD_ANGLE = Math.PI / 6;
@@ -512,9 +514,12 @@ export function Canvas({
           if (activeObject instanceof IText && activeObject.isEditing) return;
 
           const { x, y } = getCanvasCoordinates(fc, e.e);
-          const textObject = new IText("", {
+          // Textbox (an IText subclass) wraps at a fixed width, so it can be
+          // resized from the side handles and alignment has room to show
+          const textObject = new Textbox("", {
             left: x,
             top: y,
+            width: TEXTBOX_DEFAULT_WIDTH,
             fontFamily: "Arial",
             fill: color,
             hasControls: false,

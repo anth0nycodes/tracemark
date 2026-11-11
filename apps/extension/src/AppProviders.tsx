@@ -5,6 +5,7 @@ import { ColorProvider } from "@/context/toolbar/color/ColorProvider";
 import { EraserPopoverProvider } from "@/context/toolbar/eraser-popover/EraserPopoverProvider";
 import { FramePopoverProvider } from "@/context/toolbar/frame/FramePopoverProvider";
 import { HighlighterPopoverProvider } from "@/context/toolbar/highlighter-popover/HighlighterPopoverProvider";
+import { LinePopoverProvider } from "@/context/toolbar/line-popover/LinePopoverProvider";
 import { PencilPopoverProvider } from "@/context/toolbar/pencil-popover/PencilPopoverProvider";
 import { TextPopoverProvider } from "@/context/toolbar/text-popover/TextPopoverProvider";
 
@@ -23,6 +24,7 @@ const providers: ProviderComponent[] = [
   EraserPopoverProvider,
   TextPopoverProvider,
   FramePopoverProvider,
+  LinePopoverProvider,
 ];
 
 export function AppProviders({ children }: AppProvidersProps) {

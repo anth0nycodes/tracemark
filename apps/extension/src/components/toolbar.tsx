@@ -42,6 +42,7 @@ import { ColorPicker } from "@/components/color-picker";
 import { Line, Text, type CustomIcon } from "@/components/custom-icons/icons";
 import { EraserPopover } from "@/components/popovers/erase-popover";
 import { HighlighterPopover } from "@/components/popovers/highlighter-popover";
+import { LinePopover } from "@/components/popovers/line-popover";
 import { PencilPopover } from "@/components/popovers/pencil-popover";
 import { TextPopover } from "@/components/popovers/text-popover";
 import { Button } from "@/components/ui/button";
@@ -208,7 +209,7 @@ const toolbarItems: ToolbarItemProps[] = [
     popover: <TextPopover />,
   },
   { name: "Frame", icon: Square, shortcut: "f", popover: <FramePopover /> },
-  { name: "Line", icon: Line, shortcut: "l" },
+  { name: "Line", icon: Line, shortcut: "l", popover: <LinePopover /> },
 ];
 
 interface SecondaryToolbarItem {

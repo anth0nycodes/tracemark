@@ -9,12 +9,13 @@ import {
   IText,
   PencilBrush,
   Point,
-  Polyline,
   Rect,
+  Textbox,
   Triangle,
   type FabricObject,
   type TPointerEvent,
   type TPointerEventInfo,
+  type XY,
 } from "fabric";
 import type { ToolbarStates } from "@/App";
 import { useFabricCanvas } from "@/context/fabric-canvas/use-fabric-canvas";
@@ -23,13 +24,23 @@ import { useColor } from "@/context/toolbar/color/use-color";
 import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
 import { useFramePopover } from "@/context/toolbar/frame/use-frame-popover";
 import { useHighlighterPopover } from "@/context/toolbar/highlighter-popover/use-highlighter-popover";
+import { useLinePopover } from "@/context/toolbar/line-popover/use-line-popover";
 import { usePencilPopover } from "@/context/toolbar/pencil-popover/use-pencil-popover";
 import { useTextPopover } from "@/context/toolbar/text-popover/use-text-popover";
+import { ArrowLine } from "@/lib/arrow-line";
 import { getCanvasCoordinates } from "@/lib/helpers";
+import {
+  applySelectionStyles,
+  canvasSelectionOptions,
+} from "@/lib/selection-styles";
+
+applySelectionStyles();
 
 const HIGHLIGHTER_ALPHA = 0.4;
 const CANVAS_LAG_WARNING_HEIGHT = 16250;
 const CANVAS_HEIGHT_INCREMENT_AMOUNT = 500;
+const LINE_STROKE_WIDTH = 4;
+const TEXTBOX_DEFAULT_WIDTH = 500;
 let hasAlertedLagWarning = false;
 
 function alertLagWarning() {
@@ -149,6 +160,7 @@ export function Canvas({
   const { eraserWidth } = useEraserPopover();
   const { textAlignment } = useTextPopover();
   const { frame } = useFramePopover();
+  const { lineStyle } = useLinePopover();
   const shadowContainer = useShadowContainer();
   // Cloned selection from the last Cmd/Ctrl+C, kept in memory (same tab only)
   const clipboardRef = useRef<FabricObject | null>(null);
@@ -163,6 +175,7 @@ export function Canvas({
     const canvas = canvasRef.current;
     const fc = new FabricCanvas(canvas, {
       enableRetinaScaling: true, // Let Fabric handle DPR automatically
+      ...canvasSelectionOptions,
     });
     setFc(fc);
 
@@ -476,9 +489,12 @@ export function Canvas({
           if (activeObject instanceof IText && activeObject.isEditing) return;
 
           const { x, y } = getCanvasCoordinates(fc, e.e);
-          const textObject = new IText("", {
+          // Textbox (an IText subclass) wraps at a fixed width, so it can be
+          // resized from the side handles and alignment has room to show
+          const textObject = new Textbox("", {
             left: x,
             top: y,
+            width: TEXTBOX_DEFAULT_WIDTH,
             fontFamily: "Arial",
             fill: color,
             hasControls: false,
@@ -629,47 +645,33 @@ export function Canvas({
         fc.discardActiveObject();
         fc.requestRenderAll();
         fc.isDrawingMode = false;
-        let lineObject: Polyline | null = null;
-        let startX: number;
-        let startY: number;
+        let lineObject: ArrowLine | null = null;
+        let startPoint: XY;
 
         const handleMouseDown = (e: TPointerEventInfo<TPointerEvent>) => {
           isUsingToolRef.current = true;
-          const { x, y } = getCanvasCoordinates(fc, e.e);
-          startX = x;
-          startY = y;
+          startPoint = getCanvasCoordinates(fc, e.e);
 
-          lineObject = new Polyline(
-            [
-              { x: startX, y: startY },
-              { x: startX, y: startY },
-            ],
-            {
-              stroke: color,
-              strokeWidth: 4,
-              fill: "transparent",
-              // let Fabric derive position/bbox from points instead of
-              // overriding with a manual left/top
-              objectCaching: false,
-              excludeFromExport: true,
-            }
-          );
+          lineObject = ArrowLine.fromEndpoints(startPoint, startPoint, {
+            lineStyle,
+            stroke: color,
+            strokeWidth: LINE_STROKE_WIDTH,
+            // round joins keep the arrowhead tip clean where the polyline
+            // doubles back on itself
+            strokeLineJoin: "round",
+            strokeLineCap: "round",
+            fill: "transparent",
+            // let Fabric derive position/bbox from points instead of
+            // overriding with a manual left/top
+            objectCaching: false,
+            excludeFromExport: true,
+          });
           fc.add(lineObject);
         };
 
         const handleMouseMove = (e: TPointerEventInfo<TPointerEvent>) => {
-          const { x: endX, y: endY } = getCanvasCoordinates(fc, e.e);
           if (!lineObject) return;
-
-          const updatedCoordinates = [
-            { x: startX, y: startY },
-            { x: endX, y: endY },
-          ];
-
-          lineObject.set({ points: updatedCoordinates });
-          // recompute bounding box/pathOffset after mutating points,
-          // otherwise controls + hit area stay stale
-          lineObject.setBoundingBox(true);
+          lineObject.setEndpoints(startPoint, getCanvasCoordinates(fc, e.e));
           fc.requestRenderAll();
         };
 
@@ -715,6 +717,7 @@ export function Canvas({
     eraserWidth,
     textAlignment,
     frame,
+    lineStyle,
     setCurrentTool,
     shadowContainer,
     isUsingToolRef,

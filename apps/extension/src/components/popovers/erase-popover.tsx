@@ -6,9 +6,9 @@ import {
 import { useEraserPopover } from "@/context/toolbar/eraser-popover/use-eraser-popover";
 
 const options: PopoverOption<number>[] = [
-  { icon: Dot, value: 5, strokeWidth: 3, label: "Eraser width 5px" },
-  { icon: Dot, value: 15, strokeWidth: 7, label: "Eraser width 15px" },
-  { icon: Dot, value: 25, strokeWidth: 10, label: "Eraser width 25px" },
+  { icon: Dot, value: 8, strokeWidth: 4, label: "Eraser width 8px" },
+  { icon: Dot, value: 12, strokeWidth: 6, label: "Eraser width 12px" },
+  { icon: Dot, value: 18, strokeWidth: 9, label: "Eraser width 18px" },
 ];
 
 export function EraserPopover() {

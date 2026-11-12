@@ -81,21 +81,38 @@ export function Features() {
       className="flex flex-col gap-10 py-16 md:py-24"
     >
       <div className="flex flex-col gap-6">
-        <a
-          href="https://www.producthunt.com/products/tracemark?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-tracemark"
-          className="inline-block h-11"
-          style={animationStyle(riseIn(0))}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            className="size-full object-contain"
-            alt="Tracemark - The only markup tool you need. | Product Hunt"
-            width="250"
-            height="54"
-            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1313455&amp;theme=light&amp;t=1794469546178"
-          />
-        </a>
+        <div className="flex flex-col gap-4">
+          <a
+            href="https://www.producthunt.com/products/tracemark?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-tracemark"
+            className="inline-block h-8 sm:h-11"
+            style={animationStyle(riseIn(0))}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              className="size-full object-contain"
+              alt="Tracemark - The only markup tool you need. | Product Hunt"
+              width="250"
+              height="54"
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1313455&amp;theme=light&amp;t=1794469546178"
+            />
+          </a>
+          <a 
+            href="https://programmerneeds.com/tools/tracemark?utm_source=maker-site&amp;utm_medium=badge&amp;utm_campaign=tracemark"
+            className="inline-block h-8 sm:h-11"
+            style={animationStyle(riseIn(0))}
+            target="_blank"
+            rel="noopener"
+          >
+            <Image
+              className="size-full object-contain"
+              src="https://programmerneeds.com/api/badge/tracemark?v=10"
+              alt="Find Tracemark on ProgrammerNeeds"
+              width="220" 
+              height="54"
+            />
+          </a>
+        </div>
         <SectionHeader
           id="features-title"
           delayMs={HEADER_DELAY_MS}

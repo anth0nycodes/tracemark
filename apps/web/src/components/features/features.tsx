@@ -22,9 +22,12 @@ import { StaysOutDemo } from "./stays-out-demo";
 import { UndoRedoDemo } from "./undo-redo-demo";
 
 const CARD_COUNT = 4;
+// The Product Hunt badge reveals first, pushing the header and cards back a step
+const HEADER_DELAY_MS = REVEAL_STAGGER_MS;
+const CARDS_DELAY_MS = SECTION_CONTENT_DELAY_MS + HEADER_DELAY_MS;
 // When the last card's entrance finishes
 const CARDS_LANDED_AT_MS =
-  SECTION_CONTENT_DELAY_MS + (CARD_COUNT - 1) * REVEAL_STAGGER_MS + REVEAL_DURATION_MS;
+  CARDS_DELAY_MS + (CARD_COUNT - 1) * REVEAL_STAGGER_MS + REVEAL_DURATION_MS;
 
 type FeatureCardProps = {
   title: string;
@@ -51,7 +54,7 @@ function FeatureCard({
         "border-border relative z-10 flex flex-col gap-3 rounded-2xl border bg-white p-3",
         className,
       )}
-      style={animationStyle(riseIn(SECTION_CONTENT_DELAY_MS + revealIndex * REVEAL_STAGGER_MS))}
+      style={animationStyle(riseIn(CARDS_DELAY_MS + revealIndex * REVEAL_STAGGER_MS))}
     >
       <PlayOnView
         className={cn(
@@ -81,6 +84,7 @@ export function Features() {
         <a
           href="https://www.producthunt.com/products/tracemark?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-tracemark"
           className="inline-block h-11"
+          style={animationStyle(riseIn(0))}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -94,6 +98,7 @@ export function Features() {
         </a>
         <SectionHeader
           id="features-title"
+          delayMs={HEADER_DELAY_MS}
           title="Simple tools, no setup"
           description="Open Tracemark on any tab and start annotating. No accounts, no extra apps."
         />

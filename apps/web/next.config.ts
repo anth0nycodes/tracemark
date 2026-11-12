@@ -1,15 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "programmerneeds.com",
-        pathname: "/api/badge/**",
-      },
-    ],
-  },
+  /* config options here */
 };
 
 export default nextConfig;

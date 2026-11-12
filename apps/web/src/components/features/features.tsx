@@ -51,7 +51,7 @@ function FeatureCard({
   return (
     <article
       className={cn(
-        "border-border relative z-10 flex flex-col gap-3 rounded-2xl border bg-white p-3",
+        "border-border relative z-10 flex min-w-0 flex-col gap-3 rounded-2xl border bg-white p-3",
         className,
       )}
       style={animationStyle(riseIn(CARDS_DELAY_MS + revealIndex * REVEAL_STAGGER_MS))}
@@ -97,21 +97,6 @@ export function Features() {
               src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1313455&amp;theme=light&amp;t=1794469546178"
             />
           </a>
-          <a 
-            href="https://programmerneeds.com/tools/tracemark?utm_source=maker-site&amp;utm_medium=badge&amp;utm_campaign=tracemark"
-            className="inline-block h-8 sm:h-11"
-            style={animationStyle(riseIn(0))}
-            target="_blank"
-            rel="noopener"
-          >
-            <Image
-              className="size-full object-contain"
-              src="https://programmerneeds.com/api/badge/tracemark?v=10"
-              alt="Find Tracemark on ProgrammerNeeds"
-              width="220" 
-              height="54"
-            />
-          </a>
         </div>
         <SectionHeader
           id="features-title"
@@ -125,7 +110,7 @@ export function Features() {
         Bento: wide cards sit diagonally on large screens. At tablet width the
         wide cards take full rows with the two narrow ones side by side.
       */}
-      <div className="relative grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="relative grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {/* Peeking over the cards from behind them */}
         <TriangleGuy
           aria-hidden

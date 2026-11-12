@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import {
   animationStyle,
   hiddenBetween,
@@ -23,9 +24,7 @@ import { UndoRedoDemo } from "./undo-redo-demo";
 const CARD_COUNT = 4;
 // When the last card's entrance finishes
 const CARDS_LANDED_AT_MS =
-  SECTION_CONTENT_DELAY_MS +
-  (CARD_COUNT - 1) * REVEAL_STAGGER_MS +
-  REVEAL_DURATION_MS;
+  SECTION_CONTENT_DELAY_MS + (CARD_COUNT - 1) * REVEAL_STAGGER_MS + REVEAL_DURATION_MS;
 
 type FeatureCardProps = {
   title: string;
@@ -50,27 +49,21 @@ function FeatureCard({
     <article
       className={cn(
         "border-border relative z-10 flex flex-col gap-3 rounded-2xl border bg-white p-3",
-        className
+        className,
       )}
-      style={animationStyle(
-        riseIn(SECTION_CONTENT_DELAY_MS + revealIndex * REVEAL_STAGGER_MS)
-      )}
+      style={animationStyle(riseIn(SECTION_CONTENT_DELAY_MS + revealIndex * REVEAL_STAGGER_MS))}
     >
       <PlayOnView
         className={cn(
           "bg-secondary-background relative overflow-hidden rounded-xl md:h-64",
-          isWide ? "aspect-[19/8] md:aspect-auto" : "h-60"
+          isWide ? "aspect-[19/8] md:aspect-auto" : "h-60",
         )}
       >
         {demo}
       </PlayOnView>
       <div className="flex flex-col gap-1 px-1 pb-1">
-        <h3 className="font-secondary text-base font-medium md:text-lg">
-          {title}
-        </h3>
-        <p className="text-muted-foreground text-sm md:text-base">
-          {description}
-        </p>
+        <h3 className="font-secondary text-base font-medium md:text-lg">{title}</h3>
+        <p className="text-muted-foreground text-sm md:text-base">{description}</p>
       </div>
     </article>
   );
@@ -84,11 +77,27 @@ export function Features() {
       aria-labelledby="features-title"
       className="flex flex-col gap-10 py-16 md:py-24"
     >
-      <SectionHeader
-        id="features-title"
-        title="Simple tools, no setup"
-        description="Open Tracemark on any tab and start annotating. No accounts, no extra apps."
-      />
+      <div className="flex flex-col gap-6">
+        <a
+          href="https://www.producthunt.com/products/tracemark?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-tracemark"
+          className="inline-block h-11"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            className="size-full object-contain"
+            alt="Tracemark - The only markup tool you need. | Product Hunt"
+            width="250"
+            height="54"
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1313455&amp;theme=light&amp;t=1794469546178"
+          />
+        </a>
+        <SectionHeader
+          id="features-title"
+          title="Simple tools, no setup"
+          description="Open Tracemark on any tab and start annotating. No accounts, no extra apps."
+        />
+      </div>
 
       {/*
         Bento: wide cards sit diagonally on large screens. At tablet width the
@@ -106,7 +115,7 @@ export function Features() {
             ...travelOffset(0, 70),
             ...animationStyle(
               hiddenBetween(0, CARDS_LANDED_AT_MS),
-              travelFrom(CARDS_LANDED_AT_MS, 500, POP_EASE)
+              travelFrom(CARDS_LANDED_AT_MS, 500, POP_EASE),
             ),
           }}
         />

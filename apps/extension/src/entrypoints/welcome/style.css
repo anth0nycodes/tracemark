@@ -1,0 +1,68 @@
+@import "../../index.css";
+
+/*
+ * Welcome page brand layer: the landing page's fonts, brand colors, and
+ * dot grid. Kept out of index.css so the overlay injected into host pages
+ * doesn't ship these fonts.
+ *
+ * Fonts are declared here instead of importing each package's index.css,
+ * which would bundle every language subset. Latin covers the page's copy.
+ */
+@font-face {
+  font-family: "Bricolage Grotesque Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url("@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2")
+    format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Manrope Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url("@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2")
+    format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Caveat";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/caveat/files/caveat-latin-600-normal.woff2") format("woff2");
+}
+
+@theme {
+  /* Brand colors from the landing page. For illustration and decoration, not text. */
+  --color-brand-red: #e04040;
+  --color-brand-green: #4bbe3a;
+  --color-brand-blue: #4291db;
+  --color-brand-yellow: #ffd700;
+
+  --font-body: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", cursive;
+}
+
+/* Faint dots, like a canvas or graph paper. Follows the theme's muted color. */
+@utility dot-grid {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--color-muted-foreground) 30%, transparent) 1px,
+    transparent 1.5px
+  );
+  background-size: 18px 18px;
+}
+
+/* Same tracking the landing page uses for each family */
+@utility font-body {
+  font-family: var(--font-body);
+  letter-spacing: -0.025em;
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}

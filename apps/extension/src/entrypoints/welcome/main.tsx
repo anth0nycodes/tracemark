@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@/index.css";
+import "./style.css";
 import { Welcome } from "./Welcome";
 
 // The theme tokens key off a `dark` class; this page has no toggle, so mirror

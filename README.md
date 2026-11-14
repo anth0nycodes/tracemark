@@ -1,12 +1,19 @@
-# Tracemark
+<div align="center">
 
 <img src=".github/assets/poster.png" alt="The web is your canvas: a browser window covered in Tracemark annotations, including a red frame, a purple triangle, a handwritten 'I like this!' and a worked math problem." />
 
-<br />
+# <img src="apps/extension/assets/icon.svg" alt="" width="32" height="32" /> Tracemark
 
-A Chrome extension that lets you draw over any webpage and export or copy the result as an image.
+A Chrome extension that lets you markup/annotate any webpage and export or copy the result as an image.
 
-**[Install from the Chrome Web Store →](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)**
+[![Install from the Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-Install-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)
+
+[![Version](https://img.shields.io/chrome-web-store/v/mgckpdklnjeklihpmplgcfnhncifikjd?label=version)](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)
+[![Users](https://img.shields.io/chrome-web-store/users/mgckpdklnjeklihpmplgcfnhncifikjd)](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)
+[![Rating](https://img.shields.io/chrome-web-store/rating/mgckpdklnjeklihpmplgcfnhncifikjd)](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)
+[![License](https://img.shields.io/github/license/anth0nycodes/tracemark)](./LICENSE)
+
+</div>
 
 Tracemark injects a full-page drawing overlay into the active tab. Annotate anything — articles, dashboards, designs — with pencil, highlighter, text, and framing tools, then export the annotated view as a PNG or copy it straight to your clipboard.
 
@@ -15,7 +22,7 @@ Tracemark injects a full-page drawing overlay into the active tab. Annotate anyt
 - **Draw over any page** — pencil, highlighter, line, frame, text, eraser, and a color picker.
 - **Edit as you go** — undo, redo, copy, paste, group, and delete your objects.
 - **Capture in one click** — copy to clipboard or export as PNG.
-- **Stays out of your way** — toolbar that snaps to any screen edge, single-key tool shortcuts, Interact / Select modes, and a hotkey to hide the overlay without losing your work.
+- **Stays out of your way** — toolbar that snaps to any screen edge, single-key tool shortcuts, and a hotkey to hide the overlay without losing your work.
 - **Light and dark themes** — follows your system by default; your choice is remembered across sites.
 - **Private by design** — runs only on the tab you activate, entirely in your browser.
 - **Onboards on install** — a welcome page walks through the tools and shortcuts.
@@ -35,7 +42,11 @@ Click the toolbar icon to open the overlay on the current tab; click it again to
 | Frame       | `F` | Box off the part that matters          |
 | Line        | `L` | Straight lines for pointing things out |
 
-Pencil, Highlighter, Erase, Text, and Frame each open a popover for color, size, and style.
+Pencil, Highlighter, Erase, Text, and Frame each open a popover for color, size, and style. Copy, Export (PNG), Clear, and the light/dark theme toggle live on the secondary toolbar.
+
+<details>
+<summary><strong>Keyboard shortcuts</strong></summary>
+<br />
 
 | Shortcut         | Action                   |
 | ---------------- | ------------------------ |
@@ -48,11 +59,17 @@ Pencil, Highlighter, Erase, Text, and Frame each open a popover for color, size,
 | `Backspace`      | Delete selection         |
 | `⌘.` / `Ctrl+.`  | Hide / show overlay      |
 
-Copy, Export (PNG), Clear, and the light/dark theme toggle live on the secondary toolbar.
+</details>
+
+<details>
+<summary><strong>Moving and hiding the toolbar</strong></summary>
+<br />
 
 Drag the toolbar by its handle to move it. It snaps to the nearest screen edge — horizontal on the top and bottom, vertical on the left and right — and collapses into a small circle while you pull it between edges.
 
 Hiding the overlay with `⌘.` / `Ctrl+.` keeps your drawings, undo history, and active tool intact while the page works normally. Closing it does not — drawings aren't saved, so copy or export before closing the overlay or reloading the page.
+
+</details>
 
 ## Tech Stack
 
@@ -62,52 +79,30 @@ Hiding the overlay with `⌘.` / `Ctrl+.` keeps your drawings, undo history, and
 - [Tailwind CSS 4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com)
 - [Motion](https://motion.dev) — animations
 
-## Getting Started
+## Development
 
 Requires [pnpm](https://pnpm.io) (see `packageManager` in `package.json`). This is a pnpm workspace — run everything from the repo root.
 
 ```bash
-# install dependencies for all apps
 pnpm install
-
-# run the extension in dev mode
-pnpm dev:extension
-
-# run the landing page in dev mode
-pnpm dev:web
+pnpm dev:extension   # launches a browser with the extension loaded and hot reload
 ```
 
-`pnpm dev:extension` launches a browser with the extension loaded and hot reload enabled.
+| Script               | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| `pnpm dev:extension` | Extension dev mode with hot reload              |
+| `pnpm dev:web`       | Landing page dev server                         |
+| `pnpm build`         | Production build of both apps                   |
+| `pnpm zip`           | Package the extension as a distributable zip    |
+| `pnpm check`         | Type-check the extension (`wxt prepare && tsc`) |
+| `pnpm lint`          | Run ESLint in both apps                         |
+| `pnpm checkall`      | Run `check`, `lint`, and `build` in sequence    |
 
-## Build
+Extension build output lands in `apps/extension/.output/`. To run any other script in a single app, use `pnpm --filter ./apps/<app> <script>`.
 
-```bash
-# production build of both apps
-pnpm build
-
-# package the extension as a distributable zip
-pnpm zip
-```
-
-Extension build output lands in `apps/extension/.output/`.
-
-## Scripts
-
-Run from the repo root:
-
-| Script               | Description                                             |
-| -------------------- | ------------------------------------------------------- |
-| `pnpm dev:extension` | Extension dev mode with hot reload                      |
-| `pnpm dev:web`       | Landing page dev server                                 |
-| `pnpm build`         | Production build of both apps                           |
-| `pnpm zip`           | Package the extension as a zip                          |
-| `pnpm check`         | Type-check the extension (`wxt prepare && tsc`)         |
-| `pnpm lint`          | Run ESLint in both apps                                 |
-| `pnpm checkall`      | Run `check`, `lint`, and `build` in sequence            |
-
-To run any other script in a single app, use `pnpm --filter ./apps/<app> <script>`.
-
-## Project Structure
+<details>
+<summary><strong>Project structure</strong></summary>
+<br />
 
 ```
 apps/
@@ -126,13 +121,7 @@ apps/
 └── web/                    # the landing page (Next.js)
 ```
 
-## How It Works
-
-Clicking the toolbar icon injects an overlay entrypoint into the active tab. The overlay mounts a React app inside a Shadow DOM container, isolating the extension's styles from the host page. A Fabric.js canvas sits on top of the page, and toolbar tools drive canvas state through React context providers. On export, the canvas is serialized to an image for download or clipboard copy.
-
-The theme is applied as a `dark` class on the overlay's content container inside the shadow root, and the user's choice is saved to `chrome.storage.local` so it carries across every site.
-
-On first install, the background script opens `welcome.html` — a standalone React page that introduces the tools and shortcuts.
+</details>
 
 ## License
 

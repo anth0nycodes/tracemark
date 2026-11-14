@@ -84,7 +84,9 @@ export function TracemarkLogo(props: SVGProps<SVGSVGElement>) {
  */
 export function TracemarkTile(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 40 40" fill="none" {...props}>
+    // Cropped to the tile's outline (stroke included), so the tile fills the
+    // element instead of sitting inside a margin. Matches src/app/icon.svg.
+    <svg viewBox="1.27 1.12 37.48 37.48" fill="none" {...props}>
       <path
         d="M9 2.5 C 18 1.5, 26 2, 31 2.8 C 35.5 3.5, 37.5 6, 37.6 10 C 38 18, 37.8 25, 37.2 30.5 C 36.8 35, 34.5 37.3, 30 37.5 C 22 38, 15 37.8, 9.5 37.2 C 5 36.8, 2.6 34.6, 2.5 30 C 2 22, 2.2 15, 2.7 9 C 3 5, 5 3, 9 2.5 Z"
         strokeWidth="1.6"

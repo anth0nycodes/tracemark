@@ -2,7 +2,7 @@
 
 <img src=".github/assets/poster.png" alt="The web is your canvas: a browser window covered in Tracemark annotations, including a red frame, a purple triangle, a handwritten 'I like this!' and a worked math problem." />
 
-# <img src="apps/extension/assets/icon.svg" alt="" width="32" height="32" /> Tracemark
+# <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.svg" /><img src=".github/assets/logo-light.svg" alt="Tracemark" width="280" /></picture>
 
 A Chrome extension that lets you markup/annotate any webpage and export or copy the result as an image.
 

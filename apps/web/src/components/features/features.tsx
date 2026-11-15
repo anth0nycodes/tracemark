@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import Image from "next/image";
 import {
   animationStyle,
   hiddenBetween,
@@ -15,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TriangleGuy } from "../decor/characters";
 import { PlayOnView } from "../play-on-view";
+import { ProductHuntBadge } from "../product-hunt-badge";
 import { SectionHeader } from "../section-header";
 import { ExportDemo } from "./export-demo";
 import { MarkupToolsDemo } from "./markup-tools-demo";
@@ -52,21 +52,27 @@ function FeatureCard({
     <article
       className={cn(
         "border-border relative z-10 flex min-w-0 flex-col gap-3 rounded-2xl border bg-white p-3",
-        className,
+        className
       )}
-      style={animationStyle(riseIn(CARDS_DELAY_MS + revealIndex * REVEAL_STAGGER_MS))}
+      style={animationStyle(
+        riseIn(CARDS_DELAY_MS + revealIndex * REVEAL_STAGGER_MS)
+      )}
     >
       <PlayOnView
         className={cn(
           "bg-secondary-background relative overflow-hidden rounded-xl md:h-64",
-          isWide ? "aspect-[19/8] md:aspect-auto" : "h-60",
+          isWide ? "aspect-[19/8] md:aspect-auto" : "h-60"
         )}
       >
         {demo}
       </PlayOnView>
       <div className="flex flex-col gap-1 px-1 pb-1">
-        <h3 className="font-secondary text-base font-medium md:text-lg">{title}</h3>
-        <p className="text-muted-foreground text-sm md:text-base">{description}</p>
+        <h3 className="font-secondary text-base font-medium md:text-lg">
+          {title}
+        </h3>
+        <p className="text-muted-foreground text-sm md:text-base">
+          {description}
+        </p>
       </div>
     </article>
   );
@@ -81,21 +87,7 @@ export function Features() {
       className="flex flex-col gap-10 py-16 md:py-24"
     >
       <div className="flex flex-col gap-6">
-        <a
-          href="https://www.producthunt.com/products/tracemark?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-tracemark"
-          className="inline-block h-11"
-          style={animationStyle(riseIn(0))}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            className="size-full object-contain"
-            alt="Tracemark - The only markup tool you need. | Product Hunt"
-            width="250"
-            height="54"
-            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1313455&amp;theme=light&amp;t=1794469546178"
-          />
-        </a>
+        <ProductHuntBadge style={animationStyle(riseIn(0))} />
         <SectionHeader
           id="features-title"
           delayMs={HEADER_DELAY_MS}
@@ -120,7 +112,7 @@ export function Features() {
             ...travelOffset(0, 70),
             ...animationStyle(
               hiddenBetween(0, CARDS_LANDED_AT_MS),
-              travelFrom(CARDS_LANDED_AT_MS, 500, POP_EASE),
+              travelFrom(CARDS_LANDED_AT_MS, 500, POP_EASE)
             ),
           }}
         />

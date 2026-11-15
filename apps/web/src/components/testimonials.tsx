@@ -18,7 +18,7 @@ import { SectionHeader } from "./section-header";
 type Testimonial = {
   name: string;
   role: string;
-  company: { name: string; url: string; note?: string };
+  company?: { name: string; url: string; note?: string };
   avatarSrc: string;
   quote: string;
 };
@@ -37,20 +37,23 @@ const TESTIMONIALS: Testimonial[] = [
       "Tracemark is really helpful for quickly communicating changes related to product design. It saves me time from using GPT image to create mock-ups and skips all of the iteration. So I can just indicate exactly what I want the way I want it. It's a useful collaboration tool I recommend for any team that does a lot of design iteration.",
   },
   {
-    name: "Simon Xu",
-    role: "Co-founder & CEO",
-    company: { name: "Ness", url: "https://ness-health.com/" },
-    avatarSrc: "/testimonials/simon-xu.png",
+    name: "Arman Kumaraswamy",
+    role: "Co-founder",
+    company: {
+      name: "TCC",
+      url: "https://www.thecontextcompany.com/",
+      note: "(YC F25)",
+    },
+    avatarSrc: "/testimonials/arman-kumaraswamy.png",
     quote:
-      "I use this at my company every day, really helpful for providing context to engineers / agents.",
+      "this extension is phenomenal. makes it super fast and easy to annotate my screen, mark it up, and share it.",
   },
   {
-    name: "Andrew Miller",
-    role: "Co-founder & CTO",
-    company: { name: "Ness", url: "https://ness-health.com/" },
-    avatarSrc: "/testimonials/andrew-miller.png",
+    name: "Sufi",
+    role: "College student",
+    avatarSrc: "/testimonials/sufi.png",
     quote:
-      "Really helpful extension. I've been using it to give coding agents better context and for quick sketches. It's well made, and the shortcuts are intuitive. 10/10.",
+      "I personally use Tracemark to take notes/do scratch work for my assignments on platforms that don't have a dedicated area/feature for doing so. I really enjoy the aesthetically pleasing and frictionless experience whenever using this extension!",
   },
 ];
 
@@ -119,16 +122,29 @@ export function Testimonials() {
                   {testimonial.name}
                 </span>
                 <span className="text-muted-foreground text-sm">
-                  {testimonial.role} @{" "}
-                  <a
-                    href={testimonial.company.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-foreground hover:text-foreground-hover decoration-border underline underline-offset-2 transition-colors hover:decoration-current"
-                  >
-                    {testimonial.company.name}
-                  </a>
-                  {testimonial.company.note && ` ${testimonial.company.note}`}
+                  {testimonial.role}
+                  {/*
+                    Kept on one line so a long role wraps before the "@",
+                    never inside the company name or its note
+                  */}
+                  {testimonial.company && (
+                    <>
+                      {" "}
+                      <span className="whitespace-nowrap">
+                        @{" "}
+                        <a
+                          href={testimonial.company.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-foreground hover:text-foreground-hover decoration-border underline underline-offset-2 transition-colors hover:decoration-current"
+                        >
+                          {testimonial.company.name}
+                        </a>
+                        {testimonial.company.note &&
+                          ` ${testimonial.company.note}`}
+                      </span>
+                    </>
+                  )}
                 </span>
               </span>
             </figcaption>

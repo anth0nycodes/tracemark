@@ -49,9 +49,9 @@ const TESTIMONIALS: Testimonial[] = [
       "this extension is phenomenal. makes it super fast and easy to annotate my screen, mark it up, and share it.",
   },
   {
-    name: "Sufi",
+    name: "Sufi Musa",
     role: "College student",
-    avatarSrc: "/testimonials/sufi.png",
+    avatarSrc: "/testimonials/sufi-musa.png",
     quote:
       "I personally use Tracemark to take notes/do scratch work for my assignments on platforms that don't have a dedicated area/feature for doing so. I really enjoy the aesthetically pleasing and frictionless experience whenever using this extension!",
   },

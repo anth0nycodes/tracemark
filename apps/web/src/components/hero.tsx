@@ -4,7 +4,7 @@ import {
   REVEAL_STAGGER_MS,
   riseIn,
 } from "@/lib/motion-sequence";
-import { AddToChromeButton } from "./add-to-chrome-button";
+import { AddToBrowserButton } from "./add-to-browser-button";
 import { SquareGuy } from "./decor/characters";
 import { HandDrawnStar } from "./decor/hand-drawn-star";
 import { HeroMockup } from "./hero-mockup";
@@ -47,7 +47,7 @@ export function Hero() {
           style={animationStyle(riseIn(REVEAL_STAGGER_MS * 3))}
         >
           {/* The page's one call to action, so it's larger than default */}
-          <AddToChromeButton className="px-6 py-3 text-lg" />
+          <AddToBrowserButton className="px-6 py-3 text-lg" />
           {/* Answers "what does it cost?" right where people decide */}
           <p className="text-muted-foreground text-sm">
             Free to use · No account needed

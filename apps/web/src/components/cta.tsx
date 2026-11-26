@@ -12,7 +12,7 @@ import {
   writeIn,
 } from "@/lib/motion-sequence";
 import { cn } from "@/lib/utils";
-import { AddToChromeButton } from "./add-to-chrome-button";
+import { AddToBrowserButton } from "./add-to-browser-button";
 import { SquareGuy, TriangleGuy } from "./decor/characters";
 import { PlayOnView } from "./play-on-view";
 import { TracemarkTile } from "./svgs/logo-mark";
@@ -111,7 +111,7 @@ export function Cta() {
             )}
           />
         </svg>
-        <AddToChromeButton />
+        <AddToBrowserButton />
       </div>
 
       {/* Popping up from the bottom corners, looking at the button */}

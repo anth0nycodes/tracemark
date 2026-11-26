@@ -130,9 +130,10 @@ export default function PrivacyPolicy() {
         <p>
           tracemark.fun uses Vercel Web Analytics to count page visits. It
           collects anonymous, aggregated statistics, doesn&apos;t use cookies,
-          and has nothing to do with the extension. The Add to Chrome buttons
-          take you to the Chrome Web Store, which is covered by Google&apos;s
-          own privacy policy.
+          and has nothing to do with the extension. The Add to Chrome and
+          Add to Firefox buttons take you to the Chrome Web Store or Firefox
+          Add-ons, which are covered by Google&apos;s and Mozilla&apos;s own
+          privacy policies.
         </p>
       </PolicySection>
 

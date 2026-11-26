@@ -26,6 +26,14 @@ export default defineConfig({
       128: "icon128.png",
     },
     permissions: ["activeTab", "scripting", "storage"],
+    browser_specific_settings: {
+      gecko: {
+        id: "tracemark@tracemark.fun",
+        data_collection_permissions: {
+          required: ["none"],
+        },
+      },
+    },
   }),
   vite: () => ({
     plugins: [tailwindcss()],

@@ -105,10 +105,10 @@ export default function PrivacyPolicy() {
       <PolicySection title="The one thing that's saved: your theme">
         <p>
           If you switch between light and dark mode, Tracemark remembers your
-          choice in <Code>chrome.storage.local</Code>, Chrome&apos;s built-in
+          choice in <Code>storage.local</Code>, your browser&apos;s built-in
           storage for extensions. It&apos;s a single setting, kept on your
-          device. It isn&apos;t synced to your Google account or sent anywhere,
-          and removing the extension deletes it.
+          device. It isn&apos;t synced to your Google or Firefox account or sent
+          anywhere, and removing the extension deletes it.
         </p>
       </PolicySection>
 
@@ -130,10 +130,10 @@ export default function PrivacyPolicy() {
         <p>
           tracemark.fun uses Vercel Web Analytics to count page visits. It
           collects anonymous, aggregated statistics, doesn&apos;t use cookies,
-          and has nothing to do with the extension. The Add to Chrome and
-          Add to Firefox buttons take you to the Chrome Web Store or Firefox
-          Add-ons, which are covered by Google&apos;s and Mozilla&apos;s own
-          privacy policies.
+          and has nothing to do with the extension. The Add to Chrome and Add to
+          Firefox buttons take you to the Chrome Web Store or Firefox Add-ons,
+          which are covered by Google&apos;s and Mozilla&apos;s own privacy
+          policies.
         </p>
       </PolicySection>
 

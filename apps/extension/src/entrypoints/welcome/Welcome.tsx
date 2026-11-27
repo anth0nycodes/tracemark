@@ -83,7 +83,7 @@ interface Step {
 const steps: Step[] = [
   {
     title: "Pin Tracemark to your toolbar",
-    body: "Click the puzzle-piece icon in Chrome's toolbar, then pin Tracemark so it's one click away.",
+    body: "Click the puzzle-piece icon in your browser's toolbar, then pin Tracemark so it's one click away.",
     circleClassName: "stroke-brand-red",
   },
   {
@@ -265,8 +265,9 @@ export function Welcome() {
           Drawings aren't saved, so copy or export before you close the overlay or reload the page.
         </p>
         <p>
-          Chrome blocks extensions on its own pages (<code>chrome://</code> URLs, the Chrome Web
-          Store, and other extensions' pages), so the overlay won't open there.
+          Browsers block extensions on their own pages (<code>chrome://</code> and{" "}
+          <code>about:</code> URLs, the Chrome Web Store, Firefox Add-ons, and other extensions'
+          pages), so the overlay won't open there.
         </p>
       </div>
 

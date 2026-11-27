@@ -19,7 +19,7 @@ const bricolageGrotesque = Bricolage_Grotesque({
 export const metadata: Metadata = {
   title: "Tracemark",
   description:
-    "A Chrome extension that lets you markup/annotate any webpage and copy/export the result as an image.",
+    "A browser extension for Chrome and Firefox that lets you markup/annotate any webpage and copy/export the result as an image.",
   keywords: [
     "website annotation tool",
     "markup tool",
@@ -28,7 +28,9 @@ export const metadata: Metadata = {
     "screenshot annotation",
     "viewport screenshot",
     "browser annotation tool",
+    "browser extension annotation",
     "chrome extension annotation",
+    "firefox extension annotation",
     "web capture tool",
     "developer annotation tool",
     "design feedback tool",
@@ -40,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Tracemark",
     description:
-      "A Chrome extension that lets you markup/annotate any webpage and copy/export the result as an image.",
+      "A browser extension for Chrome and Firefox that lets you markup/annotate any webpage and copy/export the result as an image.",
     url: "https://tracemark.fun",
     siteName: "Tracemark",
     locale: "en_US",
@@ -68,7 +70,7 @@ export const metadata: Metadata = {
   twitter: {
     title: "Tracemark",
     description:
-      "A Chrome extension that lets you markup/annotate any webpage and copy/export the result as an image.",
+      "A browser extension for Chrome and Firefox that lets you markup/annotate any webpage and copy/export the result as an image.",
     card: "summary_large_image",
     images: ["https://tracemark.fun/og.png"],
   },

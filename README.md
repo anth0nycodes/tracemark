@@ -4,9 +4,10 @@
 
 # <picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.svg" /><img src=".github/assets/logo-light.svg" alt="Tracemark" width="280" /></picture>
 
-A Chrome extension that lets you markup/annotate any webpage and export or copy the result as an image.
+A browser extension for Chrome and Firefox that lets you markup/annotate any webpage and export or copy the result as an image.
 
 [![Install from the Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-Install-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)
+[![Get the Firefox Add-on](https://img.shields.io/badge/Firefox_Add--ons-Install-FF7139?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://addons.mozilla.org/en-US/firefox/addon/tracemark)
 
 [![Version](https://img.shields.io/chrome-web-store/v/mgckpdklnjeklihpmplgcfnhncifikjd?label=version)](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)
 [![Users](https://img.shields.io/chrome-web-store/users/mgckpdklnjeklihpmplgcfnhncifikjd)](https://chromewebstore.google.com/detail/tracemark/mgckpdklnjeklihpmplgcfnhncifikjd)
@@ -106,7 +107,7 @@ Extension build output lands in `apps/extension/.output/`. To run any other scri
 
 ```
 apps/
-├── extension/              # the Chrome extension (WXT + React)
+├── extension/              # the browser extension (WXT + React)
 │   └── src/
 │       ├── entrypoints/    # background, overlay, and welcome entrypoints
 │       ├── components/     # toolbar, canvas, color picker, popovers, ui

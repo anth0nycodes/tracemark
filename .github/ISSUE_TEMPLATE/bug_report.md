@@ -28,6 +28,7 @@ assignees: ""
 ## Environment
 
 - **OS:** <!-- e.g., macOS 14.0, Windows 11, Ubuntu 22.04 -->
+- **Browser:** <!-- e.g., Chrome 131, Firefox 133 -->
 
 ## Error Output
 

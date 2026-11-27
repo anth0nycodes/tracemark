@@ -152,7 +152,7 @@ export function Testimonials() {
         ))}
       </div>
 
-      {/* Secondary on purpose: the hero's Add to Chrome is the main action */}
+      {/* Secondary on purpose: the hero's Add to Chrome/Firefox button is the main action */}
       <a
         href={CHROME_STORE_REVIEWS_URL}
         target="_blank"

@@ -84,7 +84,7 @@ Keep the subject line concise (≤ 50 chars)
 
 ```
 apps/
-├── extension/              # the Chrome extension (WXT + React)
+├── extension/              # the browser extension (WXT + React)
 │   └── src/
 │       ├── entrypoints/    # background, overlay, and welcome entrypoints
 │       ├── components/     # toolbar, canvas, color picker, popovers, ui

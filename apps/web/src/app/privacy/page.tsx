@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Tracemark doesn't collect, store, or send your data. The only thing it remembers is your theme.",
 };
 
-const LAST_UPDATED = "November 9, 2026";
+const LAST_UPDATED = "November 27, 2026";
 const CONTACT_EMAIL = "hoanganthony2207@gmail.com";
 
 function PolicySection({
